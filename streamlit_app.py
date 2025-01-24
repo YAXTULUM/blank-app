@@ -1,51 +1,94 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pydeck as pdk
 import altair as alt
-from urllib.error import URLError
+import pydeck as pdk
 import time
+from urllib.error import URLError
 
-# Cached function for UN data
+# App Configuration
+st.set_page_config(page_title="VillaTerras Ai Real Estate Dashboard", layout="wide")
+
+# Title and Description
+st.title("Real Estate Dashboard")
+st.markdown("""
+Welcome to the **Real Estate Dashboard**. Analyze, compare, and manage properties with advanced metrics and tools.
+""")
+
+# Sidebar Filters
+st.sidebar.header("Filters")
+price_range = st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000)
+bedrooms = st.sidebar.slider("Bedrooms", 1, 10, (2, 4))
+bathrooms = st.sidebar.slider("Bathrooms", 1, 10, (1, 3))
+area_range = st.sidebar.slider("Area (sq ft)", 500, 10000, (1000, 5000), step=100)
+
+# Financial Inputs
+st.sidebar.header("Financial Details")
+property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
+annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
+annual_expenses = st.sidebar.number_input("Annual Expenses ($)", value=5000, step=1000)
+down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
+interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
+loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
+
+# Calculations
+def calculate_metrics(price, rent, expenses, down, rate, term):
+    loan_amount = price - down
+    monthly_rate = rate / 100 / 12
+    num_payments = term * 12
+    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
+    noi = rent - expenses
+    cap_rate = (noi / price) * 100
+    cash_on_cash = (noi / down) * 100
+    return cap_rate, cash_on_cash, monthly_payment, noi
+
+cap_rate, cash_on_cash, monthly_payment, noi = calculate_metrics(
+    property_price, annual_rent_income, annual_expenses, down_payment, interest_rate, loan_term
+)
+
+# Display Metrics
+st.header("Metrics")
+st.write(f"**Capitalization Rate:** {cap_rate:.2f}%")
+st.write(f"**Cash-on-Cash Return:** {cash_on_cash:.2f}%")
+st.write(f"**Monthly Mortgage Payment:** ${monthly_payment:,.2f}")
+st.write(f"**Net Operating Income (NOI):** ${noi:,.2f}")
+
+# Visualization: Price Distribution
+if st.checkbox("Show Price Distribution"):
+    price_data = pd.DataFrame({"Price ($)": np.random.randint(price_range[0], price_range[1], 50)})
+    st.bar_chart(price_data)
+
+# Data: Gross Agricultural Production
 @st.cache_data
 def get_UN_data():
     AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
     df = pd.read_csv(AWS_BUCKET_URL + "/agri.csv.gz")
     return df.set_index("Region")
 
-# Main application block
 try:
     df = get_UN_data()
-    countries = st.multiselect(
-        "Choose countries", list(df.index), ["China", "United States of America"]
-    )
+    countries = st.multiselect("Choose countries", list(df.index), ["China", "United States of America"])
     if not countries:
         st.error("Please select at least one country.")
     else:
         data = df.loc[countries]
         data /= 1000000.0
-        st.subheader("Gross agricultural production ($B)")
+        st.subheader("Gross Agricultural Production ($B)")
         st.dataframe(data.sort_index())
 
         # Altair chart
         data = data.T.reset_index()
-        data = pd.melt(data, id_vars=["index"]).rename(
-            columns={"index": "year", "value": "Gross Agricultural Product ($B)"}
-        )
-        chart = (
-            alt.Chart(data)
-            .mark_area(opacity=0.3)
-            .encode(
-                x="year:T",
-                y=alt.Y("Gross Agricultural Product ($B):Q", stack=None),
-                color="Region:N",
-            )
+        data = pd.melt(data, id_vars=["index"]).rename(columns={"index": "year", "value": "Gross Agricultural Product ($B)"})
+        chart = alt.Chart(data).mark_area(opacity=0.3).encode(
+            x="year:T",
+            y=alt.Y("Gross Agricultural Product ($B):Q", stack=None),
+            color="Region:N",
         )
         st.altair_chart(chart, use_container_width=True)
 except URLError as e:
     st.error(f"This demo requires internet access. Connection error: {e.reason}")
 
-# Plot Graph with Progress Bar
+# Dynamic Line Chart with Progress Bar
 progress_bar = st.sidebar.progress(0)
 status_text = st.sidebar.empty()
 last_rows = np.random.randn(1, 1)
@@ -60,15 +103,11 @@ for i in range(1, 101):
     time.sleep(0.05)
 
 progress_bar.empty()
-st.button("Rerun")
 
-# Mapping with Pydeck
+# Mapping
 @st.cache_data
 def from_data_file(filename):
-    url = (
-        "https://raw.githubusercontent.com/streamlit/"
-        "example-data/master/hello/v1/%s" % filename
-    )
+    url = "https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/%s" % filename
     return pd.read_json(url)
 
 try:
@@ -90,69 +129,20 @@ try:
             get_radius="[exits]",
             radius_scale=0.05,
         ),
-        "Bart stop names": pdk.Layer(
-            "TextLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_text="name",
-            get_color=[0, 0, 0, 200],
-            get_size=10,
-            get_alignment_baseline="'bottom'",
-        ),
-        "Outbound flow": pdk.Layer(
-            "ArcLayer",
-            data=from_data_file("bart_path_stats.json"),
-            get_source_position=["lon", "lat"],
-            get_target_position=["lon2", "lat2"],
-            get_source_color=[200, 30, 0, 160],
-            get_target_color=[200, 30, 0, 160],
-            auto_highlight=True,
-            width_scale=0.0001,
-            get_width="outbound",
-            width_min_pixels=3,
-            width_max_pixels=30,
-        ),
     }
     st.sidebar.subheader("Map layers")
     selected_layers = [
-        layer
-        for layer_name, layer in ALL_LAYERS.items()
-        if st.sidebar.checkbox(layer_name, True)
+        layer for layer_name, layer in ALL_LAYERS.items() if st.sidebar.checkbox(layer_name, True)
     ]
     if selected_layers:
         st.pydeck_chart(
             pdk.Deck(
                 map_style=None,
-                initial_view_state={
-                    "latitude": 37.76,
-                    "longitude": -122.4,
-                    "zoom": 11,
-                    "pitch": 50,
-                },
+                initial_view_state={"latitude": 37.76, "longitude": -122.4, "zoom": 11, "pitch": 50},
                 layers=selected_layers,
             )
         )
     else:
         st.error("Please choose at least one layer above.")
 except URLError as e:
-    st.error(
-        """
-        **This demo requires internet access.**
-        Connection error: %s
-    """
-        % e.reason
-    )
-
-# Map radius search
-@st.cache_data
-def map_search_data():
-    # Mock data or extend to add real datasets
-    data = pd.DataFrame({
-        "Latitude": [37.76, 37.77, 37.75],
-        "Longitude": [-122.42, -122.41, -122.43],
-        "Value": [10, 20, 30]
-    })
-    return data
-
-map_data = map_search_data()
-st.map(map_data)
+    st.error(f"Connection error: {e.reason}")
