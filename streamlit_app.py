@@ -12,9 +12,9 @@ st.set_page_config(page_title="VillaTerras Ai Real Estate Dashboard", layout="wi
 # Title and Description
 st.title("VillaTerras Ai Real Estate Dashboard")
 st.markdown("""
-Welcome to the **VillaTerras Ai Real Estate Dashboard**. 
-All Real Estate Knowledge**. 
-Analyze, compare, and manage properties with advanced metrics and tools.
+Welcome to the **VillaTerras Ai Real Estate Dashboard**.  """)
+("""All Real Estate Knowledge. """)
+("""Analyze, compare, and manage properties with advanced metrics and tools.
 """)
 
 # Sidebar Filters
