@@ -10,9 +10,11 @@ from urllib.error import URLError
 st.set_page_config(page_title="VillaTerras Ai Real Estate Dashboard", layout="wide")
 
 # Title and Description
-st.title("Real Estate Dashboard")
+st.title("VillaTerras Ai Real Estate Dashboard")
 st.markdown("""
-Welcome to the **Real Estate Dashboard**. Analyze, compare, and manage properties with advanced metrics and tools.
+Welcome to the **VillaTerras Ai Real Estate Dashboard**. 
+All Real Estate Knowledge**. 
+Analyze, compare, and manage properties with advanced metrics and tools.
 """)
 
 # Sidebar Filters
