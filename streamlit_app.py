@@ -6,16 +6,81 @@ import pydeck as pdk
 import time
 from urllib.error import URLError
 
+
+###########  Header Start ############################
+
 # App Configuration
 st.set_page_config(page_title="VillaTerras Ai Real Estate Dashboard", layout="wide")
 
+# Header Section
+def render_header():
+    st.markdown(
+        """
+        <style>
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+        }
+        .logo-container img {
+            height: 150px;
+            width: auto;
+        }
+        .menu-container a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .menu-container a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        </style>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="/"><img src="https://i0.wp.com/villaterras.com/wp-content/uploads/2024/11/cropped-VillaTerra-Logo.png?resize=264%2C264&ssl=1" alt="VillaTerras Logo"></a>
+            </div>
+            <div class="menu-container">
+                <a href="/?page=Home">Home</a>
+                <a href="/?page=Calculators">Calculators</a>
+                <a href="/?page=Business">Business</a>
+                <a href="/?page=RealEstate">Real Estate</a>
+                <a href="/?page=Investment">Investment</a>
+                <a href="/?page=MarketAnalysis">Market Analysis</a>
+                <a href="/?page=Trends">Trends</a>
+                <a href="/?page=Contact">Contact</a>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Call the header rendering function
+render_header()
+
 # Title and Description
 st.title("VillaTerras Ai Real Estate Dashboard")
-st.markdown("""
-Welcome to the **VillaTerras Ai Real Estate Dashboard**.  """)
-("""All Real Estate Knowledge. """)
-("""Analyze, compare, and manage properties with advanced metrics and tools.
-""")
+st.markdown(
+    """
+    Welcome to the **VillaTerras Ai Real Estate Dashboard**.  
+    All Real Estate Knowledge in One Place.  
+    Analyze, compare, and manage properties with advanced metrics and tools.
+    """
+)
+
+
+
+###########  Header End ############################
+
+
+
+
+
 
 # Sidebar Filters
 st.sidebar.header("Filters")
