@@ -134,7 +134,7 @@ def get_UN_data():
 
 try:
     df = get_UN_data()
-    countries = st.multiselect("Choose countries", list(df.index), ["United States of America" "Mexico", "Canada",])
+    countries = st.multiselect("Choose countries", list(df.index), ["United States of America", "Mexico", "Canada",])
     if not countries:
         st.error("Please select at least Two countries.")
     else:
