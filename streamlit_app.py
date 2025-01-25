@@ -11,6 +11,8 @@ from urllib.error import URLError
 
 import streamlit as st
 
+import streamlit as st
+
 st.markdown(
     """
     <style>
@@ -154,28 +156,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-    <!-- Title Section -->
-    <div class="title-section">
-        <h1>VillaTerras Ai</h1>
-        <h2>Ai Real Estate Agent | Assistant</h2>
-        <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
-        <p>All Real Estate Knowledge in One Place.</p>
-        
- 
- 
-
-  <p>Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com</p>
-
-
- 
-    <p style="font-size:12px; color:lightgrey;">
-      Written by Ekbalam.
-    </p> 
-
-
-    """,
-    unsafe_allow_html=True
-)
 
 ###########  Header End ############################
 
