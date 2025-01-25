@@ -172,7 +172,7 @@ st.markdown(
             padding: 8px 15px;
         }
     }
-
+</style>
 
 <!-- Dropdown Menu -->
 <div class="dropdown-container">
