@@ -161,6 +161,24 @@ st.markdown(
                 padding: 8px 15px;
             }
         }
+
+@media screen and (max-width: 768px) {
+    .dropdown-container {
+        top: 10px;
+        right: 10px; /* Adjust for mobile spacing */
+    }
+
+    .dropdown-button {
+        font-size: 14px;
+        padding: 8px 12px; /* Smaller padding for mobile */
+    }
+
+    .dropdown-content {
+        min-width: 180px; /* Smaller dropdown width */
+    }
+}
+
+        
   </style>
 
 
@@ -354,3 +372,214 @@ try:
         st.error("Please choose at least one layer above.")
 except URLError as e:
     st.error(f"Connection error: {e.reason}")
+
+
+
+
+
+# Function to generate mock data for California's growing cities
+@st.cache_data
+def california_investment_data():
+    data = pd.DataFrame({
+        "city": [
+            "San Francisco", "Los Angeles", "San Diego", "San Jose", "Fresno",
+            "Sacramento", "Long Beach", "Oakland", "Bakersfield", "Anaheim",
+            "Santa Ana", "Riverside", "Stockton", "Irvine", "Chula Vista",
+            "Fremont", "San Bernardino", "Modesto", "Fontana", "Oxnard",
+            "Moreno Valley", "Glendale", "Huntington Beach", "Santa Clarita", "Garden Grove"
+        ],
+        "lat": [
+            37.7749, 34.0522, 32.7157, 37.3382, 36.7378,
+            38.5816, 33.7701, 37.8044, 35.3733, 33.8366,
+            33.7455, 33.9806, 37.9577, 33.6846, 32.6401,
+            37.5485, 34.1083, 37.6391, 34.0922, 34.1975,
+            33.9425, 34.1425, 33.6595, 34.3917, 33.7743
+        ],
+        "lon": [
+            -122.4194, -118.2437, -117.1611, -121.8863, -119.7871,
+            -121.4944, -118.1937, -122.2711, -119.0187, -117.9145,
+            -117.8677, -117.3755, -121.2908, -117.8265, -117.0842,
+            -121.9886, -117.2898, -120.9969, -117.4350, -119.1771,
+            -117.2297, -118.2551, -117.9988, -118.5426, -117.9379
+        ],
+        "investment_value": [
+            80, 95, 85, 88, 75,
+            82, 78, 81, 74, 89,
+            83, 80, 76, 90, 79,
+            84, 77, 73, 76, 72,
+            70, 69, 86, 88, 68
+        ],
+    })
+    return data
+
+# Load the California investment data
+california_data = california_investment_data()
+
+# Display the raw data
+st.subheader("California Investment Data")
+st.dataframe(california_data)
+
+# Heat Map Layer
+heatmap_layer = pdk.Layer(
+    "HeatmapLayer",
+    data=california_data,
+    get_position=["lon", "lat"],
+    get_weight="investment_value",
+    radius=200,
+    opacity=0.8,
+    aggregation="MEAN",
+)
+
+# Scatterplot Layer (Optional for city markers)
+scatter_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=california_data,
+    get_position=["lon", "lat"],
+    get_radius=500,
+    get_color="[200, 30, 0, 160]",
+    pickable=True,
+)
+
+# Set the view state
+view_state = pdk.ViewState(
+    latitude=36.7783,  # Center latitude of California
+    longitude=-119.4179,  # Center longitude of California
+    zoom=6,
+    pitch=50,
+)
+
+# Render the map
+st.header("California Investment Heat Map")
+st.pydeck_chart(
+    pdk.Deck(
+        layers=[heatmap_layer, scatter_layer],
+        initial_view_state=view_state,
+        tooltip={
+            "html": "<b>City:</b> {city}<br><b>Investment Value:</b> {investment_value}",
+            "style": {"color": "white"}
+        },
+    )
+)
+
+# Highlight Best Cities to Invest
+st.subheader("Top 5 Cities to Invest")
+top_cities = california_data.nlargest(5, "investment_value")[["city", "investment_value"]]
+st.table(top_cities)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import streamlit as st
+import pandas as pd
+import pydeck as pdk
+import numpy as np
+
+# Mock advanced data for 25 cities in California
+@st.cache_data
+def get_advanced_data():
+    return pd.DataFrame({
+        "City": [
+            "Los Angeles", "San Diego", "San Jose", "San Francisco", "Fresno",
+            "Sacramento", "Long Beach", "Oakland", "Bakersfield", "Anaheim",
+            "Stockton", "Riverside", "Irvine", "Santa Ana", "Chula Vista",
+            "Fremont", "Santa Clarita", "San Bernardino", "Modesto", "Fontana",
+            "Oxnard", "Moreno Valley", "Glendale", "Huntington Beach", "Ontario"
+        ],
+        "Latitude": [
+            34.0522, 32.7157, 37.3382, 37.7749, 36.7378,
+            38.5816, 33.7701, 37.8044, 35.3733, 33.8366,
+            37.9577, 33.9806, 33.6846, 33.7455, 32.6401,
+            37.5485, 34.3917, 34.1083, 37.6391, 34.0922,
+            34.1975, 33.9425, 34.1425, 33.6595, 34.0633
+        ],
+        "Longitude": [
+            -118.2437, -117.1611, -121.8863, -122.4194, -119.7871,
+            -121.4944, -118.1937, -122.2711, -119.0187, -117.9145,
+            -121.2908, -117.3755, -117.8265, -117.8677, -117.0842,
+            -121.9886, -118.5426, -117.2898, -120.9969, -117.4350,
+            -119.1771, -117.2297, -118.2551, -117.9988, -117.6509
+        ],
+        "Population Growth (%)": np.random.uniform(0.5, 3.5, 25),
+        "Median Home Price ($)": np.random.randint(300000, 1500000, 25),
+        "Average Rental Yield (%)": np.random.uniform(2.5, 6.0, 25),
+        "Employment Rate (%)": np.random.uniform(80, 95, 25)
+    })
+
+# Load data
+data = get_advanced_data()
+
+# Sidebar filters
+st.sidebar.header("Filters")
+growth_filter = st.sidebar.slider("Population Growth (%)", 0.5, 3.5, (1.0, 3.0))
+rental_yield_filter = st.sidebar.slider("Rental Yield (%)", 2.5, 6.0, (3.0, 5.0))
+price_filter = st.sidebar.slider("Median Home Price ($)", 300000, 1500000, (500000, 1000000))
+
+# Apply filters
+filtered_data = data[
+    (data["Population Growth (%)"].between(*growth_filter)) &
+    (data["Average Rental Yield (%)"].between(*rental_yield_filter)) &
+    (data["Median Home Price ($)"].between(*price_filter))
+]
+
+# Heatmap Layer
+heatmap_layer = pdk.Layer(
+    "HeatmapLayer",
+    data=filtered_data,
+    get_position=["Longitude", "Latitude"],
+    get_weight="Population Growth (%)",
+    radius=300,
+    opacity=0.7,
+    aggregation="MEAN"
+)
+
+# Scatterplot Layer
+scatter_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=filtered_data,
+    get_position=["Longitude", "Latitude"],
+    get_radius=500,
+    get_color="[200, 30, 0, 160]",
+    pickable=True
+)
+
+# View State
+view_state = pdk.ViewState(
+    latitude=36.7783,
+    longitude=-119.4179,
+    zoom=6,
+    pitch=40
+)
+
+# Render Map
+st.header("California Advanced Real Estate Heatmap")
+st.pydeck_chart(pdk.Deck(
+    layers=[heatmap_layer, scatter_layer],
+    initial_view_state=view_state,
+    tooltip={
+        "html": "<b>City:</b> {City}<br>"
+                "<b>Population Growth:</b> {Population Growth (%)},<br>"
+                "<b>Median Price:</b> {Median Home Price ($)}",
+        "style": {"color": "white"}
+    }
+))
+
+# Show Filtered Table
+st.subheader("Filtered Data")
+st.dataframe(filtered_data)
+
+
+
+
