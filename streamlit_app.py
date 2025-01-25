@@ -369,29 +369,49 @@ except Exception as e:
 
 
 
+import streamlit as st
+import pandas as pd
+
 # Map Integration
 st.subheader("Investment Heatmap")
+
+# Define city data for heatmap
 city_data = pd.DataFrame({
     "City": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"],
     "Latitude": [34.0522, 37.7749, 32.7157, 38.5816, 37.3382],
     "Longitude": [-118.2437, -122.4194, -117.1611, -121.4944, -121.8863],
-    "Value": [75, 85, 70, 65, 80]
+    "Value": [75, 85, 70, 65, 80]  # Example investment value (e.g., score or metric)
 })
 
+# Ensure column names and data types are correct for st.map
+city_data.rename(columns={"Latitude": "lat", "Longitude": "lon"}, inplace=True)
+city_data["lat"] = pd.to_numeric(city_data["lat"], errors="coerce")
+city_data["lon"] = pd.to_numeric(city_data["lon"], errors="coerce")
+
+# Display the map with heatmap data
 st.map(city_data)
 
 # Downloadable Report
-def generate_report(metrics):
-    report_df = pd.DataFrame.from_dict(metrics, orient='index', columns=['Value'])
-    return report_df.to_csv().encode('utf-8')
+st.subheader("Download Investment Report")
 
-download_csv = generate_report(metrics)
+# Generate a CSV report based on the city_data
+def generate_report(data):
+    # Create a detailed report from the city_data DataFrame
+    report_df = data.copy()
+    report_df.rename(columns={"lat": "Latitude", "lon": "Longitude"}, inplace=True)
+    return report_df.to_csv(index=False).encode("utf-8")
+
+# Call the report generation function
+download_csv = generate_report(city_data)
+
+# Add a download button for the report
 st.download_button(
     label="Download Investment Report",
     data=download_csv,
     file_name="investment_report.csv",
     mime="text/csv"
 )
+
 
 
 
