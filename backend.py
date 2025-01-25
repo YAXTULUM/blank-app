@@ -2,11 +2,7 @@ import openai
 import numpy as np
 import pandas as pd
 
-
-# Set OpenAI API Key
-openai.api_key = "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
-"  # Replace with your OpenAI API key
-
+ 
 
 def calculate_metrics(financial_details):
     """Calculate key financial metrics for a real estate investment."""
