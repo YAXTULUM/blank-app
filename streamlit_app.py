@@ -287,6 +287,8 @@ try:
 except URLError as e:
     st.error(f"This demo requires internet access. Connection error: {e.reason}")
 
+
+
 # Dynamic Line Chart with Progress Bar
 progress_bar = st.sidebar.progress(0)
 status_text = st.sidebar.empty()
@@ -302,7 +304,6 @@ for i in range(1, 101):
     time.sleep(0.05)
 
 progress_bar.empty()
-
 
 
 
