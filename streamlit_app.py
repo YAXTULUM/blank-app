@@ -1,63 +1,6 @@
-# Enhanced Debug: Financial Details Section
-st.subheader("📊 Debug: Financial Details")
-
-# Add custom styling for the financial details section
-st.markdown(
-    """
-    <style>
-        .details-container {
-            background: linear-gradient(135deg, #ffffff, #e8f1f7);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-        .details-header {
-            font-size: 1.8em;
-            font-weight: bold;
-            text-align: center;
-            color: #0056b3;
-            margin-bottom: 15px;
-        }
-        .details-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        .details-table th, .details-table td {
-            padding: 12px 15px;
-            border: 1px solid #dde5ed;
-            text-align: left;
-        }
-        .details-table th {
-            background: #0056b3;
-            color: white;
-            font-weight: bold;
-        }
-        .details-table tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        .details-table tr:hover {
-            background: #f1f7fc;
-        }
-        .details-value {
-            font-weight: bold;
-            color: #0056b3;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Convert the financial details dictionary into a DataFrame
-financial_details_df = pd.DataFrame(list(financial_details.items()), columns=["Detail", "Value"])
-
-# Render the financial details in a styled container
-st.markdown('<div class="details-container">', unsafe_allow_html=True)
-st.markdown('<div class="details-header">Financial Details Overview</div>', unsafe_allow_html=True)
-st.markdown(financial_details_df.to_html(index=False, classes="details-table"), unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+import streamlit as st
+import pandas as pd
+import numpy as np
 
 # --- Sidebar Configuration ---
 def configure_sidebar():
@@ -106,10 +49,10 @@ def configure_sidebar():
 
     return location_details, property_details, financial_details
 
+
 # --- Calculate Metrics ---
 def calculate_metrics(financial_details):
     """Calculate key financial metrics for a real estate investment."""
-    # Extract Inputs
     price = financial_details["property_price"]
     rent = financial_details["annual_rent_income"]
     down = financial_details["down_payment"]
@@ -123,7 +66,6 @@ def calculate_metrics(financial_details):
     rate = financial_details["interest_rate"]
     term = financial_details["loan_term"]
 
-    # Calculations
     loan_amount = price - down
     monthly_rate = rate / 100 / 12
     num_payments = term * 12
@@ -151,18 +93,29 @@ def calculate_metrics(financial_details):
         "Cash-on-Cash ROI (%)": cash_on_cash,
     }
 
+
 # --- Main Function ---
 def main():
-    st.markdown('<div class="title-section"><h1>Real Estate Investment Calculator</h1></div>', unsafe_allow_html=True)
+    st.title("Real Estate Investment Calculator")
+    st.markdown("Analyze your real estate investment with detailed metrics and insights.")
 
+    # Sidebar Configuration
     location_details, property_details, financial_details = configure_sidebar()
 
+    # Enhanced Debug Display
     st.subheader("📊 Debug: Financial Details")
-    st.json(financial_details)
+    financial_details_df = pd.DataFrame(list(financial_details.items()), columns=["Detail", "Value"])
+    st.table(financial_details_df)
 
-    metrics = calculate_metrics(financial_details)
-    st.subheader("Investment Metrics")
-    st.table(pd.DataFrame(metrics.items(), columns=["Metric", "Value"]))
+    # Metrics Calculation
+    try:
+        metrics = calculate_metrics(financial_details)
+        st.subheader("Investment Metrics")
+        metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
+        st.table(metrics_df)
+    except Exception as e:
+        st.error(f"Error calculating metrics: {e}")
+
 
 if __name__ == "__main__":
     main()
