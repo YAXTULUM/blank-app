@@ -81,7 +81,7 @@ st.markdown(
             }
         }
 
-       <style>
+  
     /* Dropdown Button Styling */
     .dropdown-button {
         background-color: #007BFF;
@@ -223,6 +223,9 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+
+
 ###########  Header End ############################
 
 
