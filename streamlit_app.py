@@ -410,30 +410,43 @@ if __name__ == "__main__":
 
 # Sensitivity Analysis Function
 def sensitivity_analysis(financial_details):
-    """Perform sensitivity analysis on rent and price."""
+    """Perform sensitivity analysis on rent and property price."""
+    # Extract initial values for rent and price
     rent_income = financial_details["annual_rent_income"]
     property_price = financial_details["property_price"]
 
+    # Define ranges for sensitivity analysis (20 points between 80% and 120% of initial values)
     rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
     price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
 
-    results = []
+    results = []  # Store results for all combinations of rent and price
+
     for rent in rent_range:
         for price in price_range:
+            # Create a copy of the financial details and update rent and price
             updated_details = financial_details.copy()
             updated_details["annual_rent_income"] = rent
             updated_details["property_price"] = price
-            metrics = calculate_metrics(updated_details)
-            results.append({
-                "Rent Income ($)": rent,
-                "Property Price ($)": price,
-                "Cap Rate (%)": metrics["Cap Rate (%)"],
-                "Cash Flow ($)": metrics["Cash Flow"],
-            })
 
+            # Calculate metrics using the modified details
+            try:
+                metrics = calculate_metrics(updated_details)
+                results.append({
+                    "Rent Income ($)": rent,
+                    "Property Price ($)": price,
+                    "Cap Rate (%)": metrics["Cap Rate (%)"],
+                    "Cash Flow ($)": metrics["Cash Flow"],
+                })
+            except ValueError as e:
+                # Skip combinations that result in invalid calculations
+                continue
+
+    # Return results as a DataFrame
     return pd.DataFrame(results)
 
-# Main Function
+
+
+
 def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
@@ -443,34 +456,40 @@ def main():
 
     # Calculate Metrics
     try:
+        # Display calculated metrics
         metrics = calculate_metrics(financial_details)
         st.header("Investment Metrics")
         metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
         st.table(metrics_df)
     except ValueError as e:
-        st.error(f"Error: {e}")
+        st.error(f"Error in calculating metrics: {e}")
         return
 
-    # Sensitivity Analysis
+    # Sensitivity Analysis Section
     if st.checkbox("Perform Sensitivity Analysis"):
         st.subheader("Sensitivity Analysis Results")
-        sensitivity_results = sensitivity_analysis(financial_details)
-        st.write(sensitivity_results)
+        try:
+            # Perform sensitivity analysis
+            sensitivity_results = sensitivity_analysis(financial_details)
 
-        # Visualization
-        st.subheader("Sensitivity Analysis Visualization")
-        chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
-            x="Rent Income ($):Q",
-            y="Property Price ($):Q",
-            color="Cap Rate (%):Q",
-            tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
-        ).interactive()
-        st.altair_chart(chart, use_container_width=True)
+            # Display results in a table
+            st.write("Explore how changes in rent and property price affect key metrics:")
+            st.dataframe(sensitivity_results)
+
+            # Visualization of sensitivity analysis
+            st.subheader("Sensitivity Analysis Visualization")
+            chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
+                x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
+                y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
+                color=alt.Color("Cap Rate (%):Q", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
+                tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
+            ).interactive()
+            st.altair_chart(chart, use_container_width=True)
+        except Exception as e:
+            st.error(f"Error during sensitivity analysis: {e}")
 
 if __name__ == "__main__":
     main()
-
-
 
 
 
