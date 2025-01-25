@@ -311,101 +311,123 @@ progress_bar.empty()
 
 
 
-import streamlit as st
-import pandas as pd
-import pydeck as pdk
-import numpy as np
-
-# Mock advanced data for 25 cities in California
+# Map Data Preparation
 @st.cache_data
-def get_advanced_data():
-    return pd.DataFrame({
-        "City": [
-            "Los Angeles", "San Diego", "San Jose", "San Francisco", "Fresno",
-            "Sacramento", "Long Beach", "Oakland", "Bakersfield", "Anaheim",
-            "Stockton", "Riverside", "Irvine", "Santa Ana", "Chula Vista",
-            "Fremont", "Santa Clarita", "San Bernardino", "Modesto", "Fontana",
-            "Oxnard", "Moreno Valley", "Glendale", "Huntington Beach", "Ontario"
-        ],
-        "Latitude": [
-            34.0522, 32.7157, 37.3382, 37.7749, 36.7378,
-            38.5816, 33.7701, 37.8044, 35.3733, 33.8366,
-            37.9577, 33.9806, 33.6846, 33.7455, 32.6401,
-            37.5485, 34.3917, 34.1083, 37.6391, 34.0922,
-            34.1975, 33.9425, 34.1425, 33.6595, 34.0633
-        ],
-        "Longitude": [
-            -118.2437, -117.1611, -121.8863, -122.4194, -119.7871,
-            -121.4944, -118.1937, -122.2711, -119.0187, -117.9145,
-            -121.2908, -117.3755, -117.8265, -117.8677, -117.0842,
-            -121.9886, -118.5426, -117.2898, -120.9969, -117.4350,
-            -119.1771, -117.2297, -118.2551, -117.9988, -117.6509
-        ],
-        "Population Growth (%)": np.random.uniform(0.5, 3.5, 25),
-        "Median Home Price ($)": np.random.randint(300000, 1500000, 25),
-        "Average Rental Yield (%)": np.random.uniform(2.5, 6.0, 25),
-        "Employment Rate (%)": np.random.uniform(80, 95, 25)
+def map_search_data():
+    # Mock data for demonstration
+    data = pd.DataFrame({
+        "lat": [37.76, 37.77, 37.75, 37.78, 37.79],
+        "lon": [-122.42, -122.41, -122.43, -122.44, -122.40],
+        "value": [10, 20, 30, 40, 50]
     })
+    return data
 
-# Load data
-data = get_advanced_data()
+# Load the data
+map_data = map_search_data()
 
-# Sidebar filters
-st.sidebar.header("Filters")
-growth_filter = st.sidebar.slider("Population Growth (%)", 0.5, 3.5, (1.0, 3.0))
-rental_yield_filter = st.sidebar.slider("Rental Yield (%)", 2.5, 6.0, (3.0, 5.0))
-price_filter = st.sidebar.slider("Median Home Price ($)", 300000, 1500000, (500000, 1000000))
+# Simple Map with st.map
+st.header("Simple Map")
+st.map(map_data)
 
-# Apply filters
-filtered_data = data[
-    (data["Population Growth (%)"].between(*growth_filter)) &
-    (data["Average Rental Yield (%)"].between(*rental_yield_filter)) &
-    (data["Median Home Price ($)"].between(*price_filter))
-]
+# Customized Map with Pydeck
+st.header("Customized Map with Pydeck")
 
-# Heatmap Layer
-heatmap_layer = pdk.Layer(
-    "HeatmapLayer",
-    data=filtered_data,
-    get_position=["Longitude", "Latitude"],
-    get_weight="Population Growth (%)",
-    radius=300,
-    opacity=0.7,
-    aggregation="MEAN"
-)
-
-# Scatterplot Layer
-scatter_layer = pdk.Layer(
+# Define layers
+scatterplot_layer = pdk.Layer(
     "ScatterplotLayer",
-    data=filtered_data,
-    get_position=["Longitude", "Latitude"],
-    get_radius=500,
-    get_color="[200, 30, 0, 160]",
-    pickable=True
+    data=map_data,
+    get_position=["lon", "lat"],
+    get_color="[200, value * 5, value * 2]",
+    get_radius="value * 100",
+    pickable=True,
+    auto_highlight=True,
 )
 
-# View State
+hexagon_layer = pdk.Layer(
+    "HexagonLayer",
+    data=map_data,
+    get_position=["lon", "lat"],
+    radius=200,
+    elevation_scale=4,
+    elevation_range=[0, 1000],
+    extruded=True,
+)
+
+# Define the view state
 view_state = pdk.ViewState(
-    latitude=36.7783,
-    longitude=-119.4179,
-    zoom=6,
-    pitch=40
+    latitude=37.76,
+    longitude=-122.42,
+    zoom=12,
+    pitch=50,
 )
 
-# Render Map
-st.header("California Advanced Real Estate Heatmap")
-st.pydeck_chart(pdk.Deck(
-    layers=[heatmap_layer, scatter_layer],
-    initial_view_state=view_state,
-    tooltip={
-        "html": "<b>City:</b> {City}<br>"
-                "<b>Population Growth:</b> {Population Growth (%)},<br>"
-                "<b>Median Price:</b> {Median Home Price ($)}",
-        "style": {"color": "white"}
-    }
-))
+# Create the map
+st.pydeck_chart(
+    pdk.Deck(
+        layers=[scatterplot_layer, hexagon_layer],
+        initial_view_state=view_state,
+        tooltip={
+            "html": "<b>Value:</b> {value}<br><b>Latitude:</b> {lat}<br><b>Longitude:</b> {lon}",
+            "style": {"color": "white"},
+        },
+    )
+)
 
-# Show Filtered Table
-st.subheader("Filtered Data")
-st.dataframe(filtered_data)
+# Radius Search Example
+st.header("Map with Radius Search")
 
+# Create radius data
+@st.cache_data
+def radius_search_data(center_lat, center_lon, radius_km=5):
+    # Generate mock points in a circle for visualization
+    from math import sin, cos, sqrt, atan2, radians
+    import numpy as np
+
+    points = []
+    for angle in range(0, 360, 10):
+        theta = radians(angle)
+        lat_offset = (radius_km / 111) * cos(theta)
+        lon_offset = (radius_km / (111 * cos(radians(center_lat)))) * sin(theta)
+        points.append([center_lat + lat_offset, center_lon + lon_offset])
+
+    df = pd.DataFrame(points, columns=["lat", "lon"])
+    df["value"] = np.random.randint(1, 100, len(df))
+    return df
+
+# Generate radius search points
+radius_data = radius_search_data(center_lat=37.76, center_lon=-122.42, radius_km=5)
+
+# Create a scatterplot for radius search
+radius_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=radius_data,
+    get_position=["lon", "lat"],
+    get_color="[255, value, 100]",
+    get_radius=100,
+    pickable=True,
+    auto_highlight=True,
+)
+
+# Update view state
+radius_view_state = pdk.ViewState(
+    latitude=37.76,
+    longitude=-122.42,
+    zoom=13,
+    pitch=30,
+)
+
+# Render radius map
+st.pydeck_chart(
+    pdk.Deck(
+        layers=[radius_layer],
+        initial_view_state=radius_view_state,
+        tooltip={
+            "html": "<b>Radius Point</b><br><b>Value:</b> {value}<br><b>Latitude:</b> {lat}<br><b>Longitude:</b> {lon}",
+            "style": {"color": "white"},
+        },
+    )
+)
+
+# Display the raw radius data
+st.subheader("Raw Radius Search Data")
+st.dataframe(radius_data)
