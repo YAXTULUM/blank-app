@@ -185,7 +185,7 @@ st.markdown(
     <p style="font-size:12px; color:lightgrey;">
         Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com - by Ekbalam
     </p>
-    """,  # Closing triple quote here
+    """,  # Properly closed
     unsafe_allow_html=True
 )
 
@@ -202,6 +202,7 @@ st.markdown(
     """,  # Properly closed
     unsafe_allow_html=True
 )
+
 
 
 
