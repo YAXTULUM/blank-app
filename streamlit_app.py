@@ -95,7 +95,7 @@ st.markdown(
         }
 
         .dropdown-content {
-            display: block;
+            display: inline-block;
             position: absolute;
             background-color: #f8f9fa;
             box-shadow: 0 4px 8px rgba(0, 0, 0.44, 0.55);
@@ -112,7 +112,7 @@ st.markdown(
             font-weight: 500;
             padding: 10px 20px;
             text-decoration: none;
-            display: block;
+            display: inline-block;
             border-radius: 15px;
             transition: background-color 0.2s ease;
         }
@@ -124,13 +124,13 @@ st.markdown(
 
         /* Show the dropdown content on hover */
         .dropdown-container:hover .dropdown-content {
-            display: block;
+            display: inline-block;
         }
 
         /* Dropdown Arrow Styling */
         .dropdown-arrow {
             margin-left: 5px;
-            font-size: 12px;
+            font-size: 8px;
         }
 
         /* Responsive Adjustments */
