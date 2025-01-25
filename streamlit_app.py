@@ -322,15 +322,12 @@ def configure_sidebar():
 
 ##########  graph ##########
 # Calculate Metrics and Display Visualizations
-try:
-    metrics = calculate_metrics(financial_details)
-    st.header("Investment Metrics")
-
-    # Display metrics as a table
+  # Display metrics as a table
     metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
     st.table(metrics_df)
 
     # Visualization 1: Bar Chart for Key Metrics
+    st.subheader("Investment Metrics Visualization")
     bar_chart_data = metrics_df[
         metrics_df["Metric"].isin(["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"])
     ]
@@ -342,6 +339,7 @@ try:
     st.altair_chart(bar_chart, use_container_width=True)
 
     # Visualization 2: Pie Chart for Expense Breakdown
+    st.subheader("Expense Breakdown")
     expense_data = pd.DataFrame({
         "Category": ["Taxes", "Insurance", "Utilities", "HOA Fees", "Maintenance", "CapEx", "Management"],
         "Amount": [
@@ -362,6 +360,7 @@ try:
     st.altair_chart(pie_chart, use_container_width=True)
 
     # Visualization 3: Line Chart for Trends (e.g., NOI vs. Property Price)
+    st.subheader("Trend Analysis")
     trend_data = []
     price_range = np.linspace(
         financial_details["property_price"] * 0.8, 
@@ -371,22 +370,21 @@ try:
     for price in price_range:
         temp_details = financial_details.copy()
         temp_details["property_price"] = price
-        try:
-            trend_metrics = calculate_metrics(temp_details)
-            trend_data.append({"Property Price ($)": price, "NOI ($)": trend_metrics["NOI"], "Cash Flow ($)": trend_metrics["Cash Flow"]})
-        except Exception as e:
-            st.warning(f"Skipped property price ${price}: {e}")
+        trend_metrics = calculate_metrics(temp_details)
+        trend_data.append({"Property Price ($)": price, "NOI ($)": trend_metrics["NOI"], "Cash Flow ($)": trend_metrics["Cash Flow"]})
 
     trend_df = pd.DataFrame(trend_data)
     line_chart = alt.Chart(trend_df).mark_line(point=True).encode(
         x=alt.X("Property Price ($):Q", title="Property Price ($)"),
         y=alt.Y("NOI ($):Q", title="Net Operating Income ($)"),
+        color=alt.value("steelblue"),
         tooltip=["Property Price ($)", "NOI ($)", "Cash Flow ($)"]
     ).interactive()
     st.altair_chart(line_chart, use_container_width=True)
 
-    # Sensitivity Analysis
+    # Visualization 4: Scatter Plot for Sensitivity Analysis (if applicable)
     if st.checkbox("Perform Sensitivity Analysis"):
+        st.subheader("Sensitivity Analysis Results")
         sensitivity_results = sensitivity_analysis(financial_details)
         st.write(sensitivity_results)
 
@@ -400,7 +398,6 @@ try:
 
 except ValueError as e:
     st.error(f"Error in calculating metrics: {e}")
-
 
 
 
