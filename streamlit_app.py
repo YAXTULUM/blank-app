@@ -989,6 +989,7 @@ import altair as alt
 from urllib.error import URLError
 
 
+
 # Function to generate random price data for distribution
 def display_price_distribution(price_range):
     """
@@ -1083,8 +1084,6 @@ def main():
 # Entry point
 if __name__ == "__main__":
     main()
-
-
 
 
 
