@@ -266,16 +266,13 @@ def configure_sidebar():
         ),
     }
 
-  # Financial Details
-st.sidebar.subheader("Financial Details")
+ 
 financial_details = {
     "property_price": st.sidebar.number_input("Property Price ($)", value=300000, step=10000, key="property_price_sidebar"),
     "down_payment": st.sidebar.number_input("Down Payment ($)", value=60000, step=1000, key="down_payment_sidebar"),
     "closing_costs": st.sidebar.number_input("Closing Costs ($)", value=5000, step=500, key="closing_costs_sidebar"),
     "rehab_costs": st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs_sidebar"),
-    "annual_property_taxes": st.sidebar.number_input(
-        "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes_sidebar"
-    ),
+    "annual_property_taxes": st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes_sidebar"),
     "annual_insurance": st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100, key="annual_insurance_sidebar"),
     "annual_utilities": st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500, key="annual_utilities_sidebar"),
     "maintenance_perc": st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc_sidebar"),
@@ -284,15 +281,13 @@ financial_details = {
     "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1, key="vacancy_perc_sidebar"),
     "hoa_fees": st.sidebar.number_input("HOA Fees (Monthly $)", value=0, step=50, key="hoa_fees_sidebar"),
     "other_income": st.sidebar.number_input("Other Income (Monthly $)", value=0, step=50, key="other_income_sidebar"),
-    appreciation_rate = st.sidebar.number_input("Appreciation Rate (%)", value=3.0, step=0.1)
+    "appreciation_rate": st.sidebar.number_input("Appreciation Rate (%)", value=3.0, step=0.1, key="appreciation_rate_sidebar"),
     "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1, key="interest_rate_sidebar"),
     "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1, key="loan_term_sidebar"),
-    "annual_rent_income": st.sidebar.number_input(
-        "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income_sidebar"
-    ),
+    "annual_rent_income": st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income_sidebar"),
     "inflation_rate": st.sidebar.number_input("Inflation Rate (%)", value=2.0, step=0.1, key="inflation_rate_sidebar"),
     "selling_costs_perc": st.sidebar.number_input("Selling Costs (% of Sale Price)", value=6.0, step=0.1, key="selling_costs_sidebar"),
-    }
+}
 
     return location_details, property_details, financial_details
 
