@@ -280,19 +280,28 @@ def configure_sidebar():
         "capex_perc": st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc"),
         "mgmt_perc": st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1, key="mgmt_perc"),
         "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1, key="vacancy_perc"),
+        "hoa_fees": st.sidebar.number_input("HOA Fees (Monthly $)", value=0, step=50, key="hoa_fees"),
+        "other_income": st.sidebar.number_input("Other Income (Monthly $)", value=0, step=50, key="other_income"),
         "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1, key="interest_rate"),
         "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1, key="loan_term"),
         "annual_rent_income": st.sidebar.number_input(
             "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income"
         ),
-        "hoa_fees": st.sidebar.number_input("HOA Fees (Monthly $)", value=0, step=50, key="hoa_fees"),
-        "other_income": st.sidebar.number_input("Other Income (Monthly $)", value=0, step=50, key="other_income"),
         "appreciation_rate": st.sidebar.number_input("Appreciation Rate (%)", value=3.0, step=0.1, key="appreciation_rate"),
         "inflation_rate": st.sidebar.number_input("Inflation Rate (%)", value=2.0, step=0.1, key="inflation_rate"),
         "selling_costs_perc": st.sidebar.number_input("Selling Costs (% of Sale Price)", value=6.0, step=0.1, key="selling_costs_perc"),
+        "rental_growth_rate": st.sidebar.number_input("Rental Growth Rate (% per Year)", value=2.5, step=0.1, key="rental_growth_rate"),
+        "maintenance_cost_cap": st.sidebar.number_input("Maintenance Cost Cap ($/Year)", value=5000, step=500, key="maintenance_cost_cap"),
+        "debt_service_reserve": st.sidebar.number_input("Debt Service Reserve ($)", value=10000, step=500, key="debt_service_reserve"),
+        "vacancy_loss_reserve": st.sidebar.number_input("Vacancy Loss Reserve ($)", value=5000, step=500, key="vacancy_loss_reserve"),
+        "tax_depreciation_life": st.sidebar.number_input("Tax Depreciation Life (Years)", value=27.5, step=0.1, key="tax_depreciation_life"),
+        "capital_gain_tax_rate": st.sidebar.number_input("Capital Gain Tax Rate (%)", value=15.0, step=0.1, key="capital_gain_tax_rate"),
+        "loan_origination_fee": st.sidebar.number_input("Loan Origination Fee (%)", value=1.0, step=0.1, key="loan_origination_fee"),
+        "utility_escalation_rate": st.sidebar.number_input("Utility Escalation Rate (% per Year)", value=1.5, step=0.1, key="utility_escalation_rate"),
     }
 
     return location_details, property_details, financial_details
+
 
 
 # Calculation function
