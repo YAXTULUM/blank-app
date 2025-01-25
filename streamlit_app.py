@@ -161,24 +161,6 @@ st.markdown(
                 padding: 8px 15px;
             }
         }
-
-@media screen and (max-width: 768px) {
-    .dropdown-container {
-        top: 10px;
-        right: 10px; /* Adjust for mobile spacing */
-    }
-
-    .dropdown-button {
-        font-size: 14px;
-        padding: 8px 12px; /* Smaller padding for mobile */
-    }
-
-    .dropdown-content {
-        min-width: 180px; /* Smaller dropdown width */
-    }
-}
-
-        
   </style>
 
 
@@ -222,7 +204,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 
 ###########  Header End ############################
