@@ -316,17 +316,24 @@ def configure_sidebar():
 
 
 
-
-
-
-
 def calculate_metrics(financial_details, debug=False):
     """Calculate key financial metrics for a real estate investment."""
     # Input validation
     if financial_details["property_price"] <= 0:
         raise ValueError("Property price must be greater than zero.")
+    if financial_details["loan_term"] <= 0:
+        raise ValueError("Loan term must be greater than zero.")
+    if financial_details["interest_rate"] < 0:
+        raise ValueError("Interest rate cannot be negative.")
     if not (0 <= financial_details["maintenance_perc"] <= 100):
         raise ValueError("Maintenance percentage must be between 0 and 100.")
+    if not (0 <= financial_details["capex_perc"] <= 100):
+        raise ValueError("Capital expenditure percentage must be between 0 and 100.")
+    if not (0 <= financial_details["mgmt_perc"] <= 100):
+        raise ValueError("Management percentage must be between 0 and 100.")
+    if not (0 <= financial_details["vacancy_perc"] <= 100):
+        raise ValueError("Vacancy percentage must be between 0 and 100.")
+
     # Extract inputs
     price = financial_details["property_price"]
     rent = financial_details["annual_rent_income"]
@@ -342,8 +349,8 @@ def calculate_metrics(financial_details, debug=False):
     vacancy_perc = financial_details["vacancy_perc"]
     rate = financial_details["interest_rate"]
     term = financial_details["loan_term"]
-    hoa_fees = financial_details["hoa_fees"] * 12
-    other_income = financial_details["other_income"] * 12
+    hoa_fees = financial_details["hoa_fees"] * 12  # Annualized
+    other_income = financial_details["other_income"] * 12  # Annualized
 
     # Loan calculations
     loan_amount = price - down
@@ -353,21 +360,25 @@ def calculate_metrics(financial_details, debug=False):
     try:
         monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
     except ZeroDivisionError:
-        monthly_payment = 0
+        monthly_payment = 0  # Zero monthly payment if loan term is zero
 
     annual_debt_service = monthly_payment * 12
-    operating_expenses = taxes + insurance + utilities + hoa_fees + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
+    operating_expenses = (
+        taxes + insurance + utilities + hoa_fees +
+        (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
+    )
     effective_gross_income = rent * (1 - vacancy_perc / 100) + other_income
     noi = effective_gross_income - operating_expenses
 
     cash_flow = noi - annual_debt_service
     total_investment = down + closing + rehab
+
     cap_rate = (noi / price) * 100 if price > 0 else 0
     cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
     try:
         break_even_rent = (operating_expenses + annual_debt_service) / (1 - vacancy_perc / 100)
     except ZeroDivisionError:
-        break_even_rent = float('inf')  # Cannot break even with 100% vacancy.
+        break_even_rent = float('inf')  # Break-even rent is unattainable with 100% vacancy.
 
     metrics = {
         "Monthly Payment": monthly_payment,
@@ -385,37 +396,6 @@ def calculate_metrics(financial_details, debug=False):
         print("Metrics calculated:", metrics)
 
     return metrics
-
-
-
-
-
-
-
-# Main function  INVESTMENT CALCULATOR            WORKS  
-
-def main():
-    st.title("Real Estate Investment Calculator")
-    st.write("Analyze your real estate investment with detailed metrics.")
-
-    # Sidebar Inputs
-    location_details, property_details, financial_details = configure_sidebar()
-
-    # Calculate Metrics
-    metrics = calculate_metrics(financial_details)
-
-    # Display Metrics
-    st.header("Investment Metrics")
-    for key, value in metrics.items():
-        st.write(f"**{key}:** ${value:,.2f}" if "($)" in key or "Payment" in key else f"**{key}:** {value:.2f}%")
-
-    st.write("Use the sidebar to adjust variables and see real-time analysis.")
-
-
-# Run the app
-if __name__ == "__main__":
-    main()
-
 
 
 
