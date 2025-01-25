@@ -331,7 +331,7 @@ def main():
     st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
 
     # Sidebar Inputs
-    _, _, financial_details = configure_sidebar()
+    location_details, property_details, financial_details = configure_sidebar()
 
     # Debugging: Display financial_details
     st.write("Debug: Financial Details:", financial_details)
@@ -340,7 +340,7 @@ def main():
     try:
         metrics = calculate_metrics(financial_details)
         st.header("Investment Metrics")
-        
+
         # Display metrics as a table
         metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
         st.table(metrics_df)
@@ -349,7 +349,7 @@ def main():
         st.subheader("Investment Metrics Visualization")
         selected_metrics = st.multiselect(
             "Select Metrics to Visualize",
-            options=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow", "Cap Rate (%)", "Cash-on-Cash ROI (%)"],
+            options=list(metrics.keys()),
             default=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"]
         )
 
@@ -357,11 +357,15 @@ def main():
         if bar_chart_data.empty:
             st.warning("No metrics selected for visualization.")
         else:
-            bar_chart = create_bar_chart(bar_chart_data, title="Key Investment Metrics")
+            bar_chart = alt.Chart(bar_chart_data).mark_bar().encode(
+                x=alt.X("Metric", sort=None, title="Metric"),
+                y=alt.Y("Value", title="Value ($)"),
+                tooltip=["Metric", "Value"]
+            ).interactive()
             st.altair_chart(bar_chart, use_container_width=True)
 
-        # Visualization: Trend Analysis Line Chart
-        st.subheader("Trend Analysis")
+        # Visualization: Line Chart for Property Price Sensitivity
+        st.subheader("Property Price Sensitivity Analysis")
         trend_data = []
         price_range = np.linspace(
             financial_details["property_price"] * 0.8,
@@ -387,29 +391,23 @@ def main():
         ).interactive()
         st.altair_chart(line_chart, use_container_width=True)
 
-        # Sensitivity Analysis
+        # Optional: Sensitivity Analysis
         if st.checkbox("Perform Sensitivity Analysis"):
             st.subheader("Sensitivity Analysis Results")
-            try:
-                sensitivity_results = sensitivity_analysis(financial_details)
-                st.write(sensitivity_results)
+            sensitivity_results = sensitivity_analysis(financial_details)
+            st.write(sensitivity_results)
 
-                # Visualization: Sensitivity Analysis Scatterplot
-                scatter_chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
-                    x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
-                    y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
-                    color=alt.Color("Cap Rate (%)", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
-                    tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
-                ).interactive()
-                st.altair_chart(scatter_chart, use_container_width=True)
+            # Visualization: Scatter Plot for Sensitivity
+            scatter_chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
+                x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
+                y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
+                color=alt.Color("Cap Rate (%)", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
+                tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
+            ).interactive()
+            st.altair_chart(scatter_chart, use_container_width=True)
 
-            except Exception as e:
-                st.error(f"Error during sensitivity analysis: {e}")
-
-    except ValueError as e:
-        st.error(f"Error in calculating metrics: {e}. Please check your input values.")
     except Exception as e:
-        st.error(f"Unexpected error occurred: {e}")
+        st.error(f"An error occurred while calculating metrics: {e}")
 
 
 if __name__ == "__main__":
