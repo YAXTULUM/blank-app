@@ -18,141 +18,92 @@ import streamlit as st
 # Title Section and Dropdown Menu
 st.markdown(
     """
-    <style>
-        /* Title Section Styling */
-        .title-section {
-            padding: 20px;
-            background: linear-gradient(135deg, #b9d2ec, #bcd2e58c);
-            color: white;
-            border-radius: 25px;
-            box-shadow: 0 12px 18px rgba(0, 0.44, 0.55, 0.55);
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease-in-out;
-        }
+   <style>
+    /* Dropdown Button Styling */
+    .dropdown-button {
+        background-color: #b3cfed;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0.44, 0.55);
+        transition: all 0.3s ease-in-out;
+        text-align: center;
+    }
 
-        .title-section:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            transform: translateY(-2px);
-        }
+    .dropdown-button:hover {
+        background-color: #0056b3;
+        box-shadow: 0 6px 12px rgba(0, 0, 0.33, 0.55);
+    }
 
-        .title-section h1 {
-            font-size: 3em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
-                         0 0 20px rgba(0, 123, 255, 0.8),
-                         0 0 30px rgba(0, 123, 255, 0.7);
-            transition: all 0.3s ease-in-out;
-        }
+    /* Dropdown Menu Container */
+    .dropdown-container {
+        position: relative; /* Ensure proper alignment for the dropdown content */
+        display: inline-block;
+    }
 
-        .title-section h1:hover {
-            text-shadow: 0 0 5px rgba(255, 255, 255, 1),
-                         0 0 10px rgba(0, 123, 255, 1),
-                         0 0 15px rgba(0, 123, 255, 1);
-            transform: scale(1.1);
-        }
+    /* Dropdown Menu Styling */
+    .dropdown-content {
+        display: none; /* Initially hide the dropdown menu */
+        position: absolute;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.44);
+        border-radius: 10px;
+        margin-top: 10px;
+        min-width: 220px; /* Slightly larger for better readability */
+        z-index: 1;
+        right: 0; /* Align the dropdown to the right */
+    }
 
-        .title-section h2 {
-            font-size: 2em;
-            font-weight: semi-bold;
-            margin-bottom: 15px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8),
-                         0 0 15px rgba(0, 123, 255, 0.7);
-        }
+    /* Dropdown Menu Links */
+    .dropdown-content a {
+        color: black;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 10px 20px;
+        text-decoration: none;
+        display: block;
+        border-radius: 5px;
+        transition: background-color 0.2s ease;
+    }
 
-        .title-section p {
-            font-size: 1.2em;
-            margin: 0;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
-        }
+    .dropdown-content a:hover {
+        background-color: #cce4f7;
+        color: #0056b3;
+    }
 
-        /* Dropdown Button Styling */
+    /* Show the dropdown content when hovering over the container */
+    .dropdown-container:hover .dropdown-content {
+        display: block; /* Reveal the dropdown menu */
+    }
+
+    /* Dropdown Arrow Styling */
+    .dropdown-arrow {
+        margin-left: 5px;
+        font-size: 8px;
+    }
+
+    /* Responsive Adjustments */
+    @media screen and (max-width: 768px) {
         .dropdown-button {
-            background-color: #b3cfed;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0.44, 0.55);
-            transition: all 0.3s ease-in-out;
-            text-align: center;
-        }
-
-     .dropdown-button:hover {
-            background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 0, 0.33, 0.55);
-        }
-
-        /* Dropdown Menu Styling */
-        .dropdown-container {
-            position: absolute;
-            top: 20px;
-            Right: 20px; /* Positioning the dropdown to the right-hand side */
-            display: inline-block;
+            font-size: 10px;
+            padding: 8px 12px;
         }
 
         .dropdown-content {
-                                display: flex;
-            position: absolute;
-            background-color: #f8f9fa;
-            box-shadow: 0 4px 8px rgba(0, 0, 0.44, 0.55);
-            border-radius: 10px;
-            margin-top: 10px;
-            min-width: 220px; /* Slightly larger for better readability */
-            z-index: 1;
-            right: 0; /* Align the dropdown to the right */
+            min-width: 180px; /* Adjust dropdown width for smaller screens */
         }
 
         .dropdown-content a {
-            color: black;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 10px 20px;
-            text-decoration: none;
-            display: block;
-            border-radius: 5px;
-            transition: background-color 0.2s ease;
+            font-size: 12px;
+            padding: 8px 15px;
         }
+    }
+</style>
 
-        .dropdown-content a:hover {
-            background-color: #cce4f7;
-            color: #0056b3;
-        }
-
-        /* Show the dropdown content on hover */
-        .dropdown-container:hover .dropdown-content {
-            display: block;
-        }
-
-        /* Dropdown Arrow Styling */
-        .dropdown-arrow {
-            margin-left: 5px;
-            font-size: 8px;
-        }
-
-        /* Responsive Adjustments */
-        @media screen and (max-width: 768px) {
-            .dropdown-button {
-                font-size: 10px;
-                padding: 8px 12px;
-            }
-
-            .dropdown-content {
-                min-width: 180px; /* Adjust dropdown width for smaller screens */
-            }
-
-            .dropdown-content a {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-        }
-  </style>
 
 
 
