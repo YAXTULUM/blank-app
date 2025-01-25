@@ -427,7 +427,13 @@ def main():
         st.error(f"Input Error: {e}")
         return
 
- def sensitivity_analysis(financial_details):
+
+
+
+
+
+
+def sensitivity_analysis(financial_details):
     """Perform sensitivity analysis on rent and property price."""
     rent_income = financial_details["annual_rent_income"]
     property_price = financial_details["property_price"]
@@ -458,3 +464,8 @@ def main():
 
     # Convert results to DataFrame
     return pd.DataFrame(results)
+
+
+
+
+
