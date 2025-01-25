@@ -11,7 +11,6 @@ from urllib.error import URLError
 
 import streamlit as st
 
-# Title Section and Dropdown Menu
 st.markdown(
     """
     <style>
@@ -21,7 +20,7 @@ st.markdown(
             background: linear-gradient(135deg, #b9d2ec, #bcd2e58c);
             color: white;
             border-radius: 25px;
-            box-shadow: 0 12px 18px rgba(0, 0.44, 0.55, 0.55);
+            box-shadow: 0 12px 18px rgba(0, 0, 0, 0.55);
             text-align: center;
             margin-top: 20px;
             margin-bottom: 20px;
@@ -40,14 +39,6 @@ st.markdown(
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
                          0 0 20px rgba(0, 123, 255, 0.8),
                          0 0 30px rgba(0, 123, 255, 0.7);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .title-section h1:hover {
-            text-shadow: 0 0 5px rgba(255, 255, 255, 1),
-                         0 0 10px rgba(0, 123, 255, 1),
-                         0 0 15px rgba(0, 123, 255, 1);
-            transform: scale(1.1);
         }
 
         .title-section h2 {
@@ -67,29 +58,26 @@ st.markdown(
 
         /* Dropdown Button Styling */
         .dropdown-button {
-            background-color: #b3cfed;
+            background-color: #007BFF;
             color: white;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0.44, 0.55);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.22);
             transition: all 0.3s ease-in-out;
-            text-align: center;
         }
 
         .dropdown-button:hover {
             background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.55);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
         /* Dropdown Menu Styling */
         .dropdown-container {
-            position: absolute;
-            top: 20px;
-            right: 20px; /* Positioning the dropdown to the right-hand side */
+            position: relative;
             display: inline-block;
         }
 
@@ -100,9 +88,9 @@ st.markdown(
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             margin-top: 10px;
-            min-width: 220px; /* Slightly larger for better readability */
+            min-width: 220px;
             z-index: 1;
-            right: 0; /* Align the dropdown to the right */
+            right: 0;
         }
 
         .dropdown-content a {
@@ -121,36 +109,22 @@ st.markdown(
             color: #0056b3;
         }
 
-        /* Show the dropdown content on hover */
-        .dropdown-container:hover .dropdown-content {
+        /* Show dropdown content when toggled */
+        .dropdown-container.active .dropdown-content {
             display: block;
         }
+    </style>
 
-        /* Dropdown Arrow Styling */
-        .dropdown-arrow {
-            margin-left: 5px;
-            font-size: 12px;
-        }
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const dropdownButton = document.querySelector(".dropdown-button");
+            const dropdownContainer = document.querySelector(".dropdown-container");
 
-        /* Responsive Adjustments */
-        @media screen and (max-width: 768px) {
-            .dropdown-button {
-                font-size: 10px;
-                padding: 8px 12px;
-            }
-
-            .dropdown-content {
-                min-width: 180px; /* Adjust dropdown width for smaller screens */
-            }
-
-            .dropdown-content a {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-        }
-  </style>
-
-
+            dropdownButton.addEventListener("click", function() {
+                dropdownContainer.classList.toggle("active");
+            });
+        });
+    </script>
 
     <!-- Dropdown Menu -->
     <div class="dropdown-container">
@@ -168,6 +142,17 @@ st.markdown(
             <a href="/?page=Contact">Contact</a>
         </div>
     </div>
+
+    <!-- Title Section -->
+    <div class="title-section">
+        <h1>VillaTerras Ai</h1>
+        <h2>Ai Real Estate Agent | Assistant</h2>
+        <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
+        <p>All Real Estate Knowledge in One Place.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
     <!-- Title Section -->
     <div class="title-section">
