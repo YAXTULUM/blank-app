@@ -174,37 +174,7 @@ st.markdown(
     }
 </style>
 
-<!-- Dropdown Menu -->
-<div class="dropdown-container">
-    <button class="dropdown-button">
-        Menu <span class="dropdown-arrow">▼</span>
-    </button>
-    <div class="dropdown-content">
-        <a href="/?page=Home">Home</a>
-        <a href="/?page=Calculators">Calculators</a>
-        <a href="/?page=Business">Business</a>
-        <a href="/?page=RealEstate">Real Estate</a>
-        <a href="/?page=Investment">Investment</a>
-        <a href="/?page=MarketAnalysis">Market Analysis</a>
-        <a href="/?page=Trends">Trends</a>
-        <a href="/?page=Contact">Contact</a>
-    </div>
-</div>
- 
-
-
-    <!-- Title Section -->
-    <div class="title-section">
-        <h1>VillaTerras Ai Real Estate Dashboard</h1>
-        <h2>Real Estate Dashboard</h2>
-        <p>Welcome to the <strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
-        <p>All Real Estate Knowledge in One Place.</p>
-        <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
-    </div>
-
-
-
-    <!-- Dropdown Menu Section -->
+ <!-- Dropdown Menu -->
     <div class="dropdown-container">
         <button class="dropdown-button">
             Menu <span class="dropdown-arrow">▼</span>
@@ -219,6 +189,15 @@ st.markdown(
             <a href="/?page=Trends">Trends</a>
             <a href="/?page=Contact">Contact</a>
         </div>
+    </div>
+
+    <!-- Title Section -->
+    <div class="title-section">
+        <h1>VillaTerras Ai Real Estate Dashboard</h1>
+        <h2>Real Estate Dashboard</h2>
+        <p>Welcome to the <strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
+        <p>All Real Estate Knowledge in One Place.</p>
+        <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
     </div>
     """,
     unsafe_allow_html=True
