@@ -238,6 +238,10 @@ def from_data_file(filename):
 
 
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+
 
 # Sidebar configuration function
 def configure_sidebar():
@@ -337,7 +341,7 @@ def calculate_metrics(financial_details):
     rate = financial_details["interest_rate"]
     term = financial_details["loan_term"]
 
-    loan_amount = price - down
+    loan_amount = max(0, price - down)  # Prevent negative loan amounts
     monthly_rate = rate / 100 / 12
     num_payments = term * 12
 
@@ -356,6 +360,8 @@ def calculate_metrics(financial_details):
 
     cap_rate = (noi / price) * 100 if price > 0 else 0
     cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
+    ltv = (loan_amount / price) * 100 if price > 0 else 0
+    dscr = noi / annual_debt_service if annual_debt_service > 0 else 0
 
     return {
         "Monthly Payment": monthly_payment,
@@ -366,6 +372,8 @@ def calculate_metrics(financial_details):
         "Cash Flow": cash_flow,
         "Cap Rate": cap_rate,
         "Cash on Cash": cash_on_cash,
+        "Loan-to-Value Ratio": ltv,
+        "Debt Service Coverage Ratio": dscr,
     }
 
 
@@ -382,19 +390,20 @@ def main():
 
     # Display Metrics
     st.header("Investment Metrics")
-    st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
-    st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
-    st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
-    st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
-    st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
-    st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
-    st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
-    st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
+    for metric, value in metrics.items():
+        if isinstance(value, float):
+            st.write(f"**{metric}:** ${value:,.2f}" if "Value" not in metric else f"{value:.2f}%")
+        else:
+            st.write(f"**{metric}:** {value}")
 
 
 # Run the app
 if __name__ == "__main__":
     main()
+
+
+
+
 
 
 
