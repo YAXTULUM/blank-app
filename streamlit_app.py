@@ -633,9 +633,6 @@ progress_bar.empty()
 
 
 
-
-
-
 @st.cache_data
 def from_data_file(filename):
     url = (
@@ -644,72 +641,86 @@ def from_data_file(filename):
     )
     return pd.read_json(url)
 
+# Sidebar configuration for map settings
+st.sidebar.subheader("Map Layers & Settings")
+user_lat = st.sidebar.number_input("Starting Latitude", value=37.76, step=0.01)
+user_lon = st.sidebar.number_input("Starting Longitude", value=-122.4, step=0.01)
+hex_radius = st.sidebar.slider("Hexagon Radius (meters)", min_value=100, max_value=1000, value=200, step=50)
+
+# Define layers for visualization
 try:
     ALL_LAYERS = {
-"VillaZone": pdk.Layer(
+        "VillaZone": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
+            data=from_data_file("villa_zone_stats.json"),
             get_position=["lon", "lat"],
-            radius=200,
+            radius=hex_radius,
             elevation_scale=4,
             elevation_range=[0, 1000],
             extruded=True,
         ),
-"Residential": pdk.Layer(
+        "Residential": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
+            data=from_data_file("residential_zone_stats.json"),
             get_position=["lon", "lat"],
-            radius=200,
+            radius=hex_radius,
             elevation_scale=4,
             elevation_range=[0, 1000],
             extruded=True,
         ),
-"Multifamily": pdk.Layer(
+        "Multifamily": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
+            data=from_data_file("multifamily_zone_stats.json"),
             get_position=["lon", "lat"],
-            radius=200,
+            radius=hex_radius,
             elevation_scale=4,
             elevation_range=[0, 1000],
             extruded=True,
         ),
-"Retail": pdk.Layer(
+        "Retail": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
+            data=from_data_file("retail_zone_stats.json"),
             get_position=["lon", "lat"],
-            radius=200,
+            radius=hex_radius,
             elevation_scale=4,
             elevation_range=[0, 1000],
             extruded=True,
         ),
- "Industrial Parks": pdk.Layer(
+        "Industrial Parks": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
+            data=from_data_file("industrial_parks_stats.json"),
             get_position=["lon", "lat"],
-            radius=200,
+            radius=hex_radius,
             elevation_scale=4,
             elevation_range=[0, 1000],
             extruded=True,
         ),
- "Schools": pdk.Layer(
+        "Schools": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
+            data=from_data_file("schools_zone_stats.json"),
             get_position=["lon", "lat"],
-            radius=200,
+            radius=hex_radius,
             elevation_scale=4,
             elevation_range=[0, 1000],
             extruded=True,
         ),
-        "Bike rentals": pdk.Layer(
+        "Heatmap": pdk.Layer(
+            "HeatmapLayer",
+            data=from_data_file("investment_data.json"),
+            get_position=["lon", "lat"],
+            get_weight="investment_potential",
+            radius=500,
+        ),
+        "Bike Rentals": pdk.Layer(
             "HexagonLayer",
             data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
-            radius=200,
+            radius=hex_radius,
             elevation_scale=4,
             elevation_range=[0, 1000],
             extruded=True,
         ),
-        "Bart stop exits": pdk.Layer(
+        "Bart Stop Exits": pdk.Layer(
             "ScatterplotLayer",
             data=from_data_file("bart_stop_stats.json"),
             get_position=["lon", "lat"],
@@ -717,7 +728,7 @@ try:
             get_radius="[exits]",
             radius_scale=0.05,
         ),
-        "Bart stop names": pdk.Layer(
+        "Bart Stop Names": pdk.Layer(
             "TextLayer",
             data=from_data_file("bart_stop_stats.json"),
             get_position=["lon", "lat"],
@@ -726,7 +737,7 @@ try:
             get_size=10,
             get_alignment_baseline="'bottom'",
         ),
-        "Outbound flow": pdk.Layer(
+        "Outbound Flow": pdk.Layer(
             "ArcLayer",
             data=from_data_file("bart_path_stats.json"),
             get_source_position=["lon", "lat"],
@@ -740,38 +751,38 @@ try:
             width_max_pixels=30,
         ),
     }
-    st.sidebar.subheader("Map layers")
+
+    # Select layers to display
+    st.sidebar.subheader("Layer Visibility")
     selected_layers = [
         layer
         for layer_name, layer in ALL_LAYERS.items()
         if st.sidebar.checkbox(layer_name, True)
     ]
+
     if selected_layers:
+        # Render the map with selected layers
         st.pydeck_chart(
             pdk.Deck(
-                map_style=None,
+                map_style="mapbox://styles/mapbox/streets-v11",
                 initial_view_state={
-                    "latitude": 37.76,
-                    "longitude": -122.4,
+                    "latitude": user_lat,
+                    "longitude": user_lon,
                     "zoom": 11,
                     "pitch": 50,
                 },
                 layers=selected_layers,
+                tooltip={"html": "<b>Location:</b> {name}<br><b>Value:</b> {value}", "style": {"color": "white"}},
             )
         )
     else:
         st.error("Please choose at least one layer above.")
+
 except URLError as e:
     st.error(
-        """
+        f"""
         **This demo requires internet access.**
-        Connection error: %s
-    """
-        % e.reason
+        Connection error: {e.reason}
+        """
     )
-
-
-
-
-
  
