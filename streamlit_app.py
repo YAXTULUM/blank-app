@@ -550,10 +550,7 @@ except Exception as e:
 
 
 
-
-
-import streamlit as st
-import pandas as pd
+ 
 
 # Map Integration
 st.subheader("Investment Heatmap")
