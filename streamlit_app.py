@@ -274,10 +274,10 @@ def configure_sidebar():
     # Location Details
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value="", key="location_address_sidebar_1"),
-        "city": st.sidebar.text_input("City", value="", key="location_city_sidebar_1"),
-        "state": st.sidebar.text_input("State", value="", key="location_state_sidebar_1"),
-        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip_sidebar_1"),
+        "address": st.sidebar.text_input("Address", value="", key="location_address"),
+        "city": st.sidebar.text_input("City", value="", key="location_city"),
+        "state": st.sidebar.text_input("State", value="", key="location_state"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip"),
     }
 
     # Property Details
