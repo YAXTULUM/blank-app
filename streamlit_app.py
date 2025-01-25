@@ -456,9 +456,6 @@ def main():
     # Sidebar Inputs
     _, _, financial_details = configure_sidebar()
 
-
-
- 
    def create_bar_chart(dataframe, title):
     return alt.Chart(dataframe).mark_bar().encode(
         x=alt.X("Metric", sort=None, title="Metric"),
