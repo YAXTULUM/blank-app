@@ -315,6 +315,16 @@ def calculate_metrics(financial_details):
 
 
 # --- Main Function ---
+# Function to create bar chart
+def create_bar_chart(dataframe, title):
+    """Creates a bar chart from a given dataframe."""
+    return alt.Chart(dataframe).mark_bar().encode(
+        x=alt.X("Metric", sort=None, title="Metric"),
+        y=alt.Y("Value", title="Value ($)"),
+        tooltip=["Metric", "Value"]
+    ).properties(title=title).interactive()
+
+
 def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
@@ -409,4 +419,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
