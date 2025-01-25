@@ -179,22 +179,27 @@ st.markdown(
  
  
 
-# Correctly formatted markdown with closing triple quotes
 st.markdown(
     """
+    <h1>VillaTerras AI Dashboard</h1>
     <p style="font-size:12px; color:lightgrey;">
         Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com - by Ekbalam
     </p>
-    """,
+    """,  # Closing triple quote here
     unsafe_allow_html=True
 )
 
-# Example of another section to verify syntax
 st.markdown(
     """
-    <h1>Welcome to VillaTerras AI Dashboard</h1>
-    <p>Explore powerful tools and analytics to manage real estate efficiently.</p>
-    """,
+    <div>
+        <h2>Key Features</h2>
+        <ul>
+            <li>Advanced Metrics</li>
+            <li>Property Analysis</li>
+            <li>Real Estate Trends</li>
+        </ul>
+    </div>
+    """,  # Properly closed
     unsafe_allow_html=True
 )
 
