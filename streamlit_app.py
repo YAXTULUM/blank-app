@@ -140,7 +140,7 @@ try:
     else:
         data = df.loc[countries]
         data /= 1000000.0
-        st.subheader("Gross Agricultural Production ($B)")
+        st.subheader("Gross Real Estate GDP ($T)")
         st.dataframe(data.sort_index())
 
         # Altair chart
