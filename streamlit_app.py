@@ -221,7 +221,7 @@ import pandas as pd
 import numpy as np
 import altair as alt
 
-# --- DUMMY Data Loader ---
+# --- Not so DUMMY Data Loader ---
 
 
 @st.cache_data
@@ -242,65 +242,58 @@ def configure_sidebar():
     # Location Details
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value="", key="location_address"),
-        "city": st.sidebar.text_input("City", value="", key="location_city"),
-        "state": st.sidebar.text_input("State", value="", key="location_state"),
-        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip"),
+        "address": st.sidebar.text_input("Address", value="", key="location_address_sidebar"),
+        "city": st.sidebar.text_input("City", value="", key="location_city_sidebar"),
+        "state": st.sidebar.text_input("State", value="", key="location_state_sidebar"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip_sidebar"),
     }
 
     # Property Details
     st.sidebar.subheader("Property Details")
     property_details = {
         "price_range": st.sidebar.slider(
-            "Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="price_range"
+            "Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="price_range_sidebar"
         ),
-        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="bedrooms"),
-        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="bathrooms"),
+        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="bedrooms_sidebar"),
+        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="bathrooms_sidebar"),
         "area_range": st.sidebar.slider(
-            "Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="area_range"
+            "Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="area_range_sidebar"
         ),
         "land_area": st.sidebar.slider(
-            "Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="land_area"
+            "Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="land_area_sidebar"
         ),
     }
 
     # Financial Details
     st.sidebar.subheader("Financial Details")
     financial_details = {
-        "property_price": st.sidebar.number_input("Property Price ($)", value=300000, step=10000, key="property_price"),
-        "down_payment": st.sidebar.number_input("Down Payment ($)", value=60000, step=1000, key="down_payment"),
-        "closing_costs": st.sidebar.number_input("Closing Costs ($)", value=5000, step=500, key="closing_costs"),
-        "rehab_costs": st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs"),
+        "property_price": st.sidebar.number_input("Property Price ($)", value=300000, step=10000, key="property_price_sidebar"),
+        "down_payment": st.sidebar.number_input("Down Payment ($)", value=60000, step=1000, key="down_payment_sidebar"),
+        "closing_costs": st.sidebar.number_input("Closing Costs ($)", value=5000, step=500, key="closing_costs_sidebar"),
+        "rehab_costs": st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs_sidebar"),
         "annual_property_taxes": st.sidebar.number_input(
-            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes"
+            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes_sidebar"
         ),
-        "annual_insurance": st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100, key="annual_insurance"),
-        "annual_utilities": st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500, key="annual_utilities"),
-        "maintenance_perc": st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc"),
-        "capex_perc": st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc"),
-        "mgmt_perc": st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1, key="mgmt_perc"),
-        "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1, key="vacancy_perc"),
-        "hoa_fees": st.sidebar.number_input("HOA Fees (Monthly $)", value=0, step=50, key="hoa_fees"),
-        "other_income": st.sidebar.number_input("Other Income (Monthly $)", value=0, step=50, key="other_income"),
-        "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1, key="interest_rate"),
-        "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1, key="loan_term"),
+        "annual_insurance": st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100, key="annual_insurance_sidebar"),
+        "annual_utilities": st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500, key="annual_utilities_sidebar"),
+        "maintenance_perc": st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc_sidebar"),
+        "capex_perc": st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc_sidebar"),
+        "mgmt_perc": st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1, key="mgmt_perc_sidebar"),
+        "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1, key="vacancy_perc_sidebar"),
+        "hoa_fees": st.sidebar.number_input("HOA Fees (Monthly $)", value=0, step=50, key="hoa_fees_sidebar"),
+        "other_income": st.sidebar.number_input("Other Income (Monthly $)", value=0, step=50, key="other_income_sidebar"),
+        "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1, key="interest_rate_sidebar"),
+        "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1, key="loan_term_sidebar"),
         "annual_rent_income": st.sidebar.number_input(
-            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income"
+            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income_sidebar"
         ),
-        "appreciation_rate": st.sidebar.number_input("Appreciation Rate (%)", value=3.0, step=0.1, key="appreciation_rate"),
-        "inflation_rate": st.sidebar.number_input("Inflation Rate (%)", value=2.0, step=0.1, key="inflation_rate"),
-        "selling_costs_perc": st.sidebar.number_input("Selling Costs (% of Sale Price)", value=6.0, step=0.1, key="selling_costs_perc"),
-        "rental_growth_rate": st.sidebar.number_input("Rental Growth Rate (% per Year)", value=2.5, step=0.1, key="rental_growth_rate"),
-        "maintenance_cost_cap": st.sidebar.number_input("Maintenance Cost Cap ($/Year)", value=5000, step=500, key="maintenance_cost_cap"),
-        "debt_service_reserve": st.sidebar.number_input("Debt Service Reserve ($)", value=10000, step=500, key="debt_service_reserve"),
-        "vacancy_loss_reserve": st.sidebar.number_input("Vacancy Loss Reserve ($)", value=5000, step=500, key="vacancy_loss_reserve"),
-        "tax_depreciation_life": st.sidebar.number_input("Tax Depreciation Life (Years)", value=27.5, step=0.1, key="tax_depreciation_life"),
-        "capital_gain_tax_rate": st.sidebar.number_input("Capital Gain Tax Rate (%)", value=15.0, step=0.1, key="capital_gain_tax_rate"),
-        "loan_origination_fee": st.sidebar.number_input("Loan Origination Fee (%)", value=1.0, step=0.1, key="loan_origination_fee"),
-        "utility_escalation_rate": st.sidebar.number_input("Utility Escalation Rate (% per Year)", value=1.5, step=0.1, key="utility_escalation_rate"),
+        "appreciation_rate": st.sidebar.number_input("Appreciation Rate (%)", value=3.0, step=0.1, key="appreciation_rate_sidebar"),
+        "inflation_rate": st.sidebar.number_input("Inflation Rate (%)", value=2.0, step=0.1, key="inflation_rate_sidebar"),
+        "selling_costs_perc": st.sidebar.number_input("Selling Costs (% of Sale Price)", value=6.0, step=0.1, key="selling_costs_sidebar"),
     }
 
     return location_details, property_details, financial_details
+
 
 
 
