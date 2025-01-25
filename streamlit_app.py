@@ -6,7 +6,7 @@ import pydeck as pdk
 import time
 from urllib.error import URLError
 import requests
-from sklearn.linear_model import LinearRegression
+
 import datetime
 
 
