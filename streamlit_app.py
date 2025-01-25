@@ -12,8 +12,6 @@ from urllib.error import URLError
  
 
 import streamlit as st
-
- 
 # Title Section and Dropdown Menu
 st.markdown(
     """
@@ -68,13 +66,7 @@ st.markdown(
             color: rgba(255, 255, 255, 0.9);
         }
 
-
-
-###########################################   HEADER SECTION CSS END #####################################
-
-###########################################   Dropdown Button Styling CSS #####################################
-
-  /* Dropdown Button Styling */
+        /* Dropdown Button Styling */
         .dropdown-button {
             background-color: #b3cfed;
             color: white;
@@ -89,23 +81,21 @@ st.markdown(
             text-align: center;
         }
 
-     .dropdown-button:hover {
+        .dropdown-button:hover {
             background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 0, 0.33, 0.55);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.55);
         }
 
         /* Dropdown Menu Styling */
         .dropdown-container {
             position: absolute;
             top: 20px;
-            Right: 20px; /* Positioning the dropdown to the right-hand side */
+            right: 20px; /* Positioning the dropdown to the right-hand side */
             display: inline-block;
         }
 
- 
-
         .dropdown-content {
-                                display: flex;
+            display: block;
             position: absolute;
             background-color: #f8f9fa;
             box-shadow: 0 4px 8px rgba(0, 0, 0.44, 0.55);
@@ -123,7 +113,7 @@ st.markdown(
             padding: 10px 20px;
             text-decoration: none;
             display: block;
-            border-radius: 5px;
+            border-radius: 15px;
             transition: background-color 0.2s ease;
         }
 
@@ -140,7 +130,7 @@ st.markdown(
         /* Dropdown Arrow Styling */
         .dropdown-arrow {
             margin-left: 5px;
-            font-size: 8px;
+            font-size: 12px;
         }
 
         /* Responsive Adjustments */
@@ -180,9 +170,6 @@ st.markdown(
         </div>
     </div>
 
-
-
-    
     <!-- Title Section -->
     <div class="title-section">
         <h1>VillaTerras Ai</h1>
@@ -205,6 +192,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 ###########  Header End ############################
 
