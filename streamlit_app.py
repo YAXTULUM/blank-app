@@ -409,7 +409,7 @@ def sensitivity_analysis(financial_details):
 
 
 
-ef main():
+def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
 
