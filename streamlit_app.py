@@ -321,16 +321,93 @@ def configure_sidebar():
 
 
 
-# Calculation Function
-def calculate_metrics(financial_details):
-    """Calculate key financial metrics for a real estate investment."""
-    # Input Validation
-    if financial_details["property_price"] <= 0:
-        raise ValueError("Property price must be greater than zero.")
-    if financial_details["loan_term"] <= 0:
-        raise ValueError("Loan term must be greater than zero.")
-    if financial_details["interest_rate"] < 0:
-        raise ValueError("Interest rate cannot be negative.")
+# Calculate Metrics and Display Visualizations
+try:
+    metrics = calculate_metrics(financial_details)
+    st.header("Investment Metrics")
+
+    # Display metrics as a table
+    metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
+    st.table(metrics_df)
+
+    # Visualization 1: Bar Chart for Key Metrics
+    st.subheader("Investment Metrics Visualization")
+    bar_chart_data = metrics_df[
+        metrics_df["Metric"].isin(["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"])
+    ]
+    bar_chart = alt.Chart(bar_chart_data).mark_bar().encode(
+        x=alt.X("Metric", sort=None, title="Metric"),
+        y=alt.Y("Value", title="Value ($)"),
+        tooltip=["Metric", "Value"]
+    ).interactive()
+    st.altair_chart(bar_chart, use_container_width=True)
+
+    # Visualization 2: Pie Chart for Expense Breakdown
+    st.subheader("Expense Breakdown")
+    expense_data = pd.DataFrame({
+        "Category": ["Taxes", "Insurance", "Utilities", "HOA Fees", "Maintenance", "CapEx", "Management"],
+        "Amount": [
+            financial_details["annual_property_taxes"],
+            financial_details["annual_insurance"],
+            financial_details["annual_utilities"],
+            financial_details["hoa_fees"] * 12,  # Convert monthly to annual
+            financial_details["annual_rent_income"] * (financial_details["maintenance_perc"] / 100),
+            financial_details["annual_rent_income"] * (financial_details["capex_perc"] / 100),
+            financial_details["annual_rent_income"] * (financial_details["mgmt_perc"] / 100)
+        ]
+    })
+    pie_chart = alt.Chart(expense_data).mark_arc().encode(
+        theta=alt.Theta("Amount", title="Expense Amount"),
+        color=alt.Color("Category", title="Expense Category"),
+        tooltip=["Category", "Amount"]
+    ).interactive()
+    st.altair_chart(pie_chart, use_container_width=True)
+
+    # Visualization 3: Line Chart for Trends (e.g., NOI vs. Property Price)
+    st.subheader("Trend Analysis")
+    trend_data = []
+    price_range = np.linspace(
+        financial_details["property_price"] * 0.8, 
+        financial_details["property_price"] * 1.2, 
+        20
+    )
+    for price in price_range:
+        temp_details = financial_details.copy()
+        temp_details["property_price"] = price
+        trend_metrics = calculate_metrics(temp_details)
+        trend_data.append({"Property Price ($)": price, "NOI ($)": trend_metrics["NOI"], "Cash Flow ($)": trend_metrics["Cash Flow"]})
+
+    trend_df = pd.DataFrame(trend_data)
+    line_chart = alt.Chart(trend_df).mark_line(point=True).encode(
+        x=alt.X("Property Price ($):Q", title="Property Price ($)"),
+        y=alt.Y("NOI ($):Q", title="Net Operating Income ($)"),
+        color=alt.value("steelblue"),
+        tooltip=["Property Price ($)", "NOI ($)", "Cash Flow ($)"]
+    ).interactive()
+    st.altair_chart(line_chart, use_container_width=True)
+
+    # Visualization 4: Scatter Plot for Sensitivity Analysis (if applicable)
+    if st.checkbox("Perform Sensitivity Analysis"):
+        st.subheader("Sensitivity Analysis Results")
+        sensitivity_results = sensitivity_analysis(financial_details)
+        st.write(sensitivity_results)
+
+        scatter_chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
+            x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
+            y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
+            color=alt.Color("Cap Rate (%):Q", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
+            tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
+        ).interactive()
+        st.altair_chart(scatter_chart, use_container_width=True)
+
+except ValueError as e:
+    st.error(f"Error in calculating metrics: {e}")
+
+
+
+
+
+ 
 
     # Extract Inputs
     price = financial_details["property_price"]
