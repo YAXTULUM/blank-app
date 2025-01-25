@@ -9,84 +9,93 @@ from urllib.error import URLError
 
 ###########  Header Start ############################
 
-<style>
-    /* Title Section Styling */
-    .title-section {
-        padding: 20px;
-        background: linear-gradient(135deg, #007BFF, #0056b3);
-        color: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        transition: all 0.3s ease-in-out;
-    }
+import streamlit as st
 
-    .title-section:hover {
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-        transform: translateY(-2px);
-    }
-
-    /* Title Styling */
-    .title-section h1 {
-        font-size: 3em;
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
-                     0 0 20px rgba(0, 123, 255, 0.8),
-                     0 0 30px rgba(0, 123, 255, 0.7);
-        transition: all 0.3s ease-in-out;
-    }
-
-    .title-section h1:hover {
-        text-shadow: 0 0 15px rgba(255, 255, 255, 1),
-                     0 0 30px rgba(0, 123, 255, 1),
-                     0 0 45px rgba(0, 123, 255, 1);
-        transform: scale(1.1);
-    }
-
-    /* Subtitle Styling */
-    .title-section h2 {
-        font-size: 2em;
-        font-weight: semi-bold;
-        margin-bottom: 15px;
-        text-shadow: 0 0 8px rgba(255, 255, 255, 0.8),
-                     0 0 15px rgba(0, 123, 255, 0.7);
-    }
-
-    /* Paragraph Styling */
-    .title-section p {
-        font-size: 1.2em;
-        margin: 0;
-        line-height: 1.6;
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    /* Responsive Styling */
-    @media screen and (max-width: 768px) {
+# Add the HTML and CSS for the title section
+st.markdown(
+    """
+    <style>
+        /* Title Section Styling */
         .title-section {
-            padding: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #007BFF, #0056b3);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease-in-out;
         }
-        .title-section h1 {
-            font-size: 2.5em;
-        }
-        .title-section h2 {
-            font-size: 1.8em;
-        }
-        .title-section p {
-            font-size: 1em;
-        }
-    }
-</style>
 
-<div class="title-section">
-    <h1>VillaTerras Ai Real Estate Dashboard</h1>
-    <h2>Real Estate Dashboard</h2>
-    <p>Welcome to the <strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
-    <p>All Real Estate Knowledge in One Place.</p>
-    <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
-</div>
+        .title-section:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Title Styling */
+        .title-section h1 {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
+                         0 0 20px rgba(0, 123, 255, 0.8),
+                         0 0 30px rgba(0, 123, 255, 0.7);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .title-section h1:hover {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 1),
+                         0 0 30px rgba(0, 123, 255, 1),
+                         0 0 45px rgba(0, 123, 255, 1);
+            transform: scale(1.1);
+        }
+
+        /* Subtitle Styling */
+        .title-section h2 {
+            font-size: 2em;
+            font-weight: semi-bold;
+            margin-bottom: 15px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8),
+                         0 0 15px rgba(0, 123, 255, 0.7);
+        }
+
+        /* Paragraph Styling */
+        .title-section p {
+            font-size: 1.2em;
+            margin: 0;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Responsive Styling */
+        @media screen and (max-width: 768px) {
+            .title-section {
+                padding: 15px;
+            }
+            .title-section h1 {
+                font-size: 2.5em;
+            }
+            .title-section h2 {
+                font-size: 1.8em;
+            }
+            .title-section p {
+                font-size: 1em;
+            }
+        }
+    </style>
+
+    <div class="title-section">
+        <h1>VillaTerras Ai Real Estate Dashboard</h1>
+        <h2>Real Estate Dashboard</h2>
+        <p>Welcome to the <strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
+        <p>All Real Estate Knowledge in One Place.</p>
+        <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 
 ##########################  Header  ################################
