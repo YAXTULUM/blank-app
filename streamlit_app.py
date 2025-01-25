@@ -574,7 +574,6 @@ st.dataframe(sensitivity_df)
 
 
 
-
 # Main function
 def main():
     st.title("Real Estate Investment Calculator")
@@ -589,12 +588,34 @@ def main():
     # Display Metrics
     st.header("Investment Metrics")
     for metric, value in metrics.items():
-        st.write(f"**{metric}:** ${value:,.2f}" if "($)" in metric else f"**{metric}:** {value:.2f}%")
+        st.write(f"**{metric}:** ${value:,.2f}" if "($)" in metric or "Payment" in metric else f"**{metric}:** {value:.2f}%")
 
     # Perform Sensitivity Analysis
     st.header("Sensitivity Analysis")
     st.write("Explore how changes in rent and price affect key metrics.")
-    sensitivity_df = sensitivity_analysis(financial_details)
+    sensitivity_df = sensitivity_analysis(
+        rent_income=financial_details["annual_rent_income"],
+        property_price=financial_details["property_price"],
+        down_payment=financial_details["down_payment"],
+        closing_costs=financial_details["closing_costs"],
+        rehab_costs=financial_details["rehab_costs"],
+        taxes=financial_details["annual_property_taxes"],
+        insurance=financial_details["annual_insurance"],
+        utilities=financial_details["annual_utilities"],
+        maintenance=financial_details["maintenance_perc"],
+        capex=financial_details["capex_perc"],
+        mgmt_perc=financial_details["mgmt_perc"],
+        vacancy_perc=financial_details["vacancy_perc"],
+        hoa_fees=financial_details["hoa_fees"],
+        other_income=financial_details["other_income"],
+        rate=financial_details["interest_rate"],
+        term=financial_details["loan_term"],
+        appreciation_rate=financial_details.get("appreciation_rate", 0),
+        inflation_rate=financial_details.get("inflation_rate", 0)
+    )
+
+    # Display Sensitivity DataFrame
+    st.dataframe(sensitivity_df)
 
     # Plot the ROI Graph
     st.subheader("ROI Analysis")
@@ -612,31 +633,61 @@ if __name__ == "__main__":
     main()
 
 
+ # Display Metrics
+st.header("Investment Metrics")
+for key, value in metrics.items():
+    # Dynamically format based on type of metric
+    if "($)" in key or "Payment" in key:
+        st.write(f"**{key}:** ${value:,.2f}")
+    elif "%" in key:
+        st.write(f"**{key}:** {value:.2f}%")
+    else:
+        st.write(f"**{key}:** {value}")
 
+# Perform Sensitivity Analysis
+sensitivity_df = sensitivity_analysis(
+    rent_income=financial_details["annual_rent_income"],
+    property_price=financial_details["property_price"],
+    down_payment=financial_details["down_payment"],
+    closing_costs=financial_details["closing_costs"],
+    rehab_costs=financial_details["rehab_costs"],
+    taxes=financial_details["annual_property_taxes"],
+    insurance=financial_details["annual_insurance"],
+    utilities=financial_details["annual_utilities"],
+    maintenance=financial_details["maintenance_perc"],
+    capex=financial_details["capex_perc"],
+    mgmt_perc=financial_details["mgmt_perc"],
+    vacancy_perc=financial_details["vacancy_perc"],
+    hoa_fees=financial_details.get("hoa_fees", 0),
+    other_income=financial_details.get("other_income", 0),
+    rate=financial_details["interest_rate"],
+    term=financial_details["loan_term"],
+    appreciation_rate=financial_details.get("appreciation_rate", 0),
+    inflation_rate=financial_details.get("inflation_rate", 0)
+)
 
- 
-    # Display Metrics
-    st.header("Investment Metrics")
-    for key, value in metrics.items():
-        st.write(f"**{key}:** ${value:,.2f}" if "($)" in key or "Payment" in key else f"**{key}:** {value:.2f}%")
+# Enhanced Sensitivity Analysis Results
+st.header("Sensitivity Analysis")
+st.write("Explore how changes in rent and price affect key metrics.")
+st.dataframe(sensitivity_df)
 
-    # Perform sensitivity analysis
-    sensitivity_df = sensitivity_analysis(
-        financial_details["annual_rent_income"], financial_details["property_price"],
-        financial_details["down_payment"], financial_details["closing_costs"],
-        financial_details["rehab_costs"], financial_details["annual_property_taxes"],
-        financial_details["annual_insurance"], financial_details["annual_utilities"],
-        financial_details["maintenance_perc"], financial_details["capex_perc"],
-        financial_details["mgmt_perc"], financial_details["vacancy_perc"],
-        financial_details["interest_rate"], financial_details["loan_term"]
-    )
+# Additional: ROI Visualization
+st.subheader("ROI Visualization")
+roi_chart = alt.Chart(sensitivity_df).mark_circle(size=60).encode(
+    x=alt.X("Property Price ($):Q", title="Property Price ($)"),
+    y=alt.Y("Rent Income ($):Q", title="Rent Income ($)"),
+    size=alt.Size("Cap Rate (%)", legend=None, title="Cap Rate"),
+    color=alt.Color("Cash Flow ($):Q", scale=alt.Scale(scheme="blues"), title="Cash Flow"),
+    tooltip=[
+        alt.Tooltip("Property Price ($):Q", title="Property Price ($)"),
+        alt.Tooltip("Rent Income ($):Q", title="Rent Income ($)"),
+        alt.Tooltip("Cap Rate (%)", title="Cap Rate (%)"),
+        alt.Tooltip("Cash Flow ($):Q", title="Cash Flow ($)")
+    ]
+).interactive()
+st.altair_chart(roi_chart, use_container_width=True)
 
-    # Display sensitivity analysis results
-    st.header("Sensitivity Analysis")
-    st.write("Explore how changes in rent and price affect key metrics.")
-    st.dataframe(sensitivity_df)
-
-# Run the app
+# Run the App
 if __name__ == "__main__":
     main()
 
@@ -646,156 +697,128 @@ if __name__ == "__main__":
 
 
 
-
-
-
+# Enhanced Data Loading Function
 @st.cache_data
-def from_data_file(filename):
-    url = (
-        "https://raw.githubusercontent.com/streamlit/"
-        "example-data/master/hello/v1/%s" % filename
-    )
-    return pd.read_json(url)
-
-import streamlit as st
-import pydeck as pdk
-import pandas as pd
-import numpy as np
-from urllib.error import URLError
-
-
-# Function to simulate data file retrieval
-@st.cache_data
-def from_data_file(filename):
-    url = f"https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/{filename}"
+def from_data_file(filename: str, base_url: str = "https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/"):
+    """
+    Load JSON data from a URL with error handling.
+    """
+    url = f"{base_url}{filename}"
     try:
-        return pd.read_json(url)
-    except ValueError:
-        st.error(f"Error loading data from {url}. Ensure the file exists and is formatted correctly.")
-        return pd.DataFrame()
+        data = pd.read_json(url)
+        st.success(f"Successfully loaded data from: {url}")
+        return data
+    except ValueError as ve:
+        st.error(f"ValueError: Could not parse JSON data from {url}. Please check the file format.")
+    except URLError as e:
+        st.error(f"URLError: Unable to fetch data from {url}. Error: {e.reason}")
+    return pd.DataFrame()  # Return an empty DataFrame on failure
 
 
-# Sidebar configuration for map settings
-st.sidebar.subheader("Map Layers & Settings")
+# Sidebar Configuration for Map Settings
+st.sidebar.header("Map Settings")
 user_lat = st.sidebar.number_input("Starting Latitude", value=37.76, step=0.01)
 user_lon = st.sidebar.number_input("Starting Longitude", value=-122.4, step=0.01)
 hex_radius = st.sidebar.slider("Hexagon Radius (meters)", min_value=100, max_value=1000, value=200, step=50)
 
-# Define layers for visualization
+# Define Layers for Visualization
 try:
+    # Define all layers dynamically
+    def create_layer(layer_type, filename, **kwargs):
+        """
+        Generic function to create layers dynamically.
+        """
+        data = from_data_file(filename)
+        if data.empty:
+            return None
+        if layer_type == "HexagonLayer":
+            return pdk.Layer(
+                "HexagonLayer",
+                data=data,
+                get_position=kwargs.get("get_position", ["lon", "lat"]),
+                radius=kwargs.get("radius", hex_radius),
+                elevation_scale=kwargs.get("elevation_scale", 4),
+                elevation_range=kwargs.get("elevation_range", [0, 1000]),
+                extruded=kwargs.get("extruded", True),
+            )
+        elif layer_type == "HeatmapLayer":
+            return pdk.Layer(
+                "HeatmapLayer",
+                data=data,
+                get_position=kwargs.get("get_position", ["lon", "lat"]),
+                get_weight=kwargs.get("get_weight", None),
+                radius=kwargs.get("radius", 500),
+            )
+        elif layer_type == "ScatterplotLayer":
+            return pdk.Layer(
+                "ScatterplotLayer",
+                data=data,
+                get_position=kwargs.get("get_position", ["lon", "lat"]),
+                get_color=kwargs.get("get_color", [200, 30, 0, 160]),
+                get_radius=kwargs.get("get_radius", 100),
+                radius_scale=kwargs.get("radius_scale", 0.05),
+            )
+        elif layer_type == "TextLayer":
+            return pdk.Layer(
+                "TextLayer",
+                data=data,
+                get_position=kwargs.get("get_position", ["lon", "lat"]),
+                get_text=kwargs.get("get_text", "name"),
+                get_color=kwargs.get("get_color", [0, 0, 0, 200]),
+                get_size=kwargs.get("get_size", 10),
+                get_alignment_baseline=kwargs.get("get_alignment_baseline", "'bottom'"),
+            )
+        elif layer_type == "ArcLayer":
+            return pdk.Layer(
+                "ArcLayer",
+                data=data,
+                get_source_position=kwargs.get("get_source_position", ["lon", "lat"]),
+                get_target_position=kwargs.get("get_target_position", ["lon2", "lat2"]),
+                get_source_color=kwargs.get("get_source_color", [200, 30, 0, 160]),
+                get_target_color=kwargs.get("get_target_color", [200, 30, 0, 160]),
+                auto_highlight=kwargs.get("auto_highlight", True),
+                width_scale=kwargs.get("width_scale", 0.0001),
+                get_width=kwargs.get("get_width", 1),
+                width_min_pixels=kwargs.get("width_min_pixels", 3),
+                width_max_pixels=kwargs.get("width_max_pixels", 30),
+            )
+        return None
+
+    # Define layers
     ALL_LAYERS = {
-        "VillaZone": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Residential": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Multifamily": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Retail": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Industrial Parks": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Schools": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Heatmap": pdk.Layer(
+        "VillaZone": create_layer("HexagonLayer", "bike_rental_stats.json"),
+        "Residential": create_layer("HexagonLayer", "bike_rental_stats.json"),
+        "Multifamily": create_layer("HexagonLayer", "bike_rental_stats.json"),
+        "Retail": create_layer("HexagonLayer", "bike_rental_stats.json"),
+        "Industrial Parks": create_layer("HexagonLayer", "bike_rental_stats.json"),
+        "Schools": create_layer("HexagonLayer", "bike_rental_stats.json"),
+        "Heatmap": create_layer(
             "HeatmapLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
+            "bike_rental_stats.json",
             get_weight="investment_potential" if "investment_potential" in from_data_file("bike_rental_stats.json").columns else None,
-            radius=500,
         ),
-        "Bike Rentals": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Bart Stop Exits": pdk.Layer(
+        "Bart Stop Exits": create_layer(
             "ScatterplotLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_color=[200, 30, 0, 160],
+            "bart_stop_stats.json",
             get_radius="[exits]" if "exits" in from_data_file("bart_stop_stats.json").columns else 100,
-            radius_scale=0.05,
         ),
-        "Bart Stop Names": pdk.Layer(
-            "TextLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_text="name" if "name" in from_data_file("bart_stop_stats.json").columns else "",
-            get_color=[0, 0, 0, 200],
-            get_size=10,
-            get_alignment_baseline="'bottom'",
-        ),
-        "Outbound Flow": pdk.Layer(
+        "Bart Stop Names": create_layer("TextLayer", "bart_stop_stats.json"),
+        "Outbound Flow": create_layer(
             "ArcLayer",
-            data=from_data_file("bart_path_stats.json"),
+            "bart_path_stats.json",
             get_source_position=["lon", "lat"],
             get_target_position=["lon2", "lat2"],
-            get_source_color=[200, 30, 0, 160],
-            get_target_color=[200, 30, 0, 160],
-            auto_highlight=True,
-            width_scale=0.0001,
-            get_width="outbound" if "outbound" in from_data_file("bart_path_stats.json").columns else 1,
-            width_min_pixels=3,
-            width_max_pixels=30,
         ),
     }
 
     # Select layers to display
     st.sidebar.subheader("Layer Visibility")
     selected_layers = [
-        layer
-        for layer_name, layer in ALL_LAYERS.items()
-        if st.sidebar.checkbox(layer_name, True)
+        layer for layer_name, layer in ALL_LAYERS.items() if layer and st.sidebar.checkbox(layer_name, True)
     ]
 
+    # Render the map with selected layers
     if selected_layers:
-        # Render the map with selected layers
         st.pydeck_chart(
             pdk.Deck(
                 map_style="mapbox://styles/mapbox/streets-v11",
@@ -810,19 +833,10 @@ try:
             )
         )
     else:
-        st.error("Please choose at least one layer above.")
+        st.warning("Please choose at least one layer to display.")
 
 except URLError as e:
-    st.error(
-        f"""
-        **This demo requires internet access.**
-        Connection error: {e.reason}
-        """
-    )
-
-
-
-
+    st.error(f"Connection error: {e.reason}. Please ensure you have internet access.")
 
 
 
