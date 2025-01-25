@@ -179,12 +179,12 @@ st.markdown(
  
  
 
-  <p>Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com -by Ekbalam</p>
+  <p>Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com</p>
 
 
  
     <p style="font-size:12px; color:lightgrey;">
-        Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com - by Ekbalam
+      Written by Ekbalam.
     </p> 
 
 
