@@ -9,14 +9,12 @@ from urllib.error import URLError
 
 ###########  Header Start ############################
 
-# App Configuration
-st.set_page_config(page_title="VillaTerras Ai Real Estate Dashboard", layout="wide")
-
 # Header Section
 def render_header():
     st.markdown(
         """
         <style>
+        /* General header styles */
         .header-container {
             display: flex;
             justify-content: space-between;
@@ -25,54 +23,162 @@ def render_header():
             background-color: #f8f9fa;
             border-bottom: 2px solid #ddd;
         }
+
+        /* Logo container and image responsiveness */
         .logo-container img {
-            height: 150px;
+            max-height: 150px;
             width: auto;
+            max-width: 100%; /* Ensure scaling for smaller screens */
         }
-        .menu-container a {
-            margin-left: 20px;
-            text-decoration: none;
-            color: #007BFF;
-            font-weight: bold;
+
+        /* Dropdown menu for navigation */
+        .menu-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .menu-button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
             font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
-        .menu-container a:hover {
-            color: #0056b3;
-            text-decoration: underline;
+
+        .menu-button:hover {
+            background-color: #0056b3;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .menu-container:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Media query for smaller screens */
+        @media screen and (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .menu-container {
+                margin-top: 10px;
+            }
         }
         </style>
         <div class="header-container">
+            <!-- Logo Section -->
             <div class="logo-container">
                 <a href="/"><img src="https://i0.wp.com/villaterras.com/wp-content/uploads/2024/11/cropped-VillaTerra-Logo.png?resize=264%2C264&ssl=1" alt="VillaTerras Logo"></a>
             </div>
+            <!-- Dropdown Menu -->
             <div class="menu-container">
-                <a href="/?page=Home">Home</a>
-                <a href="/?page=Calculators">Calculators</a>
-                <a href="/?page=Business">Business</a>
-                <a href="/?page=RealEstate">Real Estate</a>
-                <a href="/?page=Investment">Investment</a>
-                <a href="/?page=MarketAnalysis">Market Analysis</a>
-                <a href="/?page=Trends">Trends</a>
-                <a href="/?page=Contact">Contact</a>
+                <button class="menu-button">Menu</button>
+                <div class="dropdown-content">
+                    <a href="/?page=Home">Home</a>
+                    <a href="/?page=Calculators">Calculators</a>
+                    <a href="/?page=Business">Business</a>
+                    <a href="/?page=RealEstate">Real Estate</a>
+                    <a href="/?page=Investment">Investment</a>
+                    <a href="/?page=MarketAnalysis">Market Analysis</a>
+                    <a href="/?page=Trends">Trends</a>
+                    <a href="/?page=Contact">Contact</a>
+                </div>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-# Call the header rendering function
+
+# Title and Description Section
+def render_title_section():
+    st.markdown(
+        """
+        <style>
+        /* Title section container */
+        .title-section {
+            padding: 20px;
+            background: linear-gradient(135deg, #007BFF, #0056b3);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Title styling */
+        .title-section h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Description text */
+        .title-section p {
+            font-size: 1.2em;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Hover effect */
+        .title-section:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Media queries for responsiveness */
+        @media screen and (max-width: 768px) {
+            .title-section {
+                padding: 15px;
+            }
+            .title-section h1 {
+                font-size: 2em;
+            }
+            .title-section p {
+                font-size: 1em;
+            }
+        }
+        </style>
+
+        <div class="title-section">
+            <h1>VillaTerras Ai Real Estate Dashboard</h1>
+            <p>Welcome to the <strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
+            <p>All Real Estate Knowledge in One Place.</p>
+            <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# Render the Header and Title Sections
 render_header()
-
-# Title and Description
-st.title("VillaTerras Ai Real Estate Dashboard")
-st.markdown(
-    """
-    Welcome to the **VillaTerras Ai Real Estate Dashboard**.  
-    All Real Estate Knowledge in One Place.  
-    Analyze, compare, and manage properties with advanced metrics and tools.
-    """
-)
-
+render_title_section()
 
 
 ###########  Header End ############################
