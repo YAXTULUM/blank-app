@@ -419,74 +419,39 @@ def sensitivity_analysis(financial_details):
     return pd.DataFrame(results)
 
 
-def main():
-    st.title("Real Estate Investment Calculator")
-    st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
-
-    # Sidebar Inputs
-    _, _, financial_details = configure_sidebar()
-
-    # Calculate Metrics
+def sensitivity_analysis(financial_details):
+    """Perform sensitivity analysis on rent and property price."""
+    # Extract necessary inputs from financial_details
     try:
-        metrics = calculate_metrics(financial_details)
-        st.header("Investment Metrics")
-        
-        # Display metrics as a table
-        metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
-        st.table(metrics_df)
+        rent_income = financial_details["annual_rent_income"]
+        property_price = financial_details["property_price"]
+    except KeyError as e:
+        raise ValueError(f"Missing key in financial details: {e}")
 
-        # Visualization 1: Bar Chart for Key Metrics
-        st.subheader("Investment Metrics Visualization")
-        bar_chart_data = metrics_df[
-            metrics_df["Metric"].isin(["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"])
-        ]
-        bar_chart = alt.Chart(bar_chart_data).mark_bar().encode(
-            x=alt.X("Metric", sort=None, title="Metric"),
-            y=alt.Y("Value", title="Value ($)"),
-            tooltip=["Metric", "Value"]
-        ).interactive()
-        st.altair_chart(bar_chart, use_container_width=True)
+    # Define ranges for sensitivity analysis
+    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
+    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
 
-        # Visualization 2: Pie Chart for Expense Breakdown
-        st.subheader("Expense Breakdown")
-        expense_data = pd.DataFrame({
-            "Category": ["Taxes", "Insurance", "Utilities", "HOA Fees"],
-            "Amount": [
-                financial_details["annual_property_taxes"],
-                financial_details["annual_insurance"],
-                financial_details["annual_utilities"],
-                financial_details["hoa_fees"] * 12,  # Convert monthly to annual
-            ]
-        })
-        pie_chart = alt.Chart(expense_data).mark_arc().encode(
-            theta=alt.Theta("Amount", title="Expense Amount"),
-            color=alt.Color("Category", title="Expense Category"),
-            tooltip=["Category", "Amount"]
-        )
-        st.altair_chart(pie_chart, use_container_width=True)
+    # Initialize results list
+    results = []
+    for rent in rent_range:
+        for price in price_range:
+            # Update financial details for each combination
+            updated_details = financial_details.copy()
+            updated_details["annual_rent_income"] = rent
+            updated_details["property_price"] = price
 
-    except ValueError as e:
-        st.error(f"Input Error: {e}")
-        return
+            try:
+                # Calculate metrics for each combination
+                metrics = calculate_metrics(updated_details)
+                results.append({
+                    "Rent Income ($)": rent,
+                    "Property Price ($)": price,
+                    "Cap Rate (%)": metrics["Cap Rate (%)"],
+                    "Cash Flow ($)": metrics["Cash Flow"],
+                })
+            except Exception:
+                continue  # Skip invalid combinations
 
-    # Sensitivity Analysis
-    if st.checkbox("Perform Sensitivity Analysis"):
-        st.subheader("Sensitivity Analysis Results")
-        try:
-            sensitivity_results = sensitivity_analysis(financial_details)
-            st.write(sensitivity_results)
-
-            # Visualization 3: Sensitivity Analysis Scatterplot
-            st.subheader("Sensitivity Analysis Visualization")
-            chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
-                x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
-                y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
-                color=alt.Color("Cap Rate (%)", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
-                tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
-            ).interactive()
-            st.altair_chart(chart, use_container_width=True)
-        except Exception as e:
-            st.error(f"Error during sensitivity analysis: {e}")
-
-if __name__ == "__main__":
-    main()
+    # Convert results to a DataFrame
+    return pd.DataFrame(results)
