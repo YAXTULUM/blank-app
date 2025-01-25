@@ -310,9 +310,22 @@ progress_bar.empty()
 
 
 # Mapping
+## 
+
+
+
+
+
+
+
+
+
 @st.cache_data
 def from_data_file(filename):
-    url = "https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/%s" % filename
+    url = (
+        "https://raw.githubusercontent.com/streamlit/"
+        "example-data/master/hello/v1/%s" % filename
+    )
     return pd.read_json(url)
 
 try:
@@ -334,20 +347,103 @@ try:
             get_radius="[exits]",
             radius_scale=0.05,
         ),
+        "Bart stop names": pdk.Layer(
+            "TextLayer",
+            data=from_data_file("bart_stop_stats.json"),
+            get_position=["lon", "lat"],
+            get_text="name",
+            get_color=[0, 0, 0, 200],
+            get_size=10,
+            get_alignment_baseline="'bottom'",
+        ),
+        "Outbound flow": pdk.Layer(
+            "ArcLayer",
+            data=from_data_file("bart_path_stats.json"),
+            get_source_position=["lon", "lat"],
+            get_target_position=["lon2", "lat2"],
+            get_source_color=[200, 30, 0, 160],
+            get_target_color=[200, 30, 0, 160],
+            auto_highlight=True,
+            width_scale=0.0001,
+            get_width="outbound",
+            width_min_pixels=3,
+            width_max_pixels=30,
+        ),
     }
     st.sidebar.subheader("Map layers")
     selected_layers = [
-        layer for layer_name, layer in ALL_LAYERS.items() if st.sidebar.checkbox(layer_name, True)
+        layer
+        for layer_name, layer in ALL_LAYERS.items()
+        if st.sidebar.checkbox(layer_name, True)
     ]
     if selected_layers:
         st.pydeck_chart(
             pdk.Deck(
                 map_style=None,
-                initial_view_state={"latitude": 37.76, "longitude": -122.4, "zoom": 11, "pitch": 50},
+                initial_view_state={
+                    "latitude": 37.76,
+                    "longitude": -122.4,
+                    "zoom": 11,
+                    "pitch": 50,
+                },
                 layers=selected_layers,
             )
         )
     else:
         st.error("Please choose at least one layer above.")
 except URLError as e:
-    st.error(f"Connection error: {e.reason}")
+    st.error(
+        """
+        **This demo requires internet access.**
+        Connection error: %s
+    """
+        % e.reason
+    )
+
+
+
+
+
+
+
+
+
+
+#       PLOT GRAPH #
+
+
+progress_bar = st.sidebar.progress(0)
+status_text = st.sidebar.empty()
+last_rows = np.random.randn(1, 1)
+chart = st.line_chart(last_rows)
+
+for i in range(1, 101):
+    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
+    status_text.text(f"{i}% complete")
+    chart.add_rows(new_rows)
+    progress_bar.progress(i)
+    last_rows = new_rows
+    time.sleep(0.05)
+
+progress_bar.empty()
+
+# Streamlit widgets automatically run the script from top to bottom. Since
+# this button is not connected to any other logic, it just causes a plain
+# rerun.
+st.button("Rerun")
+progress_bar = st.sidebar.progress(0)
+status_text = st.sidebar.empty()
+last_rows = np.random.randn(1, 1)
+chart = st.line_chart(last_rows)
+
+for i in range(1, 101):
+    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
+    status_text.text(f"{i}% complete")
+    chart.add_rows(new_rows)
+    progress_bar.progress(i)
+    last_rows = new_rows
+    time.sleep(0.05)
+
+progress_bar.empty()
+
+
