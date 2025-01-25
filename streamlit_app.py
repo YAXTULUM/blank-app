@@ -29,8 +29,14 @@ st.markdown(
             transition: all 0.3s ease-in-out;
         }
 
-        .title-section:hover {none; transform: none);
+             .title-section h1: {
+            text-shadow: 0 0 5px rgba(255, 255, 255, 1),
+                         0 0 10px rgba(0, 123, 255, 1),
+                         0 0 15px rgba(0, 123, 255, 1);
+            transform: scale(1.1);
         }
+
+        
 
         .title-section h1 {
             font-size: 3em;
