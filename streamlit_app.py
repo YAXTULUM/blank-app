@@ -212,23 +212,60 @@ st.markdown(
 
 
 
-
-
 # Sidebar Filters
 st.sidebar.header("Filters")
+
+# Property Location
+st.sidebar.subheader("Location Details")
+location_address = st.sidebar.text_input("Address", value="")
+location_city = st.sidebar.text_input("City", value="")
+location_state = st.sidebar.text_input("State", value="")
+location_zip = st.sidebar.text_input("Zip Code", value="")
+
+# Property Details
+st.sidebar.subheader("Property Details")
 price_range = st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000)
 bedrooms = st.sidebar.slider("Bedrooms", 1, 10, (2, 4))
 bathrooms = st.sidebar.slider("Bathrooms", 1, 10, (1, 3))
-area_range = st.sidebar.slider("Area (sq ft)", 500, 10000, (1000, 5000), step=100)
+area_range = st.sidebar.slider("Living Area (sq ft)", 500, 10000, (1000, 5000), step=100)
+land_area = st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500)
 
 # Financial Inputs
 st.sidebar.header("Financial Details")
 property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
+down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
+closing_cost = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
+rehab_costs = st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500)
+annual_property_taxes = st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500)
+annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
+annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500)
+maintenance_costs = st.sidebar.number_input("Maintenance Costs ($)", value=1500, step=100)
+miscellaneous_costs = st.sidebar.number_input("Miscellaneous Costs ($)", value=1000, step=100)
+capital_expenditures = st.sidebar.number_input("Capital Expenditures ($)", value=2000, step=100)
+property_management_fee = st.sidebar.number_input("Property Management Fee (%)", value=8.0, step=0.1)
+vacancy_rate = st.sidebar.number_input("Vacancy Rate (%)", value=5.0, step=0.1)
+
+# Income & Loan Inputs
+st.sidebar.subheader("Income and Loan Details")
 annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
 annual_expenses = st.sidebar.number_input("Annual Expenses ($)", value=5000, step=1000)
-down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
 interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
 loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
+loan_amount = property_price - down_payment
+
+# Display Summary
+st.sidebar.subheader("Summary")
+st.sidebar.write(f"**Location:** {location_address}, {location_city}, {location_state}, {location_zip}")
+st.sidebar.write(f"**Property Price:** ${property_price:,.2f}")
+st.sidebar.write(f"**Loan Amount:** ${loan_amount:,.2f}")
+st.sidebar.write(f"**Vacancy Rate:** {vacancy_rate:.1f}%")
+st.sidebar.write(f"**Annual Rent Income:** ${annual_rent_income:,.2f}")
+
+
+
+
+
+
 
 # Calculations
 def calculate_metrics(price, rent, expenses, down, rate, term):
@@ -252,12 +289,12 @@ st.write(f"**Cash-on-Cash Return:** {cash_on_cash:.2f}%")
 st.write(f"**Monthly Mortgage Payment:** ${monthly_payment:,.2f}")
 st.write(f"**Net Operating Income (NOI):** ${noi:,.2f}")
 
-# Visualization: Price Distribution
+# Visualization: Real Estate Price Distribution
 if st.checkbox("Show Price Distribution"):
     price_data = pd.DataFrame({"Price ($)": np.random.randint(price_range[0], price_range[1], 50)})
     st.bar_chart(price_data)
 
-# Data: Gross Agricultural Production
+# Data: Gross Real Estate GDP 
 @st.cache_data
 def get_UN_data():
     AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
@@ -330,6 +367,60 @@ def from_data_file(filename):
 
 try:
     ALL_LAYERS = {
+"VillaZone": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=200,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+"Residential": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=200,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+"Multifamily": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=200,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+"Retail": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=200,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+ "Industrial Parks": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=200,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+ "Schools": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=200,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
         "Bike rentals": pdk.Layer(
             "HexagonLayer",
             data=from_data_file("bike_rental_stats.json"),
@@ -404,46 +495,4 @@ except URLError as e:
 
 
 
-
-
-
-
-
-#       PLOT GRAPH #
-
-
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-last_rows = np.random.randn(1, 1)
-chart = st.line_chart(last_rows)
-
-for i in range(1, 101):
-    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    status_text.text(f"{i}% complete")
-    chart.add_rows(new_rows)
-    progress_bar.progress(i)
-    last_rows = new_rows
-    time.sleep(0.05)
-
-progress_bar.empty()
-
-# Streamlit widgets automatically run the script from top to bottom. Since
-# this button is not connected to any other logic, it just causes a plain
-# rerun.
-st.button("Rerun")
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-last_rows = np.random.randn(1, 1)
-chart = st.line_chart(last_rows)
-
-for i in range(1, 101):
-    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    status_text.text(f"{i}% complete")
-    chart.add_rows(new_rows)
-    progress_bar.progress(i)
-    last_rows = new_rows
-    time.sleep(0.05)
-
-progress_bar.empty()
-
-
+ 
