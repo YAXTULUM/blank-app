@@ -1,24 +1,10 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import altair as alt
+# Enhanced Debug: Financial Details Section
+st.subheader("📊 Debug: Financial Details")
 
-# --- Styling Section ---
+# Add custom styling for the financial details section
 st.markdown(
     """
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-        }
-        .title-section {
-            background: linear-gradient(135deg, #4c88d2, #5ba2f7);
-            color: white;
-            text-align: center;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        }
         .details-container {
             background: linear-gradient(135deg, #ffffff, #e8f1f7);
             border-radius: 12px;
@@ -28,7 +14,7 @@ st.markdown(
             margin-bottom: 20px;
         }
         .details-header {
-            font-size: 1.5em;
+            font-size: 1.8em;
             font-weight: bold;
             text-align: center;
             color: #0056b3;
@@ -37,6 +23,7 @@ st.markdown(
         .details-table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
         }
         .details-table th, .details-table td {
             padding: 12px 15px;
@@ -54,10 +41,23 @@ st.markdown(
         .details-table tr:hover {
             background: #f1f7fc;
         }
+        .details-value {
+            font-weight: bold;
+            color: #0056b3;
+        }
     </style>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
+
+# Convert the financial details dictionary into a DataFrame
+financial_details_df = pd.DataFrame(list(financial_details.items()), columns=["Detail", "Value"])
+
+# Render the financial details in a styled container
+st.markdown('<div class="details-container">', unsafe_allow_html=True)
+st.markdown('<div class="details-header">Financial Details Overview</div>', unsafe_allow_html=True)
+st.markdown(financial_details_df.to_html(index=False, classes="details-table"), unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Sidebar Configuration ---
 def configure_sidebar():
