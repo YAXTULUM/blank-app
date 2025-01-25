@@ -212,6 +212,8 @@ st.markdown(
 
 
 
+import streamlit as st
+
 # Sidebar Filters
 st.sidebar.header("Filters")
 
@@ -234,80 +236,41 @@ land_area = st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (5000, 20000), s
 st.sidebar.header("Financial Details")
 property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
 down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
-closing_cost = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
+closing_costs = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
 rehab_costs = st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500)
 annual_property_taxes = st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500)
 annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
 annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500)
-maintenance_costs = st.sidebar.number_input("Maintenance Costs ($)", value=1500, step=100)
-miscellaneous_costs = st.sidebar.number_input("Miscellaneous Costs ($)", value=1000, step=100)
-capital_expenditures = st.sidebar.number_input("Capital Expenditures ($)", value=2000, step=100)
-property_management_fee = st.sidebar.number_input("Property Management Fee (%)", value=8.0, step=0.1)
+maintenance_costs = st.sidebar.number_input("Maintenance Costs (% of Rent)", value=10, step=1)
+capital_expenditures = st.sidebar.number_input("Capital Expenditures (% of Rent)", value=10, step=1)
+property_management_fee = st.sidebar.number_input("Property Management Fee (% of Rent)", value=8.0, step=0.1)
 vacancy_rate = st.sidebar.number_input("Vacancy Rate (%)", value=5.0, step=0.1)
 
 # Income & Loan Inputs
 st.sidebar.subheader("Income and Loan Details")
 annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
-annual_expenses = st.sidebar.number_input("Annual Expenses ($)", value=5000, step=1000)
 interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
 loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
-loan_amount = property_price - down_payment
 
-# Display Summary
-st.sidebar.subheader("Summary")
-st.sidebar.write(f"**Location:** {location_address}, {location_city}, {location_state}, {location_zip}")
-st.sidebar.write(f"**Property Price:** ${property_price:,.2f}")
-st.sidebar.write(f"**Loan Amount:** ${loan_amount:,.2f}")
-st.sidebar.write(f"**Vacancy Rate:** {vacancy_rate:.1f}%")
-st.sidebar.write(f"**Annual Rent Income:** ${annual_rent_income:,.2f}")
-
-
-
-
-
-# Sidebar Filters
-st.sidebar.header("Filters")
-location = st.sidebar.text_input("Location (Address, City, State, ZIP)", "")
-price_range = st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000)
-bedrooms = st.sidebar.slider("Bedrooms", 1, 10, (2, 4))
-bathrooms = st.sidebar.slider("Bathrooms", 1, 10, (1, 3))
-area_range = st.sidebar.slider("Area (sq ft)", 500, 10000, (1000, 5000), step=100)
-land_area = st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (2000, 10000), step=500)
-
-# Financial Inputs
-st.sidebar.header("Financial Details")
-property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
-down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
-closing_costs = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
-rehab_costs = st.sidebar.number_input("Rehab Costs ($)", value=10000, step=1000)
-annual_taxes = st.sidebar.number_input("Annual Taxes ($)", value=3000, step=500)
-annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
-annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=2400, step=100)
-maintenance = st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1)
-capital_expenditure = st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1)
-property_management = st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1)
-vacancy_rate = st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1)
-interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
-loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
-annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
-
-# Advanced Calculations
+# Calculations
 def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utilities,
                       maintenance_perc, capex_perc, mgmt_perc, vacancy_perc, rate, term):
     loan_amount = price - down
     monthly_rate = rate / 100 / 12
     num_payments = term * 12
 
+    # Mortgage Payment
     monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
     annual_debt_service = monthly_payment * 12
 
+    # Operating Expenses
     operating_expenses = taxes + insurance + utilities + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
     effective_gross_income = rent * (1 - vacancy_perc / 100)
     noi = effective_gross_income - operating_expenses
 
+    # Cash Flow and Returns
     cash_flow = noi - annual_debt_service
     total_investment = down + closing + rehab
-
     cap_rate = (noi / price) * 100
     cash_on_cash = (cash_flow / total_investment) * 100
 
@@ -319,13 +282,14 @@ def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utili
         "NOI": noi,
         "Cash Flow": cash_flow,
         "Cap Rate": cap_rate,
-        "Cash on Cash": cash_on_cash
+        "Cash on Cash": cash_on_cash,
     }
 
+# Perform Calculations
 metrics = calculate_metrics(
     property_price, annual_rent_income, down_payment, closing_costs, rehab_costs,
-    annual_taxes, annual_insurance, annual_utilities, maintenance, capital_expenditure,
-    property_management, vacancy_rate, interest_rate, loan_term
+    annual_property_taxes, annual_insurance, annual_utilities, maintenance_costs,
+    capital_expenditures, property_management_fee, vacancy_rate, interest_rate, loan_term
 )
 
 # Display Metrics
@@ -338,6 +302,22 @@ st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
 st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
 st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
 st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
+
+# Summary Section
+st.sidebar.subheader("Summary")
+st.sidebar.write(f"**Location:** {location_address}, {location_city}, {location_state}, {location_zip}")
+st.sidebar.write(f"**Property Price:** ${property_price:,.2f}")
+st.sidebar.write(f"**Loan Amount:** ${property_price - down_payment:,.2f}")
+st.sidebar.write(f"**Annual Rent Income:** ${annual_rent_income:,.2f}")
+st.sidebar.write(f"**Vacancy Rate:** {vacancy_rate:.1f}%")
+
+
+
+
+
+
+
+
 
 # Sensitivity Analysis
 def sensitivity_analysis(base_rent, base_price):
