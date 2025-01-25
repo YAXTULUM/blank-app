@@ -381,6 +381,47 @@ def calculate_metrics(financial_details):
 
 
 
+def sensitivity_analysis(financial_details):
+    """Perform sensitivity analysis on rent and property price."""
+    # Extract necessary inputs from financial_details
+    try:
+        rent_income = financial_details["annual_rent_income"]
+        property_price = financial_details["property_price"]
+    except KeyError as e:
+        raise ValueError(f"Missing key in financial details: {e}")
+
+    # Define ranges for sensitivity analysis
+    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)  # Rent Income varies by ±20%
+    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)  # Property Price varies by ±20%
+
+    # Initialize results list
+    results = []
+
+    for rent in rent_range:
+        for price in price_range:
+            # Update financial details for each combination
+            updated_details = financial_details.copy()
+            updated_details["annual_rent_income"] = rent
+            updated_details["property_price"] = price
+
+            try:
+                # Calculate metrics for each combination
+                metrics = calculate_metrics(updated_details)
+                results.append({
+                    "Rent Income ($)": rent,
+                    "Property Price ($)": price,
+                    "Cap Rate (%)": metrics["Cap Rate (%)"],
+                    "Cash Flow ($)": metrics["Cash Flow"],
+                })
+            except Exception as e:
+                # Log warnings for skipped cases
+                st.warning(f"Error calculating metrics for Rent: ${rent:,.2f}, Price: ${price:,.2f}. Error: {e}")
+                continue
+
+    # Convert results to a DataFrame
+    return pd.DataFrame(results)
+
+
 def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
@@ -452,57 +493,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-def sensitivity_analysis(financial_details):
-    """Perform sensitivity analysis on rent and property price."""
-    try:
-        # Extract necessary inputs from financial_details
-        rent_income = financial_details["annual_rent_income"]
-        property_price = financial_details["property_price"]
-    except KeyError as e:
-        raise ValueError(f"Missing key in financial details: {e}")
-
-    # Define ranges for sensitivity analysis
-    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)  # Rent Income varies by ±20%
-    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)  # Property Price varies by ±20%
-
-    # Initialize results list
-    results = []
-
-    for rent in rent_range:
-        for price in price_range:
-            # Update financial details for each combination
-            updated_details = financial_details.copy()
-            updated_details["annual_rent_income"] = rent
-            updated_details["property_price"] = price
-
-            try:
-                # Calculate metrics for each combination
-                metrics = calculate_metrics(updated_details)
-                results.append({
-                    "Rent Income ($)": rent,
-                    "Property Price ($)": price,
-                    "Cap Rate (%)": metrics["Cap Rate (%)"],
-                    "Cash Flow ($)": metrics["Cash Flow"],
-                })
-            except Exception as e:
-                # Log errors without interrupting the loop
-                st.warning(f"Error calculating metrics for Rent: ${rent:,.2f}, Price: ${price:,.2f}. Error: {e}")
-                continue
-
-    # Convert results to a DataFrame
-    return pd.DataFrame(results)
-
-
-
-
