@@ -67,7 +67,7 @@ st.markdown(
 
         /* Dropdown Button Styling */
         .dropdown-button {
-            background-color: #007BFF;
+            background-color: #b3cfed;
             color: white;
             font-size: 12px;
             font-weight: bold;
@@ -75,14 +75,14 @@ st.markdown(
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.22);
+            box-shadow: 0 4px 6px rgba(0, 0, 0.44, 0.55);
             transition: all 0.3s ease-in-out;
             text-align: center;
         }
 
         .dropdown-button:hover {
             background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.55);
         }
 
         /* Dropdown Menu Styling */
