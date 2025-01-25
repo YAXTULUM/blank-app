@@ -465,6 +465,9 @@ def main():
     # Sidebar Inputs
     _, _, financial_details = configure_sidebar()
 
+    # Debugging: Display financial_details
+    st.write("Financial Details:", financial_details)
+
     # Calculate Metrics
     try:
         metrics = calculate_metrics(financial_details)
@@ -473,25 +476,10 @@ def main():
             return
 
         st.header("Investment Metrics")
-
+        
         # Display metrics as a table
         metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
         st.table(metrics_df)
-
-        # Visualization: Bar Chart for Key Metrics
-        st.subheader("Investment Metrics Visualization")
-        selected_metrics = st.multiselect(
-            "Select Metrics to Visualize",
-            options=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"],
-            default=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"]
-        )
-
-        bar_chart_data = metrics_df[metrics_df["Metric"].isin(selected_metrics)]
-        if bar_chart_data.empty:
-            st.warning("No data selected for visualization.")
-        else:
-            bar_chart = create_bar_chart(bar_chart_data, title="Key Investment Metrics")
-            st.altair_chart(bar_chart, use_container_width=True)
 
     except ValueError as e:
         st.error(f"Error in calculating metrics: {e}. Please check your input values.")
@@ -499,6 +487,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
