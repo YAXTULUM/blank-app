@@ -177,7 +177,7 @@ st.markdown(
         <p>All Real Estate Knowledge in One Place.</p>
         
       <p>
-    Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com </p> <p style="font-size: 0.9em; color: lightgrey;"> - by Ekbalam
+    Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com </p> <p> - by Ekbalam
 </p>
 
 
