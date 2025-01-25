@@ -224,88 +224,80 @@ import altair as alt
 # --- DUMMY Data Loader ---
 
 
+@st.cache_data
+def load_data(filename):
+    """Placeholder function to load JSON data."""
+    try:
+        return pd.read_json(filename)
+    except ValueError:
+        st.error(f"Error loading data from {filename}. Ensure the file exists and is formatted correctly.")
+        return pd.DataFrame()
+
+
+# Sidebar configuration function
 def configure_sidebar():
-    """Sets up the sidebar and returns user inputs."""
+    """Sets up the sidebar and returns the user inputs."""
     st.sidebar.header("Filters")
 
     # Location Details
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value="", key="location_address_123"),
-        "city": st.sidebar.text_input("City", value="", key="location_city_123"),
-        "state": st.sidebar.text_input("State", value="", key="location_state_123"),
-        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip_123"),
+        "address": st.sidebar.text_input("Address", value="", key="location_address"),
+        "city": st.sidebar.text_input("City", value="", key="location_city"),
+        "state": st.sidebar.text_input("State", value="", key="location_state"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip"),
     }
 
     # Property Details
     st.sidebar.subheader("Property Details")
     property_details = {
         "price_range": st.sidebar.slider(
-            "Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="price_range_123"
+            "Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="price_range"
         ),
-        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="bedrooms_123"),
-        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="bathrooms_123"),
+        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="bedrooms"),
+        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="bathrooms"),
         "area_range": st.sidebar.slider(
-            "Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="area_range_123"
+            "Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="area_range"
         ),
         "land_area": st.sidebar.slider(
-            "Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="land_area_123"
+            "Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="land_area"
         ),
     }
 
     # Financial Details
-    st.sidebar.header("Financial Details")
+    st.sidebar.subheader("Financial Details")
     financial_details = {
-        "property_price": st.sidebar.number_input(
-            "Property Price ($)", value=300000, step=10000, key="property_price_123"
-        ),
-        "down_payment": st.sidebar.number_input(
-            "Down Payment ($)", value=60000, step=1000, key="down_payment_123"
-        ),
-        "closing_costs": st.sidebar.number_input(
-            "Closing Costs ($)", value=5000, step=500, key="closing_costs_123"
-        ),
-        "rehab_costs": st.sidebar.number_input(
-            "Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs_123"
-        ),
+        "property_price": st.sidebar.number_input("Property Price ($)", value=300000, step=10000, key="property_price"),
+        "down_payment": st.sidebar.number_input("Down Payment ($)", value=60000, step=1000, key="down_payment"),
+        "closing_costs": st.sidebar.number_input("Closing Costs ($)", value=5000, step=500, key="closing_costs"),
+        "rehab_costs": st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs"),
         "annual_property_taxes": st.sidebar.number_input(
-            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes_123"
+            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes"
         ),
-        "annual_insurance": st.sidebar.number_input(
-            "Annual Insurance ($)", value=1200, step=100, key="annual_insurance_123"
-        ),
-        "annual_utilities": st.sidebar.number_input(
-            "Annual Utilities ($)", value=3000, step=500, key="annual_utilities_123"
-        ),
-        "maintenance_perc": st.sidebar.number_input(
-            "Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc_123"
-        ),
-        "capex_perc": st.sidebar.number_input(
-            "Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc_123"
-        ),
-        "mgmt_perc": st.sidebar.number_input(
-            "Property Management (% of Rent)", value=8, step=1, key="mgmt_perc_123"
-        ),
-        "vacancy_perc": st.sidebar.number_input(
-            "Vacancy Rate (%)", value=5, step=1, key="vacancy_perc_123"
-        ),
-        "interest_rate": st.sidebar.number_input(
-            "Interest Rate (%)", value=4.5, step=0.1, key="interest_rate_123"
-        ),
-        "loan_term": st.sidebar.number_input(
-            "Loan Term (Years)", value=30, step=1, key="loan_term_123"
-        ),
+        "annual_insurance": st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100, key="annual_insurance"),
+        "annual_utilities": st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500, key="annual_utilities"),
+        "maintenance_perc": st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc"),
+        "capex_perc": st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc"),
+        "mgmt_perc": st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1, key="mgmt_perc"),
+        "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1, key="vacancy_perc"),
+        "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1, key="interest_rate"),
+        "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1, key="loan_term"),
         "annual_rent_income": st.sidebar.number_input(
-            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income_123"
+            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income"
         ),
+        "hoa_fees": st.sidebar.number_input("HOA Fees (Monthly $)", value=0, step=50, key="hoa_fees"),
+        "other_income": st.sidebar.number_input("Other Income (Monthly $)", value=0, step=50, key="other_income"),
+        "appreciation_rate": st.sidebar.number_input("Appreciation Rate (%)", value=3.0, step=0.1, key="appreciation_rate"),
+        "inflation_rate": st.sidebar.number_input("Inflation Rate (%)", value=2.0, step=0.1, key="inflation_rate"),
+        "selling_costs_perc": st.sidebar.number_input("Selling Costs (% of Sale Price)", value=6.0, step=0.1, key="selling_costs_perc"),
     }
 
     return location_details, property_details, financial_details
 
 
-# Financial Calculations
+# Calculation function
 def calculate_metrics(financial_details):
-    """Calculate financial metrics based on user inputs."""
+    """Calculate key financial metrics."""
     price = financial_details["property_price"]
     rent = financial_details["annual_rent_income"]
     down = financial_details["down_payment"]
@@ -320,6 +312,8 @@ def calculate_metrics(financial_details):
     vacancy_perc = financial_details["vacancy_perc"]
     rate = financial_details["interest_rate"]
     term = financial_details["loan_term"]
+    hoa_fees = financial_details["hoa_fees"] * 12  # Annualized
+    other_income = financial_details["other_income"] * 12  # Annualized
 
     loan_amount = price - down
     monthly_rate = rate / 100 / 12
@@ -331,15 +325,15 @@ def calculate_metrics(financial_details):
         monthly_payment = 0
 
     annual_debt_service = monthly_payment * 12
-    operating_expenses = taxes + insurance + utilities + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
-    effective_gross_income = rent * (1 - vacancy_perc / 100)
+    operating_expenses = taxes + insurance + utilities + hoa_fees + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
+    effective_gross_income = rent * (1 - vacancy_perc / 100) + other_income
     noi = effective_gross_income - operating_expenses
 
     cash_flow = noi - annual_debt_service
     total_investment = down + closing + rehab
-
     cap_rate = (noi / price) * 100 if price > 0 else 0
     cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
+    break_even_rent = (operating_expenses + annual_debt_service) / (1 - vacancy_perc / 100)
 
     return {
         "Monthly Payment": monthly_payment,
@@ -350,10 +344,11 @@ def calculate_metrics(financial_details):
         "Cash Flow": cash_flow,
         "Cap Rate": cap_rate,
         "Cash on Cash": cash_on_cash,
+        "Break-Even Rent": break_even_rent,
     }
 
 
-# Main Application
+# Main function
 def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with detailed metrics.")
@@ -366,15 +361,13 @@ def main():
 
     # Display Metrics
     st.header("Investment Metrics")
-    for metric, value in metrics.items():
-        if isinstance(value, float):
-            st.write(f"**{metric}:** ${value:,.2f}" if "Cash" in metric or "Payment" in metric else f"**{metric}:** {value:.2f}%")
-        else:
-            st.write(f"**{metric}:** {value}")
+    for key, value in metrics.items():
+        st.write(f"**{key}:** ${value:,.2f}" if "($)" in key or "Payment" in key else f"**{key}:** {value:.2f}%")
 
-    st.success("Calculations complete!")
+    st.write("Use the sidebar to adjust variables and see real-time analysis.")
 
 
+# Run the app
 if __name__ == "__main__":
     main()
 
@@ -384,30 +377,85 @@ if __name__ == "__main__":
 
 
 
-
-# Sensitivity analysis
 def sensitivity_analysis(rent_income, property_price, down_payment, closing_costs, rehab_costs,
-                         taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc, rate, term):
-    """Perform sensitivity analysis on rent and price."""
+                         taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc,
+                         hoa_fees, other_income, rate, term, appreciation_rate=0.0, inflation_rate=0.0):
+    """
+    Perform sensitivity analysis on rent and price, considering additional variables.
+    """
     rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
     price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
 
     results = []
     for rent in rent_range:
         for price in price_range:
-            metrics = calculate_metrics(
-                price, rent, down_payment, closing_costs, rehab_costs,
-                taxes, insurance, utilities, maintenance, capex,
-                mgmt_perc, vacancy_perc, rate, term
-            )
+            # Calculate metrics for each combination of rent and price
+            metrics = calculate_metrics({
+                "property_price": price,
+                "annual_rent_income": rent,
+                "down_payment": down_payment,
+                "closing_costs": closing_costs,
+                "rehab_costs": rehab_costs,
+                "annual_property_taxes": taxes,
+                "annual_insurance": insurance,
+                "annual_utilities": utilities,
+                "maintenance_perc": maintenance,
+                "capex_perc": capex,
+                "mgmt_perc": mgmt_perc,
+                "vacancy_perc": vacancy_perc,
+                "hoa_fees": hoa_fees,
+                "other_income": other_income,
+                "interest_rate": rate,
+                "loan_term": term,
+                "appreciation_rate": appreciation_rate,
+                "inflation_rate": inflation_rate,
+            })
             results.append({
                 "Rent Income ($)": rent,
                 "Property Price ($)": price,
                 "Cap Rate (%)": metrics["Cap Rate"],
                 "Cash Flow ($)": metrics["Cash Flow"],
+                "Break-Even Rent ($)": metrics.get("Break-Even Rent", None),  # Include new metrics
+                "ROI (%)": metrics.get("ROI", None),
             })
 
     return pd.DataFrame(results)
+
+
+# Perform sensitivity analysis
+sensitivity_df = sensitivity_analysis(
+    rent_income=30000,  # Example annual rent income
+    property_price=300000,  # Example property price
+    down_payment=60000,
+    closing_costs=5000,
+    rehab_costs=10000,
+    taxes=5000,
+    insurance=1200,
+    utilities=3000,
+    maintenance=10,
+    capex=10,
+    mgmt_perc=8,
+    vacancy_perc=5,
+    hoa_fees=0,
+    other_income=0,
+    rate=4.5,
+    term=30,
+    appreciation_rate=3.0,
+    inflation_rate=2.0,
+)
+
+# Display sensitivity analysis results
+st.header("Sensitivity Analysis")
+st.write("Explore how changes in rent and price affect key metrics.")
+st.dataframe(sensitivity_df)
+
+
+
+
+
+
+
+
 
 # Main application
 def main():
