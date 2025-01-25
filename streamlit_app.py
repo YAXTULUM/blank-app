@@ -11,7 +11,7 @@ from urllib.error import URLError
 
 import streamlit as st
 
-# Add the HTML and CSS for the title section
+# Title Section (Already Included in Backbone)
 st.markdown(
     """
     <style>
@@ -33,7 +33,6 @@ st.markdown(
             transform: translateY(-2px);
         }
 
-        /* Title Styling */
         .title-section h1 {
             font-size: 3em;
             font-weight: bold;
@@ -51,7 +50,6 @@ st.markdown(
             transform: scale(1.1);
         }
 
-        /* Subtitle Styling */
         .title-section h2 {
             font-size: 2em;
             font-weight: semi-bold;
@@ -60,7 +58,6 @@ st.markdown(
                          0 0 15px rgba(0, 123, 255, 0.7);
         }
 
-        /* Paragraph Styling */
         .title-section p {
             font-size: 1.2em;
             margin: 0;
@@ -83,8 +80,66 @@ st.markdown(
                 font-size: 1em;
             }
         }
+
+        /* Dropdown Menu Styling */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .dropdown-button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .dropdown-button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-top: 10px;
+            min-width: 200px;
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            border-radius: 5px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #e1e1e1;
+        }
+
+        .dropdown-container:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-arrow {
+            margin-left: 5px;
+            font-size: 12px;
+        }
     </style>
 
+    <!-- Title Section -->
     <div class="title-section">
         <h1>VillaTerras Ai Real Estate Dashboard</h1>
         <h2>Real Estate Dashboard</h2>
@@ -92,10 +147,26 @@ st.markdown(
         <p>All Real Estate Knowledge in One Place.</p>
         <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
     </div>
+
+    <!-- Dropdown Menu Section -->
+    <div class="dropdown-container">
+        <button class="dropdown-button">
+            Menu <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="dropdown-content">
+            <a href="/?page=Home">Home</a>
+            <a href="/?page=Calculators">Calculators</a>
+            <a href="/?page=Business">Business</a>
+            <a href="/?page=RealEstate">Real Estate</a>
+            <a href="/?page=Investment">Investment</a>
+            <a href="/?page=MarketAnalysis">Market Analysis</a>
+            <a href="/?page=Trends">Trends</a>
+            <a href="/?page=Contact">Contact</a>
+        </div>
+    </div>
     """,
     unsafe_allow_html=True
 )
-
 ###########  Header End ############################
 
 
