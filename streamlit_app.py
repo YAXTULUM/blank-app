@@ -1,81 +1,61 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import altair as alt
-import pydeck as pdk
-import time
-from urllib.error import URLError
-import requests
-import datetime
-
-###########  Header Start ############################
-
-# Title Section and Dropdown Menu
+# Enhanced Debug: Financial Details
+st.subheader("📊 Debug: Financial Details")
 st.markdown(
     """
-   <style>
-        .title-section {
+    <style>
+        .details-container {
+            background: linear-gradient(135deg, #ffffff, #e8f1f7);
+            border-radius: 12px;
             padding: 20px;
-            background: linear-gradient(135deg, #b9d2ec, #bcd2e58c);
-            color: white;
-            border-radius: 25px;
-            box-shadow: 0 12px 18px rgba(0, 0.44, 0.55, 0.55);
-            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
             margin-bottom: 20px;
-            transition: all 0.3s ease-in-out;
         }
-
-        .title-section h1 {
-            font-size: 3em;
+        .details-header {
+            font-size: 1.5em;
             font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
-                         0 0 20px rgba(0, 123, 255, 0.8),
-                         0 0 30px rgba(0, 123, 255, 0.7);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .title-section h2 {
-            font-size: 2em;
-            font-weight: semi-bold;
+            text-align: center;
+            color: #0056b3;
             margin-bottom: 15px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8),
-                         0 0 15px rgba(0, 123, 255, 0.7);
         }
-
-        .dropdown-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: inline-block;
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f8f9fa;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            margin-top: 10px;
-            min-width: 220px;
-            z-index: 1;
+        .details-table th, .details-table td {
+            text-align: left;
+            padding: 12px 15px;
+            border: 1px solid #dde5ed;
         }
-
-        .dropdown-container:hover .dropdown-content {
-            display: block;
+        .details-table th {
+            background: #0056b3;
+            color: white;
+            font-weight: bold;
+        }
+        .details-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .details-table tr:hover {
+            background: #f1f7fc;
+        }
+        .details-value {
+            font-weight: bold;
+            color: #0056b3;
         }
     </style>
-    <div class="title-section">
-        <h1>VillaTerras Ai</h1>
-        <h2>Ai Real Estate Agent | Assistant</h2>
-        <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
-        <p>All Real Estate Knowledge in One Place.</p>
-        <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
-    </div>
     """,
     unsafe_allow_html=True
 )
+
+# Convert financial details dictionary to a DataFrame for a clean display
+details_df = pd.DataFrame(list(financial_details.items()), columns=["Detail", "Value"])
+
+# Display the financial details in a custom-styled container
+st.markdown('<div class="details-container">', unsafe_allow_html=True)
+st.markdown('<div class="details-header">Financial Details Overview</div>', unsafe_allow_html=True)
+st.markdown(details_df.to_html(index=False, classes="details-table"), unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
 
 ###########  Header End ############################
 
