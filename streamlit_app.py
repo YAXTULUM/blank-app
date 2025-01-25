@@ -222,7 +222,8 @@ import numpy as np
 import altair as alt
 
 # --- DUMMY Data Loader ---
-@st.cache_data
+
+
 def configure_sidebar():
     """Sets up the sidebar and returns user inputs."""
     st.sidebar.header("Filters")
