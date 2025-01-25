@@ -67,7 +67,7 @@ st.markdown(
 
         /* Dropdown Button Styling */
         .dropdown-button {
-            background-color: #007BFF;
+            background-color: #94b1cf00;
             color: white;
             font-size: 12px;
             font-weight: bold;
