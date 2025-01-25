@@ -82,6 +82,9 @@ st.markdown(
             }
         }
 
+##############################  Dropdown Menu  #######################################
+
+
         /* Dropdown Menu Styling */
         .dropdown-container {
             position: relative;
@@ -90,7 +93,7 @@ st.markdown(
         }
 
         .dropdown-button {
-            background-color: #007BFF;
+            background-color: #c6d9ed;
             color: white;
             font-size: 16px;
             font-weight: bold;
@@ -98,7 +101,7 @@ st.markdown(
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0.44, 0.55);
             transition: all 0.3s ease-in-out;
         }
 
@@ -115,6 +118,7 @@ st.markdown(
             border-radius: 10px;
             margin-top: 10px;
             min-width: 200px;
+            right: 0; /* Align dropdown content to the right */
             z-index: 1;
         }
 
@@ -123,7 +127,7 @@ st.markdown(
             padding: 10px 15px;
             text-decoration: none;
             display: block;
-            border-radius: 5px;
+            border-radius: 15px;
         }
 
         .dropdown-content a:hover {
@@ -136,10 +140,35 @@ st.markdown(
 
         .dropdown-arrow {
             margin-left: 5px;
-            font-size: 12px;
+            font-size: 8px;
         }
+
+@media screen and (max-width: 768px) {
+    .dropdown-container {
+        top: 10px;
+        right: 10px; /* Adjust for mobile spacing */
+    }
+
+    .dropdown-button {
+        font-size: 14px;
+        padding: 8px 12px; /* Smaller padding for mobile */
+    }
+
+    .dropdown-content {
+        min-width: 180px; /* Smaller dropdown width */
+    }
+}
+
+
+
     </style>
 
+
+
+   <!-- Title Section -->
+    <div class="title-section">
+
+    
 
     <!-- Dropdown Menu -->
     <div class="dropdown-container">
@@ -158,8 +187,7 @@ st.markdown(
         </div>
     </div>
 
-    <!-- Title Section -->
-    <div class="title-section">
+  
         <h1>VillaTerras Ai</h1>
         <h2>Ai Real Estate Agent | Assistant</h2>
         <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
