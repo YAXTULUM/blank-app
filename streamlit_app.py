@@ -164,11 +164,7 @@ st.markdown(
     </style>
 
 
-
-   <!-- Title Section -->
-    <div class="title-section">
-
-    
+ 
 
     <!-- Dropdown Menu -->
     <div class="dropdown-container">
@@ -188,6 +184,10 @@ st.markdown(
     </div>
 
   
+   <!-- Title Section -->
+    <div class="title-section">
+
+    
         <h1>VillaTerras Ai</h1>
         <h2>Ai Real Estate Agent | Assistant</h2>
         <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
