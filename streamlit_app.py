@@ -180,6 +180,7 @@ st.markdown(
 
 import streamlit as st
 
+# Correctly formatted markdown with closing triple quotes
 st.markdown(
     """
     <p style="font-size:12px; color:lightgrey;">
@@ -188,6 +189,16 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Example of another section to verify syntax
+st.markdown(
+    """
+    <h1>Welcome to VillaTerras AI Dashboard</h1>
+    <p>Explore powerful tools and analytics to manage real estate efficiently.</p>
+    """,
+    unsafe_allow_html=True
+)
+
 
 
 
