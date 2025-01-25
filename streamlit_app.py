@@ -29,7 +29,7 @@ st.markdown(
             transition: all 0.3s ease-in-out;
         }
 
-             .title-section h1: hover {
+             .title-section h1:   {
             text-shadow: 0 0 5px rgba(255, 255, 255, 1),
                          0 0 10px rgba(0, 123, 255, 1),
                          0 0 15px rgba(0, 123, 255, 1);
@@ -70,7 +70,7 @@ st.markdown(
             color: rgba(255, 255, 255, 0.9);
         }
 
-    #################################### DROP DOWN MENU ########################
+    
 
     
         /* Dropdown Button Styling */
