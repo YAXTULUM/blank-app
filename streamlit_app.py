@@ -102,6 +102,7 @@ st.markdown(
             border-radius: 10px;
             margin-top: 10px;
             min-width: 220px; /* Slightly larger for better readability */
+    right: 0; /* Align dropdown content to the right */
             z-index: 1;
             right: 0; /* Align the dropdown to the right */
         }
