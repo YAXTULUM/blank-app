@@ -843,13 +843,56 @@ except URLError as e:
 
 
 
+
+
+
+
+
 # Bar Chart for Key Metrics
-chart = alt.Chart(comparison_df).mark_bar().encode(
-    x=alt.X("Metric", sort=None, title="Metric"),
-    y=alt.Y("Value", title="Value"),
-    tooltip=["Metric", "Value"]
-).interactive()
-st.altair_chart(chart, use_container_width=True)
+def display_key_metrics_bar_chart(dataframe):
+    """
+    Displays a bar chart for key metrics.
+    
+    Args:
+        dataframe (pd.DataFrame): A DataFrame containing metrics to display.
+    """
+    if dataframe.empty:
+        st.warning("The data for the bar chart is empty. Please provide valid data.")
+        return
+    
+    try:
+        # Generate the Altair Bar Chart
+        chart = (
+            alt.Chart(dataframe)
+            .mark_bar()
+            .encode(
+                x=alt.X("Metric:O", sort=None, title="Metric"),
+                y=alt.Y("Value:Q", title="Value"),
+                color=alt.Color("Metric:N", legend=None),  # Optional: Color by Metric
+                tooltip=[
+                    alt.Tooltip("Metric:O", title="Metric"),
+                    alt.Tooltip("Value:Q", title="Value", format=",.2f"),  # Format with commas and decimals
+                ],
+            )
+            .properties(
+                title="Key Metrics Overview",  # Add a chart title
+                width="container",  # Make the chart responsive
+                height=400,
+            )
+            .interactive()
+        )
+        
+        # Display the chart
+        st.altair_chart(chart, use_container_width=True)
+    except Exception as e:
+        st.error(f"An error occurred while generating the chart: {str(e)}")
+
+# Example usage
+# Assuming `comparison_df` is a DataFrame with "Metric" and "Value" columns
+if "Metric" in comparison_df.columns and "Value" in comparison_df.columns:
+    display_key_metrics_bar_chart(comparison_df)
+else:
+    st.error("The required columns ('Metric' and 'Value') are missing in the data.")
 
 
 
@@ -857,35 +900,77 @@ st.altair_chart(chart, use_container_width=True)
 
 
 
-# Sensitivity Analysis
+
+
+# Sensitivity Analysis Section
 st.subheader("Sensitivity Analysis")
 st.write("Explore how changes in key variables affect property performance.")
 
-# Sensitivity Analysis Example Data
-sensitivity_df = pd.DataFrame({
-    "Interest Rate (%)": [2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
-    "Monthly Payment ($)": [
-        calculate_metrics(property_price, annual_rent_income, annual_expenses, down_payment, rate, loan_term)[2]
-        for rate in [2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
-    ]
-})
-st.line_chart(sensitivity_df.set_index("Interest Rate (%)"))
+# Enhanced Sensitivity Analysis Data Generation
+try:
+    # Define ranges for sensitivity analysis
+    interest_rate_range = np.arange(2.5, 5.5, 0.5)  # Interest rates from 2.5% to 5.0%
+    
+    # Generate the sensitivity data
+    sensitivity_data = {
+        "Interest Rate (%)": [],
+        "Monthly Payment ($)": []
+    }
+    
+    for rate in interest_rate_range:
+        metrics = calculate_metrics({
+            "property_price": property_price,
+            "annual_rent_income": annual_rent_income,
+            "down_payment": down_payment,
+            "closing_costs": 0,  # Optional or default
+            "rehab_costs": 0,  # Optional or default
+            "annual_property_taxes": annual_expenses.get("taxes", 0),
+            "annual_insurance": annual_expenses.get("insurance", 0),
+            "annual_utilities": annual_expenses.get("utilities", 0),
+            "maintenance_perc": annual_expenses.get("maintenance_perc", 0),
+            "capex_perc": annual_expenses.get("capex_perc", 0),
+            "mgmt_perc": annual_expenses.get("mgmt_perc", 0),
+            "vacancy_perc": annual_expenses.get("vacancy_perc", 0),
+            "hoa_fees": annual_expenses.get("hoa_fees", 0),
+            "interest_rate": rate,
+            "loan_term": loan_term
+        })
+        sensitivity_data["Interest Rate (%)"].append(rate)
+        sensitivity_data["Monthly Payment ($)"].append(metrics["Monthly Payment"])
 
-# AI Predictions
+    sensitivity_df = pd.DataFrame(sensitivity_data)
+
+    # Plot the Sensitivity Analysis Chart
+    st.line_chart(sensitivity_df.set_index("Interest Rate (%)"))
+
+except Exception as e:
+    st.error(f"Error generating sensitivity analysis: {str(e)}")
+
+# AI Predictions Section
 st.subheader("AI-Powered Predictions")
 st.write("Leverage AI to forecast future returns, property appreciation, and investment performance.")
 
-# Placeholder for AI Model Integration
-st.write("**Predicted 5-Year Appreciation:** 12.5%")
-st.write("**Predicted Rental Growth Rate (Next 5 Years):** 4.2% per year")
-st.write("**Risk Assessment Score:** Low Risk (Score: 2.1/10)")
+# Mock AI Predictions (Replace with real AI integration later)
+ai_predictions = {
+    "Predicted 5-Year Appreciation": "12.5%",
+    "Predicted Rental Growth Rate (Next 5 Years)": "4.2% per year",
+    "Risk Assessment Score": "Low Risk (Score: 2.1/10)"
+}
 
-# Generate Reports
+# Display AI Predictions
+for prediction, value in ai_predictions.items():
+    st.write(f"**{prediction}:** {value}")
+
+# Generate Reports Section
 st.subheader("Downloadable Reports")
 if st.button("Generate Investment Report"):
-    # Placeholder for PDF generation function
-    st.success("Investment report has been generated and is ready for download!")
-    # st.download_button(label="Download Report", data=report_file, file_name="Investment_Report.pdf")
+    try:
+        # Placeholder for PDF generation logic
+        st.success("Investment report has been generated and is ready for download!")
+        # Use this to enable report download if a file is generated
+        # st.download_button(label="Download Report", data=report_file, file_name="Investment_Report.pdf")
+    except Exception as e:
+        st.error(f"Error generating report: {str(e)}")
 
 
 
@@ -893,55 +978,166 @@ if st.button("Generate Investment Report"):
 
 
 
-# Visualization: Real Estate Price Distribution
-if st.checkbox("Show Price Distribution"):
-    price_data = pd.DataFrame({"Price ($)": np.random.randint(price_range[0], price_range[1], 50)})
-    st.bar_chart(price_data)
 
-# Data: Gross Real Estate GDP 
+
+
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+import altair as alt
+from urllib.error import URLError
+
+
+# Function to generate random price data for distribution
+def display_price_distribution(price_range):
+    """
+    Display a bar chart for real estate price distribution.
+    
+    Args:
+        price_range (tuple): Minimum and maximum price range.
+    """
+    st.subheader("Real Estate Price Distribution")
+    if st.checkbox("Show Price Distribution"):
+        price_data = pd.DataFrame({
+            "Price ($)": np.random.randint(price_range[0], price_range[1], 100)  # Generate more data points
+        })
+        st.bar_chart(price_data)
+
+
+# Function to fetch and process UN data
 @st.cache_data
-def get_UN_data():
-    AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
-    df = pd.read_csv(AWS_BUCKET_URL + "/agri.csv.gz")
-    return df.set_index("Region")
+def fetch_un_data():
+    """
+    Fetch GDP data from a remote server and preprocess it.
+    
+    Returns:
+        pd.DataFrame: Processed GDP data.
+    """
+    try:
+        AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
+        df = pd.read_csv(f"{AWS_BUCKET_URL}/agri.csv.gz")
+        return df.set_index("Region")
+    except Exception as e:
+        st.error(f"Error fetching data: {e}")
+        return pd.DataFrame()
 
-try:
-    df = get_UN_data()
-    countries = st.multiselect("Choose countries", list(df.index), ["United States of America", "Mexico", "Canada",])
+
+# Function to visualize GDP data for selected countries
+def display_gdp_data():
+    """
+    Display GDP data and visualize trends using Altair.
+    """
+    st.subheader("Gross Real Estate GDP Data")
+    df = fetch_un_data()
+    
+    if df.empty:
+        st.error("Failed to load GDP data.")
+        return
+
+    # Allow users to select countries
+    countries = st.multiselect("Choose countries", list(df.index), ["United States of America", "Mexico", "Canada"])
+    
     if not countries:
-        st.error("Please select at least Two countries.")
+        st.error("Please select at least two countries to visualize GDP trends.")
     else:
-        data = df.loc[countries]
-        data /= 1000000.0
-        st.subheader("Gross Real Estate GDP ($T)")
+        # Filter and process data for selected countries
+        data = df.loc[countries] / 1_000_000.0  # Convert values to trillions
         st.dataframe(data.sort_index())
 
-        # Altair chart
+        # Prepare data for Altair chart
         data = data.T.reset_index()
-        data = pd.melt(data, id_vars=["index"]).rename(columns={"index": "year", "value": "Gross Agricultural Production ($B)"})
+        data = pd.melt(data, id_vars=["index"]).rename(columns={
+            "index": "Year", 
+            "value": "GDP ($T)"
+        })
+
+        # Create Altair chart
         chart = alt.Chart(data).mark_area(opacity=0.3).encode(
-            x="year:T",
-            y=alt.Y("Gross Agricultural Production ($B):Q", stack=None),
-            color="Region:N",
-        )
+            x=alt.X("Year:T", title="Year"),
+            y=alt.Y("GDP ($T):Q", stack=None, title="Gross Real Estate GDP (Trillions)"),
+            color=alt.Color("Region:N", title="Country"),
+            tooltip=["Year", "Region:N", "GDP ($T):Q"]
+        ).properties(title="GDP Trends by Country")
+        
         st.altair_chart(chart, use_container_width=True)
-except URLError as e:
-    st.error(f"This demo requires internet access. Connection error: {e.reason}")
+
+
+# Main function to integrate both features
+def main():
+    st.title("Real Estate Data Visualization")
+
+    # Price Distribution
+    st.sidebar.header("Price Distribution Settings")
+    price_min = st.sidebar.number_input("Minimum Price ($)", value=100_000, step=10_000)
+    price_max = st.sidebar.number_input("Maximum Price ($)", value=1_000_000, step=50_000)
+    price_range = (price_min, price_max)
+
+    display_price_distribution(price_range)
+
+    # GDP Data Visualization
+    st.sidebar.header("GDP Data")
+    display_gdp_data()
+
+
+# Entry point
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
 
 
 
 # Dynamic Line Chart with Progress Bar
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-last_rows = np.random.randn(1, 1)
-chart = st.line_chart(last_rows)
+def dynamic_line_chart_with_progress(total_steps=100, update_interval=0.1):
+    """
+    Generate a dynamic line chart with a progress bar and real-time updates.
+    
+    Args:
+        total_steps (int): Total number of updates for the progress bar.
+        update_interval (float): Time interval (in seconds) between updates.
+    """
+    st.sidebar.subheader("Progress Tracker")
+    progress_bar = st.sidebar.progress(0)
+    status_text = st.sidebar.empty()
+    last_rows = np.random.randn(1, 1)
+    chart = st.line_chart(last_rows)
+    
+    for i in range(1, total_steps + 1):
+        # Simulate new data points
+        new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
+        
+        # Update chart and progress bar
+        status_text.text(f"Progress: {i}% complete")
+        chart.add_rows(new_rows)
+        progress_bar.progress(i)
+        last_rows = new_rows
+        
+        # Pause for the specified interval
+        time.sleep(update_interval)
+    
+    # Clean up progress bar and status text
+    progress_bar.empty()
+    status_text.text("Task completed!")
 
-for i in range(1, 101):
-    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    status_text.text(f"{i}% complete")
-    chart.add_rows(new_rows)
-    progress_bar.progress(i)
-    last_rows = new_rows
-    time.sleep(0.05)
+# Main application
+def main():
+    st.title("Dynamic Line Chart with Progress")
+    st.write("Watch the progress bar and line chart update in real-time.")
 
-progress_bar.empty()
+    # User customization options
+    total_steps = st.sidebar.slider("Total Steps", min_value=50, max_value=200, value=100, step=10)
+    update_interval = st.sidebar.slider("Update Interval (Seconds)", min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+
+    # Generate the dynamic line chart
+    dynamic_line_chart_with_progress(total_steps=total_steps, update_interval=update_interval)
+
+if __name__ == "__main__":
+    main()
