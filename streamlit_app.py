@@ -312,12 +312,10 @@ progress_bar.empty()
 
 
 
-
-
 # Set page configuration
 st.set_page_config(page_title="VillaTerras AI - Advanced Real Estate Map", layout="wide")
 
-# Mock Data (replace with API data in real implementation)
+# Mock Data (replace this with API data in real implementation)
 @st.cache_data
 def load_city_data():
     return pd.DataFrame({
@@ -327,23 +325,25 @@ def load_city_data():
         "Growth": [2.5, 3.0, 1.8, 2.3, 1.5],
         "MedianPrice": [800000, 1200000, 700000, 450000, 300000],
         "RentalYield": [3.5, 2.8, 4.0, 4.5, 5.2],
-        "CrimeRate": [5, 3, 4, 6, 8],
-        "Walkability": [8, 9, 7, 6, 5],
-        "Date": [
-            datetime.date(2023, 1, 1),
-            datetime.date(2023, 1, 1),
-            datetime.date(2023, 1, 1),
-            datetime.date(2023, 1, 1),
-            datetime.date(2023, 1, 1),
-        ]
     })
+
+# API Integration (Zillow-like or Census Mock)
+@st.cache_data
+def fetch_real_estate_data(zip_code):
+    # Mock API call, replace with a real API integration
+    api_data = {
+        "Median Price": 750000,
+        "Rental Yield": 4.2,
+        "Growth Rate": 2.1,
+    }
+    return api_data
 
 # Predict AI-driven investment scores
 @st.cache_data
 def predict_investment_scores(data):
     # Simple example with linear regression
     model = LinearRegression()
-    features = data[["Growth", "MedianPrice", "RentalYield", "CrimeRate", "Walkability"]]
+    features = data[["Growth", "MedianPrice", "RentalYield"]]
     target = np.random.rand(len(data)) * 100  # Mock target, replace with real data
     model.fit(features, target)
     data["InvestmentScore"] = model.predict(features)
@@ -358,56 +358,50 @@ def generate_report(data):
 # Load city data
 data = load_city_data()
 
-# Sidebar - User Personalization
-st.sidebar.header("Personalization")
-user_name = st.sidebar.text_input("Your Name", value="User")
-preferred_growth = st.sidebar.slider("Minimum Growth (%)", 0, 5, 2)
-max_crime_rate = st.sidebar.slider("Maximum Crime Rate", 0, 10, 5)
-preferred_walkability = st.sidebar.slider("Minimum Walkability Score", 0, 10, 5)
+# Sidebar - Search by ZIP code or City
+st.sidebar.header("Search Options")
+search_type = st.sidebar.radio("Search By:", ["City", "ZIP Code"])
+search_query = st.sidebar.text_input("Enter your search query:")
 
-# Filter data based on user preferences
-personalized_data = data[
-    (data["Growth"] >= preferred_growth) &
-    (data["CrimeRate"] <= max_crime_rate) &
-    (data["Walkability"] >= preferred_walkability)
-]
+if st.sidebar.button("Search"):
+    if search_type == "City":
+        filtered_data = data[data["City"].str.contains(search_query, case=False)]
+    elif search_type == "ZIP Code":
+        api_data = fetch_real_estate_data(search_query)
+        filtered_data = pd.DataFrame([{
+            "City": f"ZIP {search_query}",
+            "Latitude": 37.7749,  # Replace with real lat/lon
+            "Longitude": -122.4194,
+            "Growth": api_data["Growth Rate"],
+            "MedianPrice": api_data["Median Price"],
+            "RentalYield": api_data["Rental Yield"],
+        }])
+else:
+    filtered_data = data
 
 # Predict AI-driven investment scores
-personalized_data = predict_investment_scores(personalized_data)
-
-# Time-Series Animation Data Preparation
-time_series_data = personalized_data.copy()
-for i in range(1, 6):  # Add future time points
-    next_date = datetime.date(2023 + i, 1, 1)
-    growth_factor = 1 + (i * 0.01)  # Example growth over time
-    future_data = personalized_data.copy()
-    future_data["Date"] = next_date
-    future_data["MedianPrice"] *= growth_factor
-    future_data["InvestmentScore"] *= growth_factor
-    time_series_data = pd.concat([time_series_data, future_data])
+filtered_data = predict_investment_scores(filtered_data)
 
 # Display Metrics
-st.header(f"Hello, {user_name}! Here are your personalized recommendations:")
-for idx, row in personalized_data.iterrows():
+st.header("Key Metrics")
+for idx, row in filtered_data.iterrows():
     st.write(f"**City:** {row['City']}")
     st.write(f"**Growth:** {row['Growth']}%")
     st.write(f"**Median Price:** ${row['MedianPrice']:,}")
     st.write(f"**Rental Yield:** {row['RentalYield']}%")
-    st.write(f"**Crime Rate:** {row['CrimeRate']}")
-    st.write(f"**Walkability:** {row['Walkability']}")
     st.write(f"**Investment Score:** {row['InvestmentScore']:.2f}")
     st.write("---")
 
 # Generate and Download Report
 if st.button("Download Analytics Report"):
-    csv_data = generate_report(personalized_data)
+    csv_data = generate_report(filtered_data)
     st.download_button("Download CSV", csv_data, "investment_report.csv", "text/csv")
 
 # Visualization - Heatmap + Investment Score
 st.header("Investment Heatmap")
 heatmap_layer = pdk.Layer(
     "HeatmapLayer",
-    data=personalized_data,
+    data=filtered_data,
     get_position=["Longitude", "Latitude"],
     get_weight="InvestmentScore",
     radius=30000,
@@ -416,7 +410,7 @@ heatmap_layer = pdk.Layer(
 
 scatter_layer = pdk.Layer(
     "ScatterplotLayer",
-    data=personalized_data,
+    data=filtered_data,
     get_position=["Longitude", "Latitude"],
     get_color="[255, 0, 0, 160]",
     get_radius=50000,
@@ -424,8 +418,8 @@ scatter_layer = pdk.Layer(
 )
 
 view_state = pdk.ViewState(
-    latitude=personalized_data["Latitude"].mean(),
-    longitude=personalized_data["Longitude"].mean(),
+    latitude=filtered_data["Latitude"].mean(),
+    longitude=filtered_data["Longitude"].mean(),
     zoom=6,
     pitch=40,
 )
@@ -435,34 +429,3 @@ st.pydeck_chart(pdk.Deck(
     initial_view_state=view_state,
     tooltip={"html": "<b>City:</b> {City}<br><b>Investment Score:</b> {InvestmentScore:.2f}"}
 ))
-
-# Time-Series Animation Visualization
-st.header("Time-Series Analysis of Investment Potential")
-time_series_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=time_series_data,
-    get_position=["Longitude", "Latitude"],
-    get_color="[200, 100, 50, 160]",
-    get_radius=40000,
-    pickable=True,
-)
-
-time_series_view_state = pdk.ViewState(
-    latitude=personalized_data["Latitude"].mean(),
-    longitude=personalized_data["Longitude"].mean(),
-    zoom=6,
-    pitch=50,
-)
-
-st.pydeck_chart(pdk.Deck(
-    layers=[time_series_layer],
-    initial_view_state=time_series_view_state,
-    tooltip={"html": "<b>City:</b> {City}<br><b>Date:</b> {Date}<br><b>Investment Score:</b> {InvestmentScore:.2f}"}
-))
-
-
-
-
-# Display the raw radius data
-st.subheader("Raw Radius Search Data")
-st.dataframe(radius_data)
