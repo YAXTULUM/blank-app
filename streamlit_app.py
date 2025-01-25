@@ -320,9 +320,14 @@ def configure_sidebar():
 
 
 
-# Calculation function
-def calculate_metrics(financial_details):
-    """Calculate key financial metrics."""
+def calculate_metrics(financial_details, debug=False):
+    """Calculate key financial metrics for a real estate investment."""
+    # Input validation
+    if financial_details["property_price"] <= 0:
+        raise ValueError("Property price must be greater than zero.")
+    if not (0 <= financial_details["maintenance_perc"] <= 100):
+        raise ValueError("Maintenance percentage must be between 0 and 100.")
+    # Extract inputs
     price = financial_details["property_price"]
     rent = financial_details["annual_rent_income"]
     down = financial_details["down_payment"]
@@ -337,9 +342,10 @@ def calculate_metrics(financial_details):
     vacancy_perc = financial_details["vacancy_perc"]
     rate = financial_details["interest_rate"]
     term = financial_details["loan_term"]
-    hoa_fees = financial_details["hoa_fees"] * 12  # Annualized
-    other_income = financial_details["other_income"] * 12  # Annualized
+    hoa_fees = financial_details["hoa_fees"] * 12
+    other_income = financial_details["other_income"] * 12
 
+    # Loan calculations
     loan_amount = price - down
     monthly_rate = rate / 100 / 12
     num_payments = term * 12
@@ -358,9 +364,12 @@ def calculate_metrics(financial_details):
     total_investment = down + closing + rehab
     cap_rate = (noi / price) * 100 if price > 0 else 0
     cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
-    break_even_rent = (operating_expenses + annual_debt_service) / (1 - vacancy_perc / 100)
+    try:
+        break_even_rent = (operating_expenses + annual_debt_service) / (1 - vacancy_perc / 100)
+    except ZeroDivisionError:
+        break_even_rent = float('inf')  # Cannot break even with 100% vacancy.
 
-    return {
+    metrics = {
         "Monthly Payment": monthly_payment,
         "Annual Debt Service": annual_debt_service,
         "Operating Expenses": operating_expenses,
@@ -371,6 +380,11 @@ def calculate_metrics(financial_details):
         "Cash on Cash": cash_on_cash,
         "Break-Even Rent": break_even_rent,
     }
+
+    if debug:
+        print("Metrics calculated:", metrics)
+
+    return metrics
 
 
 
@@ -401,6 +415,8 @@ def main():
 # Run the app
 if __name__ == "__main__":
     main()
+
+
 
 
 
