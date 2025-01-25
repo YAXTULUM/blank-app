@@ -130,12 +130,36 @@ def render_title_section():
             margin-bottom: 20px;
         }
 
-        /* Title styling */
-        .title-section h1 {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+##########################  Header  ################################
+
+
+/* Title styling */
+.title-section h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+
+    /* Glow effect */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 
+                 0 0 10px rgba(0, 123, 255, 0.8), 
+                 0 0 20px rgba(0, 123, 255, 0.8);
+
+    /* Hover effect */
+    transition: all 0.3s ease-in-out;
+}
+
+.title-section h1:hover {
+    transform: scale(1.1); /* Slightly increase size */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 1), 
+                 0 0 20px rgba(0, 123, 255, 1), 
+                 0 0 30px rgba(0, 123, 255, 1);
+    color: #ffffff; /* Optional: Brighten the text */
+}
+
+##########################  Header  end ################################
+
+
+
 
         /* Description text */
         .title-section p {
@@ -167,6 +191,7 @@ def render_title_section():
 
         <div class="title-section">
             <h1>VillaTerras Ai Real Estate Dashboard</h1>
+              <h2>Real Estate Dashboard</h2>
             <p>Welcome to the <strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
             <p>All Real Estate Knowledge in One Place.</p>
             <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
