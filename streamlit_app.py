@@ -292,10 +292,10 @@ financial_details = {
     ),
     "inflation_rate": st.sidebar.number_input("Inflation Rate (%)", value=2.0, step=0.1, key="inflation_rate_sidebar"),
     "selling_costs_perc": st.sidebar.number_input("Selling Costs (% of Sale Price)", value=6.0, step=0.1, key="selling_costs_sidebar"),
-}
+    ),
+    }
 
-return location_details, property_details, financial_details
-
+    return location_details, property_details, financial_details
 
 
 
