@@ -216,49 +216,32 @@ st.markdown(
 
 
 @st.cache_data
-def from_data_file(filename):
-    """Fetch data from a remote JSON file."""
-    url = f"https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/{filename}"
-    try:
-        return pd.read_json(url)
-    except ValueError:
-        st.error(f"Error loading data from {url}. Ensure the file exists and is formatted correctly.")
-        return pd.DataFrame()
-
-
-
-
-
- 
-
-
-# Sidebar configuration function
 def configure_sidebar():
-    """Sets up the sidebar and returns the user inputs."""
+    """Configure the sidebar with input fields."""
     st.sidebar.header("Filters")
 
     # Location Details
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value="", key="location_address"),
-        "city": st.sidebar.text_input("City", value="", key="location_city"),
-        "state": st.sidebar.text_input("State", value="", key="location_state"),
-        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip"),
+        "address": st.sidebar.text_input("Address", value="", key="unique_location_address"),
+        "city": st.sidebar.text_input("City", value="", key="unique_location_city"),
+        "state": st.sidebar.text_input("State", value="", key="unique_location_state"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="unique_location_zip"),
     }
 
     # Property Details
     st.sidebar.subheader("Property Details")
     property_details = {
         "price_range": st.sidebar.slider(
-            "Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="price_range"
+            "Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="unique_price_range"
         ),
-        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="bedrooms"),
-        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="bathrooms"),
+        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="unique_bedrooms"),
+        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="unique_bathrooms"),
         "area_range": st.sidebar.slider(
-            "Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="area_range"
+            "Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="unique_area_range"
         ),
         "land_area": st.sidebar.slider(
-            "Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="land_area"
+            "Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="unique_land_area"
         ),
     }
 
@@ -266,50 +249,51 @@ def configure_sidebar():
     st.sidebar.header("Financial Details")
     financial_details = {
         "property_price": st.sidebar.number_input(
-            "Property Price ($)", value=300000, step=10000, key="property_price"
+            "Property Price ($)", value=300000, step=10000, key="unique_property_price"
         ),
         "down_payment": st.sidebar.number_input(
-            "Down Payment ($)", value=60000, step=1000, key="down_payment"
+            "Down Payment ($)", value=60000, step=1000, key="unique_down_payment"
         ),
         "closing_costs": st.sidebar.number_input(
-            "Closing Costs ($)", value=5000, step=500, key="closing_costs"
+            "Closing Costs ($)", value=5000, step=500, key="unique_closing_costs"
         ),
         "rehab_costs": st.sidebar.number_input(
-            "Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs"
+            "Rehabilitation Costs ($)", value=10000, step=500, key="unique_rehab_costs"
         ),
         "annual_property_taxes": st.sidebar.number_input(
-            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes"
+            "Annual Property Taxes ($)", value=5000, step=500, key="unique_property_taxes"
         ),
         "annual_insurance": st.sidebar.number_input(
-            "Annual Insurance ($)", value=1200, step=100, key="annual_insurance"
+            "Annual Insurance ($)", value=1200, step=100, key="unique_annual_insurance"
         ),
         "annual_utilities": st.sidebar.number_input(
-            "Annual Utilities ($)", value=3000, step=500, key="annual_utilities"
+            "Annual Utilities ($)", value=3000, step=500, key="unique_annual_utilities"
         ),
         "maintenance_perc": st.sidebar.number_input(
-            "Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc"
+            "Maintenance (% of Rent)", value=10, step=1, key="unique_maintenance_perc"
         ),
         "capex_perc": st.sidebar.number_input(
-            "Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc"
+            "Capital Expenditure (% of Rent)", value=10, step=1, key="unique_capex_perc"
         ),
         "mgmt_perc": st.sidebar.number_input(
-            "Property Management (% of Rent)", value=8, step=1, key="mgmt_perc"
+            "Property Management (% of Rent)", value=8, step=1, key="unique_mgmt_perc"
         ),
         "vacancy_perc": st.sidebar.number_input(
-            "Vacancy Rate (%)", value=5, step=1, key="vacancy_perc"
+            "Vacancy Rate (%)", value=5, step=1, key="unique_vacancy_perc"
         ),
         "interest_rate": st.sidebar.number_input(
-            "Interest Rate (%)", value=4.5, step=0.1, key="interest_rate"
+            "Interest Rate (%)", value=4.5, step=0.1, key="unique_interest_rate"
         ),
         "loan_term": st.sidebar.number_input(
-            "Loan Term (Years)", value=30, step=1, key="loan_term"
+            "Loan Term (Years)", value=30, step=1, key="unique_loan_term"
         ),
         "annual_rent_income": st.sidebar.number_input(
-            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income"
+            "Annual Rent Income ($)", value=30000, step=1000, key="unique_annual_rent_income"
         ),
     }
 
     return location_details, property_details, financial_details
+
 
 
 # Calculation function
