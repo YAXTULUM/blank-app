@@ -493,3 +493,56 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+def main():
+    st.title("Real Estate Investment Calculator")
+    st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
+
+    # Sidebar Inputs
+    try:
+        financial_details = configure_sidebar()
+    except Exception as e:
+        st.error(f"Error in sidebar configuration: {e}")
+        return
+
+    # Calculate Metrics
+    try:
+        # Display calculated metrics
+        metrics = calculate_metrics(financial_details)
+        st.header("Investment Metrics")
+        metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
+        st.table(metrics_df)
+    except Exception as e:
+        st.error(f"Error in calculating metrics: {e}")
+        return
+
+    # Sensitivity Analysis Section
+    if st.checkbox("Perform Sensitivity Analysis"):
+        st.subheader("Sensitivity Analysis Results")
+        try:
+            # Perform sensitivity analysis
+            sensitivity_results = sensitivity_analysis(financial_details)
+
+            if sensitivity_results.empty:
+                st.warning("No data available for sensitivity analysis. Please adjust inputs.")
+                return
+
+            # Display results in a table
+            st.write("Explore how changes in rent and property price affect key metrics:")
+            st.dataframe(sensitivity_results)
+
+            # Visualization of sensitivity analysis
+            st.subheader("Sensitivity Analysis Visualization")
+            chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
+                x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
+                y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
+                color=alt.Color("Cap Rate (%):Q", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
+                tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
+            ).interactive()
+            st.altair_chart(chart, use_container_width=True)
+        except Exception as e:
+            st.error(f"Error during sensitivity analysis: {e}")
