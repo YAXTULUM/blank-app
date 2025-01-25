@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+from backend import calculate_metrics, ai_assistant
 
-# --- Sidebar Configuration ---
+
 def configure_sidebar():
     """Sets up the sidebar and returns the user inputs."""
     st.sidebar.header("Filters")
@@ -50,62 +50,12 @@ def configure_sidebar():
     return location_details, property_details, financial_details
 
 
-# --- Calculate Metrics ---
-def calculate_metrics(financial_details):
-    """Calculate key financial metrics for a real estate investment."""
-    price = financial_details["property_price"]
-    rent = financial_details["annual_rent_income"]
-    down = financial_details["down_payment"]
-    closing = financial_details["closing_costs"]
-    rehab = financial_details["rehab_costs"]
-    taxes = financial_details["annual_property_taxes"]
-    insurance = financial_details["annual_insurance"]
-    utilities = financial_details["annual_utilities"]
-    hoa_fees = financial_details["hoa_fees"] * 12
-    other_income = financial_details["other_income"] * 12
-    rate = financial_details["interest_rate"]
-    term = financial_details["loan_term"]
-
-    loan_amount = price - down
-    monthly_rate = rate / 100 / 12
-    num_payments = term * 12
-    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
-    annual_debt_service = monthly_payment * 12
-    maintenance_cost = rent * (financial_details["maintenance_perc"] / 100)
-    capex_cost = rent * (financial_details["capex_perc"] / 100)
-    mgmt_cost = rent * (financial_details["mgmt_perc"] / 100)
-    operating_expenses = taxes + insurance + utilities + hoa_fees + maintenance_cost + capex_cost + mgmt_cost
-    effective_gross_income = rent * (1 - financial_details["vacancy_perc"] / 100) + other_income
-    noi = effective_gross_income - operating_expenses
-    cash_flow = noi - annual_debt_service
-    total_investment = down + closing + rehab
-    cap_rate = (noi / price) * 100 if price > 0 else 0
-    cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
-
-    return {
-        "Monthly Payment": monthly_payment,
-        "Annual Debt Service": annual_debt_service,
-        "Operating Expenses": operating_expenses,
-        "Effective Gross Income": effective_gross_income,
-        "NOI": noi,
-        "Cash Flow": cash_flow,
-        "Cap Rate (%)": cap_rate,
-        "Cash-on-Cash ROI (%)": cash_on_cash,
-    }
-
-
-# --- Main Function ---
 def main():
-    st.title("Real Estate Investment Calculator")
-    st.markdown("Analyze your real estate investment with detailed metrics and insights.")
+    st.title("Real Estate Investment Calculator with AI")
+    st.markdown("Analyze, compare, and manage your real estate investments.")
 
     # Sidebar Configuration
     location_details, property_details, financial_details = configure_sidebar()
-
-    # Enhanced Debug Display
-    st.subheader("📊 Debug: Financial Details")
-    financial_details_df = pd.DataFrame(list(financial_details.items()), columns=["Detail", "Value"])
-    st.table(financial_details_df)
 
     # Metrics Calculation
     try:
@@ -115,6 +65,14 @@ def main():
         st.table(metrics_df)
     except Exception as e:
         st.error(f"Error calculating metrics: {e}")
+
+    # AI Assistant
+    st.subheader("🤖 Ask the AI Assistant")
+    user_question = st.text_input("Ask any real estate-related question:")
+    if user_question:
+        with st.spinner("Generating AI response..."):
+            ai_response = ai_assistant(user_question)
+        st.markdown(f"**AI Response:** {ai_response}")
 
 
 if __name__ == "__main__":
