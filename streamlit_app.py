@@ -466,15 +466,11 @@ def main():
     _, _, financial_details = configure_sidebar()
 
     # Debugging: Display financial_details
-    st.write("Financial Details:", financial_details)
+    st.write("Debug: Financial Details:", financial_details)
 
     # Calculate Metrics
     try:
         metrics = calculate_metrics(financial_details)
-        if not metrics:
-            st.warning("No metrics available to display. Please check your inputs.")
-            return
-
         st.header("Investment Metrics")
         
         # Display metrics as a table
@@ -483,11 +479,11 @@ def main():
 
     except ValueError as e:
         st.error(f"Error in calculating metrics: {e}. Please check your input values.")
-
+    except Exception as e:
+        st.error(f"Unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()
-
 
 
 
