@@ -81,63 +81,117 @@ st.markdown(
             }
         }
 
-        /* Dropdown Menu Styling */
-        .dropdown-container {
-            position: relative;
-            display: inline-block;
-            text-align: center;
-        }
+       <style>
+    /* Dropdown Button Styling */
+    .dropdown-button {
+        background-color: #007BFF;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.22);
+        transition: all 0.3s ease-in-out;
+        text-align: center;
+    }
 
+    .dropdown-button:hover {
+        background-color: #0056b3;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Dropdown Menu Styling */
+    .dropdown-container {
+        position: absolute;
+        top: 20px;
+        right: 20px; /* Positioning the dropdown to the right-hand side */
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        margin-top: 10px;
+        min-width: 220px; /* Slightly larger for better readability */
+        z-index: 1;
+        right: 0; /* Align the dropdown to the right */
+    }
+
+    .dropdown-content a {
+        color: black;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 10px 20px;
+        text-decoration: none;
+        display: block;
+        border-radius: 5px;
+        transition: background-color 0.2s ease;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #cce4f7;
+        color: #0056b3;
+    }
+
+    /* Show the dropdown content on hover */
+    .dropdown-container:hover .dropdown-content {
+        display: block;
+    }
+
+    /* Dropdown Arrow Styling */
+    .dropdown-arrow {
+        margin-left: 5px;
+        font-size: 12px;
+    }
+
+    /* Optional Full View Styling for All Options */
+    .dropdown-content.show-all a {
+        padding: 10px;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    /* Responsive Adjustments */
+    @media screen and (max-width: 768px) {
         .dropdown-button {
-            background-color: #007BFF;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .dropdown-button:hover {
-            background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            font-size: 10px;
+            padding: 8px 12px;
         }
 
         .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f8f9fa;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            margin-top: 10px;
-            min-width: 200px;
-            z-index: 1;
+            min-width: 180px; /* Adjust dropdown width for smaller screens */
         }
 
         .dropdown-content a {
-            color: black;
-            padding: 10px 15px;
-            text-decoration: none;
-            display: block;
-            border-radius: 5px;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #e1e1e1;
-        }
-
-        .dropdown-container:hover .dropdown-content {
-            display: block;
-        }
-
-        .dropdown-arrow {
-            margin-left: 5px;
             font-size: 12px;
+            padding: 8px 15px;
         }
-    </style>
+    }
+</style>
+
+<!-- Dropdown Menu -->
+<div class="dropdown-container">
+    <button class="dropdown-button">
+        Menu <span class="dropdown-arrow">▼</span>
+    </button>
+    <div class="dropdown-content">
+        <a href="/?page=Home">Home</a>
+        <a href="/?page=Calculators">Calculators</a>
+        <a href="/?page=Business">Business</a>
+        <a href="/?page=RealEstate">Real Estate</a>
+        <a href="/?page=Investment">Investment</a>
+        <a href="/?page=MarketAnalysis">Market Analysis</a>
+        <a href="/?page=Trends">Trends</a>
+        <a href="/?page=Contact">Contact</a>
+    </div>
+</div>
+</style>
+
 
     <!-- Title Section -->
     <div class="title-section">
@@ -147,6 +201,8 @@ st.markdown(
         <p>All Real Estate Knowledge in One Place.</p>
         <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
     </div>
+
+
 
     <!-- Dropdown Menu Section -->
     <div class="dropdown-container">
