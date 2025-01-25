@@ -13,6 +13,9 @@ import streamlit as st
 
 import streamlit as st
 
+import streamlit as st
+
+# Title Section and Dropdown Menu
 st.markdown(
     """
     <style>
@@ -22,7 +25,7 @@ st.markdown(
             background: linear-gradient(135deg, #b9d2ec, #bcd2e58c);
             color: white;
             border-radius: 25px;
-            box-shadow: 0 12px 18px rgba(0, 0, 0, 0.55);
+            box-shadow: 0 12px 18px rgba(0, 0.44, 0.55, 0.55);
             text-align: center;
             margin-top: 20px;
             margin-bottom: 20px;
@@ -41,6 +44,14 @@ st.markdown(
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
                          0 0 20px rgba(0, 123, 255, 0.8),
                          0 0 30px rgba(0, 123, 255, 0.7);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .title-section h1:hover {
+            text-shadow: 0 0 5px rgba(255, 255, 255, 1),
+                         0 0 10px rgba(0, 123, 255, 1),
+                         0 0 15px rgba(0, 123, 255, 1);
+            transform: scale(1.1);
         }
 
         .title-section h2 {
@@ -58,7 +69,7 @@ st.markdown(
             color: rgba(255, 255, 255, 0.9);
         }
 
-        /* Dropdown Button Styling */
+  /* Dropdown Button Styling */
         .dropdown-button {
             background-color: #007BFF;
             color: white;
@@ -155,7 +166,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 ###########  Header End ############################
 
