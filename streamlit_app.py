@@ -307,13 +307,26 @@ def calculate_metrics(financial_details):
         "Cash-on-Cash ROI (%)": cash_on_cash,
     }
 
+
+
+
+
+
+
+
 # --- Main Function ---
 def main():
     st.title("Real Estate Investment Calculator")
-    st.write("Analyze your real estate investment with detailed metrics and visualization tools.")
+    st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
 
-    # Sidebar Configuration
+    # Sidebar Inputs
     _, _, financial_details = configure_sidebar()
+
+    # Debugging: Display financial_details
+    st.write("Debug: Financial Details:", financial_details)
+
+    # Initialize `metrics_df` to avoid NameError
+    metrics_df = None
 
     # Calculate Metrics
     try:
@@ -323,99 +336,77 @@ def main():
         # Display metrics as a table
         metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
         st.table(metrics_df)
-
-        # Visualization: Bar Chart
-        st.subheader("Key Investment Metrics")
-        bar_chart = alt.Chart(metrics_df).mark_bar().encode(
-            x=alt.X("Metric", sort=None),
-            y=alt.Y("Value"),
-            tooltip=["Metric", "Value"]
-        ).interactive()
-        st.altair_chart(bar_chart, use_container_width=True)
-
     except ValueError as e:
-        st.error(f"Error calculating metrics: {e}")
+        st.error(f"Error in calculating metrics: {e}. Please check your input values.")
+        return  # Exit if metrics calculation fails
+    except Exception as e:
+        st.error(f"Unexpected error occurred: {e}")
+        return  # Exit if unexpected error occurs
 
-# --- Run the Application ---
+    # Ensure `metrics_df` is defined before proceeding
+    if metrics_df is not None:
+        # Visualization: Bar Chart for Key Metrics
+        st.subheader("Investment Metrics Visualization")
+        selected_metrics = st.multiselect(
+            "Select Metrics to Visualize",
+            options=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow", "Cap Rate (%)", "Cash-on-Cash ROI (%)"],
+            default=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"]
+        )
+
+        bar_chart_data = metrics_df[metrics_df["Metric"].isin(selected_metrics)]
+        if bar_chart_data.empty:
+            st.warning("No metrics selected for visualization.")
+        else:
+            bar_chart = create_bar_chart(bar_chart_data, title="Key Investment Metrics")
+            st.altair_chart(bar_chart, use_container_width=True)
+
+        # Visualization: Trend Analysis Line Chart
+        st.subheader("Trend Analysis")
+        trend_data = []
+        price_range = np.linspace(
+            financial_details["property_price"] * 0.8,
+            financial_details["property_price"] * 1.2,
+            20
+        )
+        for price in price_range:
+            temp_details = financial_details.copy()
+            temp_details["property_price"] = price
+            trend_metrics = calculate_metrics(temp_details)
+            trend_data.append({
+                "Property Price ($)": price,
+                "NOI ($)": trend_metrics["NOI"],
+                "Cash Flow ($)": trend_metrics["Cash Flow"]
+            })
+
+        trend_df = pd.DataFrame(trend_data)
+        line_chart = alt.Chart(trend_df).mark_line(point=True).encode(
+            x=alt.X("Property Price ($):Q", title="Property Price ($)"),
+            y=alt.Y("NOI ($):Q", title="Net Operating Income ($)"),
+            color=alt.value("steelblue"),
+            tooltip=["Property Price ($)", "NOI ($)", "Cash Flow ($)"]
+        ).interactive()
+        st.altair_chart(line_chart, use_container_width=True)
+
+        # Sensitivity Analysis
+        if st.checkbox("Perform Sensitivity Analysis"):
+            st.subheader("Sensitivity Analysis Results")
+            try:
+                sensitivity_results = sensitivity_analysis(financial_details)
+                st.write(sensitivity_results)
+
+                # Visualization: Sensitivity Analysis Scatterplot
+                scatter_chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
+                    x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
+                    y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
+                    color=alt.Color("Cap Rate (%)", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
+                    tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
+                ).interactive()
+                st.altair_chart(scatter_chart, use_container_width=True)
+
+            except Exception as e:
+                st.error(f"Error during sensitivity analysis: {e}")
+
+
 if __name__ == "__main__":
     main()
 
-
-
-
-
-
-########################  end works dont fucj ########################
-
-     # Sensitivity Analysis
-    if st.checkbox("Perform Sensitivity Analysis"):
-        st.subheader("Sensitivity Analysis Results")
-        try:
-            # Perform sensitivity analysis
-            sensitivity_results = sensitivity_analysis(financial_details)
-            st.write(sensitivity_results)
-
-            # Visualization: Sensitivity Analysis Scatterplot
-            st.subheader("Sensitivity Analysis Visualization")
-            scatter_chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
-                x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
-                y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
-                color=alt.Color("Cap Rate (%)", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
-                tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
-            ).interactive()
-            st.altair_chart(scatter_chart, use_container_width=True)
-
-        except ValueError as e:
-            st.error(f"Error during sensitivity analysis: {e}")
-        except Exception as e:
-            st.error(f"Unexpected error occurred: {e}")
-
-    # Visualization: Key Metrics Bar Chart
-    st.subheader("Investment Metrics Visualization")
-    selected_metrics = st.multiselect(
-        "Select Metrics to Visualize",
-        options=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow", "Cap Rate (%)", "Cash-on-Cash ROI (%)"],
-        default=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"]
-    )
-
-    bar_chart_data = metrics_df[metrics_df["Metric"].isin(selected_metrics)]
-    if bar_chart_data.empty:
-        st.warning("No metrics selected for visualization.")
-    else:
-        bar_chart = create_bar_chart(bar_chart_data, title="Key Investment Metrics")
-        st.altair_chart(bar_chart, use_container_width=True)
-
-    # Visualization: Trend Analysis Line Chart
-    st.subheader("Trend Analysis")
-    trend_data = []
-    price_range = np.linspace(
-        financial_details["property_price"] * 0.8,
-        financial_details["property_price"] * 1.2,
-        20
-    )
-    for price in price_range:
-        temp_details = financial_details.copy()
-        temp_details["property_price"] = price
-        trend_metrics = calculate_metrics(temp_details)
-        trend_data.append({
-            "Property Price ($)": price,
-            "NOI ($)": trend_metrics["NOI"],
-            "Cash Flow ($)": trend_metrics["Cash Flow"]
-        })
-
-    trend_df = pd.DataFrame(trend_data)
-    line_chart = alt.Chart(trend_df).mark_line(point=True).encode(
-        x=alt.X("Property Price ($):Q", title="Property Price ($)"),
-        y=alt.Y("NOI ($):Q", title="Net Operating Income ($)"),
-        color=alt.value("steelblue"),
-        tooltip=["Property Price ($)", "NOI ($)", "Cash Flow ($)"]
-    ).interactive()
-    st.altair_chart(line_chart, use_container_width=True)
-
-    # Additional Debugging Info (if needed)
-    st.write("Debug: Metrics Dataframe:", metrics_df)
-    st.write("Debug: Trend Dataframe:", trend_df)
-
-
-
- 
