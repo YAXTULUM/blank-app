@@ -19,91 +19,92 @@ import streamlit as st
 st.markdown(
     """
    <style>
-    /* Dropdown Button Styling */
-    .dropdown-button {
-        background-color: #b3cfed;
-        color: white;
-        font-size: 12px;
-        font-weight: bold;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0, 0, 0.44, 0.55);
-        transition: all 0.3s ease-in-out;
-        text-align: center;
-    }
-
-    .dropdown-button:hover {
-        background-color: #0056b3;
-        box-shadow: 0 6px 12px rgba(0, 0, 0.33, 0.55);
-    }
-
-    /* Dropdown Menu Container */
-    .dropdown-container {
-        position: relative; /* Ensure proper alignment for the dropdown content */
-        display: inline-block;
-    }
-
-    /* Dropdown Menu Styling */
-    .dropdown-content {
-        display: none; /* Initially hide the dropdown menu */
-        position: absolute;
-        background-color: #f8f9fa;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.44);
-        border-radius: 10px;
-        margin-top: 10px;
-        min-width: 220px; /* Slightly larger for better readability */
-        z-index: 1;
-        right: 0; /* Align the dropdown to the right */
-    }
-
-    /* Dropdown Menu Links */
-    .dropdown-content a {
-        color: black;
-        font-size: 14px;
-        font-weight: 500;
-        padding: 10px 20px;
-        text-decoration: none;
-        display: block;
-        border-radius: 5px;
-        transition: background-color 0.2s ease;
-    }
-
-    .dropdown-content a:hover {
-        background-color: #cce4f7;
-        color: #0056b3;
-    }
-
-    /* Show the dropdown content when hovering over the container */
-    .dropdown-container:hover .dropdown-content {
-        display: block; /* Reveal the dropdown menu */
-    }
-
-    /* Dropdown Arrow Styling */
-    .dropdown-arrow {
-        margin-left: 5px;
-        font-size: 8px;
-    }
-
-    /* Responsive Adjustments */
-    @media screen and (max-width: 768px) {
+  /* Dropdown Button Styling */
         .dropdown-button {
-            font-size: 10px;
-            padding: 8px 12px;
+            background-color: #b3cfed;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0.44, 0.55);
+            transition: all 0.3s ease-in-out;
+            text-align: center;
         }
 
+     .dropdown-button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 12px rgba(0, 0, 0.33, 0.55);
+        }
+
+        /* Dropdown Menu Styling */
+        .dropdown-container {
+            position: absolute;
+            top: 20px;
+            Right: 20px; /* Positioning the dropdown to the right-hand side */
+            display: inline-block;
+        }
+
+ 
+
         .dropdown-content {
-            min-width: 180px; /* Adjust dropdown width for smaller screens */
+                                display: flex;
+            position: absolute;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0, 0, 0.44, 0.55);
+            border-radius: 10px;
+            margin-top: 10px;
+            min-width: 220px; /* Slightly larger for better readability */
+            z-index: 1;
+            right: 0; /* Align the dropdown to the right */
         }
 
         .dropdown-content a {
-            font-size: 12px;
-            padding: 8px 15px;
+            color: black;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
         }
-    }
-</style>
 
+        .dropdown-content a:hover {
+            background-color: #cce4f7;
+            color: #0056b3;
+        }
+
+        /* Show the dropdown content on hover */
+        .dropdown-container:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Dropdown Arrow Styling */
+        .dropdown-arrow {
+            margin-left: 5px;
+            font-size: 8px;
+        }
+
+        /* Responsive Adjustments */
+        @media screen and (max-width: 768px) {
+            .dropdown-button {
+                font-size: 10px;
+                padding: 8px 12px;
+            }
+
+            .dropdown-content {
+                min-width: 180px; /* Adjust dropdown width for smaller screens */
+            }
+
+            .dropdown-content a {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+        }
+  </style>
 
 
 
@@ -124,6 +125,9 @@ st.markdown(
         </div>
     </div>
 
+
+
+    
     <!-- Title Section -->
     <div class="title-section">
         <h1>VillaTerras Ai</h1>
