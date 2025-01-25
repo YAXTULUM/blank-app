@@ -145,22 +145,7 @@ st.markdown(
             font-size: 12px;
         }
 
-        /* Responsive Adjustments */
-        @media screen and (max-width: 768px) {
-            .dropdown-button {
-                font-size: 10px;
-                padding: 8px 12px;
-            }
-
-            .dropdown-content {
-                min-width: 180px; /* Adjust dropdown width for smaller screens */
-            }
-
-            .dropdown-content a {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-        }
+  
   </style>
 
 
