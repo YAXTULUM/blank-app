@@ -86,22 +86,22 @@ st.markdown(
 
      .dropdown-button:hover {
             background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0.33, 0.55);
         }
 
         /* Dropdown Menu Styling */
         .dropdown-container {
             position: absolute;
             top: 20px;
-            left: 20px; /* Positioning the dropdown to the right-hand side */
+            Right: 20px; /* Positioning the dropdown to the right-hand side */
             display: inline-block;
         }
 
         .dropdown-content {
-            display: none;
+                                display: flex;
             position: absolute;
             background-color: #f8f9fa;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0.44, 0.55);
             border-radius: 10px;
             margin-top: 10px;
             min-width: 220px; /* Slightly larger for better readability */
@@ -133,7 +133,7 @@ st.markdown(
         /* Dropdown Arrow Styling */
         .dropdown-arrow {
             margin-left: 5px;
-            font-size: 12px;
+            font-size: 8px;
         }
 
         /* Responsive Adjustments */
