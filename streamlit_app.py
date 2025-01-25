@@ -172,7 +172,7 @@ st.markdown(
             padding: 8px 15px;
         }
     }
-</style>
+
 
 <!-- Dropdown Menu -->
 <div class="dropdown-container">
@@ -190,7 +190,7 @@ st.markdown(
         <a href="/?page=Contact">Contact</a>
     </div>
 </div>
-</style>
+ 
 
 
     <!-- Title Section -->
