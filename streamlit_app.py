@@ -230,6 +230,12 @@ st.markdown(
 
 
 # Utility function to load JSON data
+import streamlit as st
+import pandas as pd
+import numpy as np
+from urllib.error import URLError
+
+# Utility function to load JSON data
 @st.cache_data
 def from_data_file(filename):
     """Fetch data from a remote JSON file."""
@@ -245,37 +251,37 @@ def configure_sidebar():
     st.sidebar.header("Filters")
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value=""),
-        "city": st.sidebar.text_input("City", value=""),
-        "state": st.sidebar.text_input("State", value=""),
-        "zip": st.sidebar.text_input("Zip Code", value="")
+        "address": st.sidebar.text_input("Address", value="", key="address"),
+        "city": st.sidebar.text_input("City", value="", key="city"),
+        "state": st.sidebar.text_input("State", value="", key="state"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="zip"),
     }
 
     st.sidebar.subheader("Property Details")
     property_details = {
-        "price_range": st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000),
-        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4)),
-        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3)),
-        "area_range": st.sidebar.slider("Living Area (sq ft)", 500, 10000, (1000, 5000), step=100),
-        "land_area": st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500)
+        "price_range": st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="price_range"),
+        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="bedrooms"),
+        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="bathrooms"),
+        "area_range": st.sidebar.slider("Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="area_range"),
+        "land_area": st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="land_area"),
     }
 
     st.sidebar.header("Financial Details")
     financial_details = {
-        "property_price": st.sidebar.number_input("Property Price ($)", value=300000, step=10000),
-        "down_payment": st.sidebar.number_input("Down Payment ($)", value=60000, step=1000),
-        "closing_costs": st.sidebar.number_input("Closing Costs ($)", value=5000, step=500),
-        "rehab_costs": st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500),
-        "annual_property_taxes": st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500),
-        "annual_insurance": st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100),
-        "annual_utilities": st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500),
-        "maintenance_perc": st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1),
-        "capex_perc": st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1),
-        "mgmt_perc": st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1),
-        "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1),
-        "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1),
-        "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1),
-        "annual_rent_income": st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
+        "property_price": st.sidebar.number_input("Property Price ($)", value=300000, step=10000, key="property_price"),
+        "down_payment": st.sidebar.number_input("Down Payment ($)", value=60000, step=1000, key="down_payment"),
+        "closing_costs": st.sidebar.number_input("Closing Costs ($)", value=5000, step=500, key="closing_costs"),
+        "rehab_costs": st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs"),
+        "annual_property_taxes": st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500, key="property_taxes"),
+        "annual_insurance": st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100, key="insurance"),
+        "annual_utilities": st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500, key="utilities"),
+        "maintenance_perc": st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1, key="maintenance"),
+        "capex_perc": st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1, key="capex"),
+        "mgmt_perc": st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1, key="management"),
+        "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1, key="vacancy"),
+        "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1, key="interest_rate"),
+        "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1, key="loan_term"),
+        "annual_rent_income": st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000, key="rent_income"),
     }
 
     return location_details, property_details, financial_details
@@ -312,7 +318,7 @@ def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utili
         "NOI": noi,
         "Cash Flow": cash_flow,
         "Cap Rate": cap_rate,
-        "Cash on Cash": cash_on_cash
+        "Cash on Cash": cash_on_cash,
     }
 
 # Sensitivity analysis
@@ -334,7 +340,7 @@ def sensitivity_analysis(rent_income, property_price, down_payment, closing_cost
                 "Rent Income ($)": rent,
                 "Property Price ($)": price,
                 "Cap Rate (%)": metrics["Cap Rate"],
-                "Cash Flow ($)": metrics["Cash Flow"]
+                "Cash Flow ($)": metrics["Cash Flow"],
             })
 
     return pd.DataFrame(results)
@@ -364,14 +370,8 @@ def main():
 
     # Display Metrics
     st.header("Investment Metrics")
-    st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
-    st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
-    st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
-    st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
-    st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
-    st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
-    st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
-    st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
+    for key, value in metrics.items():
+        st.write(f"**{key}:** ${value:,.2f}" if "($)" in key or "Payment" in key else f"**{key}:** {value:.2f}%")
 
     # Perform sensitivity analysis
     sensitivity_df = sensitivity_analysis(
