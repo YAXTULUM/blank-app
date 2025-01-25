@@ -320,49 +320,90 @@ st.sidebar.write(f"**Vacancy Rate:** {vacancy_rate:.1f}%")
 
 
 # Sensitivity Analysis Function
-def sensitivity_analysis(rent_income, property_price, taxes, insurance, utilities, maintenance, vacancy_rate, interest_rate, term):
+def sensitivity_analysis(rent_income, property_price, down_payment, closing_costs, rehab_costs,
+                         taxes, insurance, utilities, maintenance, capital_expenditures,
+                         property_management_fee, vacancy_rate, interest_rate, term):
     """Perform sensitivity analysis on key variables like rent income and property price."""
     # Define ranges for sensitivity
-    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 10)
-    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 10)
+    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)  # Increased granularity
+    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)  # Increased granularity
 
-    # Create an empty DataFrame to store results
+    # Initialize results DataFrame
     results = []
 
-    # Loop through ranges to calculate sensitivity for each combination
+    # Nested loops for rent and price combinations
     for rent in rent_range:
         for price in price_range:
-            metrics = calculate_metrics(
-                price, rent, down_payment, closing_costs, rehab_costs,
-                taxes, insurance, utilities, maintenance, capital_expenditures,
-                property_management_fee, vacancy_rate, interest_rate, term
-            )
-            results.append({
-                "Rent Income ($)": rent,
-                "Property Price ($)": price,
-                "Cap Rate (%)": metrics["Cap Rate"],
-                "Cash-on-Cash Return (%)": metrics["Cash on Cash"],
-                "NOI ($)": metrics["NOI"],
-                "Cash Flow ($)": metrics["Cash Flow"]
-            })
+            try:
+                metrics = calculate_metrics(
+                    price, rent, down_payment, closing_costs, rehab_costs,
+                    taxes, insurance, utilities, maintenance, capital_expenditures,
+                    property_management_fee, vacancy_rate, interest_rate, term
+                )
+                results.append({
+                    "Rent Income ($)": rent,
+                    "Property Price ($)": price,
+                    "Cap Rate (%)": metrics["Cap Rate"],
+                    "Cash-on-Cash Return (%)": metrics["Cash on Cash"],
+                    "NOI ($)": metrics["NOI"],
+                    "Cash Flow ($)": metrics["Cash Flow"]
+                })
+            except Exception as e:
+                # Append NaN for failed computations
+                results.append({
+                    "Rent Income ($)": rent,
+                    "Property Price ($)": price,
+                    "Cap Rate (%)": None,
+                    "Cash-on-Cash Return (%)": None,
+                    "NOI ($)": None,
+                    "Cash Flow ($)": None
+                })
+                st.warning(f"Calculation failed for Rent: {rent}, Price: {price}. Error: {e}")
 
     # Convert results to a DataFrame
-    df = pd.DataFrame(results)
-    return df
+    return pd.DataFrame(results)
 
 # Call Sensitivity Analysis
 try:
     sensitivity_df = sensitivity_analysis(
-        annual_rent_income, property_price, annual_property_taxes,
-        annual_insurance, annual_utilities, maintenance_costs,
-        vacancy_rate, interest_rate, loan_term
+        annual_rent_income, property_price, down_payment, closing_costs, rehab_costs,
+        annual_property_taxes, annual_insurance, annual_utilities, maintenance_costs,
+        capital_expenditures, property_management_fee, vacancy_rate, interest_rate, loan_term
     )
+
     # Display Sensitivity Results
     st.header("Sensitivity Analysis")
     st.write("Explore the impact of varying Rent Income and Property Price on investment metrics:")
-    st.dataframe(sensitivity_df)
+
+    # Visualize results with a heatmap (Cap Rate example)
+    cap_rate_pivot = sensitivity_df.pivot(
+        index="Rent Income ($)", columns="Property Price ($)", values="Cap Rate (%)"
+    )
+    st.subheader("Cap Rate Heatmap")
+    st.write("Heatmap of Capitalization Rates for varying Rent Income and Property Prices:")
+    st.dataframe(sensitivity_df)  # Optionally display the raw DataFrame
+
+    # Use Altair for a heatmap
+    st.altair_chart(
+        alt.Chart(sensitivity_df)
+        .mark_rect()
+        .encode(
+            x="Property Price ($):O",
+            y="Rent Income ($):O",
+            color="Cap Rate (%):Q"
+        )
+        .properties(
+            width=700,
+            height=400
+        ),
+        use_container_width=True
+    )
 except Exception as e:
     st.error(f"Error performing sensitivity analysis: {e}")
+
+
+
+
 
 
 
@@ -531,6 +572,12 @@ chart = alt.Chart(comparison_df).mark_bar().encode(
     tooltip=["Metric", "Value"]
 ).interactive()
 st.altair_chart(chart, use_container_width=True)
+
+
+
+
+
+
 
 # Sensitivity Analysis
 st.subheader("Sensitivity Analysis")
