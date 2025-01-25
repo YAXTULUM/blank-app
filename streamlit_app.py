@@ -245,100 +245,79 @@ import numpy as np
 
 # Sidebar configuration function
 def configure_sidebar():
-    """Sets up the sidebar with expanded inputs and returns user data."""
-    st.sidebar.header("Filters")
-
-    # Location Details
+    """Configure the sidebar with input fields."""
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value="", key="location_address_input"),
-        "city": st.sidebar.text_input("City", value="", key="location_city_input"),
-        "state": st.sidebar.text_input("State", value="", key="location_state_input"),
-        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip_input"),
-        "country": st.sidebar.text_input("Country", value="", key="location_country_input"),
-        "region": st.sidebar.text_input("Region", value="", key="location_region_input"),
-        "neighborhood": st.sidebar.text_input("Neighborhood", value="", key="location_neighborhood_input"),
+        "address": st.sidebar.text_input("Address", value="", key="location_address"),
+        "city": st.sidebar.text_input("City", value="", key="location_city"),
+        "state": st.sidebar.text_input("State", value="", key="location_state"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip"),
     }
 
-    # Property Details
     st.sidebar.subheader("Property Details")
     property_details = {
-        "price_range": st.sidebar.slider(
-            "Price Range ($)", 50000, 10000000, (200000, 1500000), step=50000, key="price_range_slider"
-        ),
-        "bedrooms": st.sidebar.slider("Bedrooms", 1, 15, (3, 5), key="bedrooms_slider"),
-        "bathrooms": st.sidebar.slider("Bathrooms", 1, 15, (2, 4), key="bathrooms_slider"),
-        "area_range": st.sidebar.slider(
-            "Living Area (sq ft)", 500, 20000, (1500, 5000), step=100, key="area_range_slider"
-        ),
-        "land_area": st.sidebar.slider(
-            "Land Area (sq ft)", 1000, 100000, (5000, 30000), step=500, key="land_area_slider"
-        ),
-        "property_type": st.sidebar.selectbox(
-            "Property Type", ["Single-Family", "Multi-Family", "Condo", "Townhouse", "Other"], key="property_type_select"
-        ),
-        "year_built": st.sidebar.slider("Year Built", 1900, 2025, 2000, key="year_built_slider"),
-        "garage": st.sidebar.radio("Garage", ["None", "1-Car", "2-Car", "3+ Car"], key="garage_radio"),
+        "property_type": st.sidebar.selectbox("Property Type", ["Residential", "Commercial"], key="property_type"),
+        "square_footage": st.sidebar.number_input("Square Footage", min_value=0, key="property_square_footage"),
     }
 
-    # Financial Details
-    st.sidebar.header("Financial Details")
+    st.sidebar.subheader("Financial Details")
     financial_details = {
-        "property_price": st.sidebar.number_input(
-            "Property Price ($)", value=300000, step=10000, key="property_price_input"
-        ),
-        "down_payment": st.sidebar.number_input(
-            "Down Payment ($)", value=60000, step=1000, key="down_payment_input"
-        ),
-        "closing_costs": st.sidebar.number_input(
-            "Closing Costs ($)", value=5000, step=500, key="closing_costs_input"
-        ),
-        "rehab_costs": st.sidebar.number_input(
-            "Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs_input"
-        ),
-        "hoa_fees": st.sidebar.number_input(
-            "HOA Fees ($/Year)", value=0, step=100, key="hoa_fees_input"
-        ),
-        "annual_property_taxes": st.sidebar.number_input(
-            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes_input"
-        ),
-        "annual_insurance": st.sidebar.number_input(
-            "Annual Insurance ($)", value=1200, step=100, key="annual_insurance_input"
-        ),
-        "annual_utilities": st.sidebar.number_input(
-            "Annual Utilities ($)", value=3000, step=500, key="annual_utilities_input"
-        ),
-        "maintenance_perc": st.sidebar.number_input(
-            "Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc_input"
-        ),
-        "capex_perc": st.sidebar.number_input(
-            "Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc_input"
-        ),
-        "mgmt_perc": st.sidebar.number_input(
-            "Property Management (% of Rent)", value=8, step=1, key="mgmt_perc_input"
-        ),
-        "vacancy_perc": st.sidebar.number_input(
-            "Vacancy Rate (%)", value=5, step=1, key="vacancy_perc_input"
-        ),
-        "interest_rate": st.sidebar.number_input(
-            "Interest Rate (%)", value=4.5, step=0.1, key="interest_rate_input"
-        ),
-        "loan_term": st.sidebar.number_input(
-            "Loan Term (Years)", value=30, step=1, key="loan_term_input"
-        ),
-        "annual_rent_income": st.sidebar.number_input(
-            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income_input"
-        ),
-        "additional_income": st.sidebar.number_input(
-            "Additional Income ($/Year)", value=0, step=500, key="additional_income_input"
-        ),
-        "depreciation": st.sidebar.number_input(
-            "Depreciation ($/Year)", value=0, step=500, key="depreciation_input"
-        ),
+        "purchase_price": st.sidebar.number_input("Purchase Price", min_value=0.0, key="financial_purchase_price"),
+        "down_payment": st.sidebar.number_input("Down Payment (%)", min_value=0.0, max_value=100.0, key="financial_down_payment"),
+        "loan_term": st.sidebar.selectbox("Loan Term (years)", [15, 30], key="financial_loan_term"),
+        "interest_rate": st.sidebar.number_input("Interest Rate (%)", min_value=0.0, max_value=100.0, key="financial_interest_rate"),
     }
 
     return location_details, property_details, financial_details
 
+
+def calculate_metrics(financial_details):
+    """Calculate financial metrics for the property."""
+    purchase_price = financial_details["purchase_price"]
+    down_payment_percent = financial_details["down_payment"]
+    loan_term_years = financial_details["loan_term"]
+    interest_rate = financial_details["interest_rate"]
+
+    # Calculate down payment and loan amount
+    down_payment = (down_payment_percent / 100) * purchase_price
+    loan_amount = purchase_price - down_payment
+
+    # Calculate monthly mortgage payment (simplified formula)
+    monthly_interest_rate = (interest_rate / 100) / 12
+    num_payments = loan_term_years * 12
+
+    if monthly_interest_rate > 0:
+        monthly_payment = loan_amount * (monthly_interest_rate * (1 + monthly_interest_rate)**num_payments) / ((1 + monthly_interest_rate)**num_payments - 1)
+    else:
+        monthly_payment = loan_amount / num_payments
+
+    return {
+        "down_payment": down_payment,
+        "loan_amount": loan_amount,
+        "monthly_payment": monthly_payment,
+    }
+
+
+def main():
+    """Main application logic."""
+    st.title("Real Estate Investment Calculator")
+    st.write("Analyze your real estate investment with detailed metrics.")
+
+    # Configure the sidebar
+    location_details, property_details, financial_details = configure_sidebar()
+
+    # Calculate Metrics
+    metrics = calculate_metrics(financial_details)
+
+    # Display Metrics
+    st.subheader("Investment Metrics")
+    st.write(f"**Down Payment:** ${metrics['down_payment']:,.2f}")
+    st.write(f"**Loan Amount:** ${metrics['loan_amount']:,.2f}")
+    st.write(f"**Estimated Monthly Payment:** ${metrics['monthly_payment']:,.2f}")
+
+
+if __name__ == "__main__":
+    main()
 
 
 
