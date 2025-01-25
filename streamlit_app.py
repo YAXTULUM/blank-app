@@ -5,6 +5,10 @@ import altair as alt
 import pydeck as pdk
 import time
 from urllib.error import URLError
+import requests
+from sklearn.linear_model import LinearRegression
+import datetime
+
 
 
 ###########  Header Start ############################
@@ -310,126 +314,154 @@ progress_bar.empty()
 
 
 
+# Set page configuration
+st.set_page_config(page_title="VillaTerras AI - Advanced Real Estate Map", layout="wide")
 
-
-
-
-# Map Data Preparation
+# Mock Data (replace with API data in real implementation)
 @st.cache_data
-def map_search_data():
-    # Mock data for demonstration
-    data = pd.DataFrame({
-        "lat": [37.76, 37.77, 37.75, 37.78, 37.79],
-        "lon": [-122.42, -122.41, -122.43, -122.44, -122.40],
-        "value": [10, 20, 30, 40, 50]
+def load_city_data():
+    return pd.DataFrame({
+        "City": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "Fresno"],
+        "Latitude": [34.0522, 37.7749, 32.7157, 38.5816, 36.7378],
+        "Longitude": [-118.2437, -122.4194, -117.1611, -121.4944, -119.7871],
+        "Growth": [2.5, 3.0, 1.8, 2.3, 1.5],
+        "MedianPrice": [800000, 1200000, 700000, 450000, 300000],
+        "RentalYield": [3.5, 2.8, 4.0, 4.5, 5.2],
+        "CrimeRate": [5, 3, 4, 6, 8],
+        "Walkability": [8, 9, 7, 6, 5],
+        "Date": [
+            datetime.date(2023, 1, 1),
+            datetime.date(2023, 1, 1),
+            datetime.date(2023, 1, 1),
+            datetime.date(2023, 1, 1),
+            datetime.date(2023, 1, 1),
+        ]
     })
+
+# Predict AI-driven investment scores
+@st.cache_data
+def predict_investment_scores(data):
+    # Simple example with linear regression
+    model = LinearRegression()
+    features = data[["Growth", "MedianPrice", "RentalYield", "CrimeRate", "Walkability"]]
+    target = np.random.rand(len(data)) * 100  # Mock target, replace with real data
+    model.fit(features, target)
+    data["InvestmentScore"] = model.predict(features)
     return data
 
-# Load the data
-map_data = map_search_data()
+# Generate downloadable analytics report
+@st.cache_data
+def generate_report(data):
+    csv_data = data.to_csv(index=False)
+    return csv_data
 
-# Simple Map with st.map
-st.header("Simple Map")
-st.map(map_data)
+# Load city data
+data = load_city_data()
 
-# Customized Map with Pydeck
-st.header("Customized Map with Pydeck")
+# Sidebar - User Personalization
+st.sidebar.header("Personalization")
+user_name = st.sidebar.text_input("Your Name", value="User")
+preferred_growth = st.sidebar.slider("Minimum Growth (%)", 0, 5, 2)
+max_crime_rate = st.sidebar.slider("Maximum Crime Rate", 0, 10, 5)
+preferred_walkability = st.sidebar.slider("Minimum Walkability Score", 0, 10, 5)
 
-# Define layers
-scatterplot_layer = pdk.Layer(
+# Filter data based on user preferences
+personalized_data = data[
+    (data["Growth"] >= preferred_growth) &
+    (data["CrimeRate"] <= max_crime_rate) &
+    (data["Walkability"] >= preferred_walkability)
+]
+
+# Predict AI-driven investment scores
+personalized_data = predict_investment_scores(personalized_data)
+
+# Time-Series Animation Data Preparation
+time_series_data = personalized_data.copy()
+for i in range(1, 6):  # Add future time points
+    next_date = datetime.date(2023 + i, 1, 1)
+    growth_factor = 1 + (i * 0.01)  # Example growth over time
+    future_data = personalized_data.copy()
+    future_data["Date"] = next_date
+    future_data["MedianPrice"] *= growth_factor
+    future_data["InvestmentScore"] *= growth_factor
+    time_series_data = pd.concat([time_series_data, future_data])
+
+# Display Metrics
+st.header(f"Hello, {user_name}! Here are your personalized recommendations:")
+for idx, row in personalized_data.iterrows():
+    st.write(f"**City:** {row['City']}")
+    st.write(f"**Growth:** {row['Growth']}%")
+    st.write(f"**Median Price:** ${row['MedianPrice']:,}")
+    st.write(f"**Rental Yield:** {row['RentalYield']}%")
+    st.write(f"**Crime Rate:** {row['CrimeRate']}")
+    st.write(f"**Walkability:** {row['Walkability']}")
+    st.write(f"**Investment Score:** {row['InvestmentScore']:.2f}")
+    st.write("---")
+
+# Generate and Download Report
+if st.button("Download Analytics Report"):
+    csv_data = generate_report(personalized_data)
+    st.download_button("Download CSV", csv_data, "investment_report.csv", "text/csv")
+
+# Visualization - Heatmap + Investment Score
+st.header("Investment Heatmap")
+heatmap_layer = pdk.Layer(
+    "HeatmapLayer",
+    data=personalized_data,
+    get_position=["Longitude", "Latitude"],
+    get_weight="InvestmentScore",
+    radius=30000,
+    opacity=0.7,
+)
+
+scatter_layer = pdk.Layer(
     "ScatterplotLayer",
-    data=map_data,
-    get_position=["lon", "lat"],
-    get_color="[200, value * 5, value * 2]",
-    get_radius="value * 100",
+    data=personalized_data,
+    get_position=["Longitude", "Latitude"],
+    get_color="[255, 0, 0, 160]",
+    get_radius=50000,
     pickable=True,
-    auto_highlight=True,
 )
 
-hexagon_layer = pdk.Layer(
-    "HexagonLayer",
-    data=map_data,
-    get_position=["lon", "lat"],
-    radius=200,
-    elevation_scale=4,
-    elevation_range=[0, 1000],
-    extruded=True,
-)
-
-# Define the view state
 view_state = pdk.ViewState(
-    latitude=37.76,
-    longitude=-122.42,
-    zoom=12,
+    latitude=personalized_data["Latitude"].mean(),
+    longitude=personalized_data["Longitude"].mean(),
+    zoom=6,
+    pitch=40,
+)
+
+st.pydeck_chart(pdk.Deck(
+    layers=[heatmap_layer, scatter_layer],
+    initial_view_state=view_state,
+    tooltip={"html": "<b>City:</b> {City}<br><b>Investment Score:</b> {InvestmentScore:.2f}"}
+))
+
+# Time-Series Animation Visualization
+st.header("Time-Series Analysis of Investment Potential")
+time_series_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=time_series_data,
+    get_position=["Longitude", "Latitude"],
+    get_color="[200, 100, 50, 160]",
+    get_radius=40000,
+    pickable=True,
+)
+
+time_series_view_state = pdk.ViewState(
+    latitude=personalized_data["Latitude"].mean(),
+    longitude=personalized_data["Longitude"].mean(),
+    zoom=6,
     pitch=50,
 )
 
-# Create the map
-st.pydeck_chart(
-    pdk.Deck(
-        layers=[scatterplot_layer, hexagon_layer],
-        initial_view_state=view_state,
-        tooltip={
-            "html": "<b>Value:</b> {value}<br><b>Latitude:</b> {lat}<br><b>Longitude:</b> {lon}",
-            "style": {"color": "white"},
-        },
-    )
-)
+st.pydeck_chart(pdk.Deck(
+    layers=[time_series_layer],
+    initial_view_state=time_series_view_state,
+    tooltip={"html": "<b>City:</b> {City}<br><b>Date:</b> {Date}<br><b>Investment Score:</b> {InvestmentScore:.2f}"}
+))
 
-# Radius Search Example
-st.header("Map with Radius Search")
 
-# Create radius data
-@st.cache_data
-def radius_search_data(center_lat, center_lon, radius_km=5):
-    # Generate mock points in a circle for visualization
-    from math import sin, cos, sqrt, atan2, radians
-    import numpy as np
 
-    points = []
-    for angle in range(0, 360, 10):
-        theta = radians(angle)
-        lat_offset = (radius_km / 111) * cos(theta)
-        lon_offset = (radius_km / (111 * cos(radians(center_lat)))) * sin(theta)
-        points.append([center_lat + lat_offset, center_lon + lon_offset])
-
-    df = pd.DataFrame(points, columns=["lat", "lon"])
-    df["value"] = np.random.randint(1, 100, len(df))
-    return df
-
-# Generate radius search points
-radius_data = radius_search_data(center_lat=37.76, center_lon=-122.42, radius_km=5)
-
-# Create a scatterplot for radius search
-radius_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=radius_data,
-    get_position=["lon", "lat"],
-    get_color="[255, value, 100]",
-    get_radius=100,
-    pickable=True,
-    auto_highlight=True,
-)
-
-# Update view state
-radius_view_state = pdk.ViewState(
-    latitude=37.76,
-    longitude=-122.42,
-    zoom=13,
-    pitch=30,
-)
-
-# Render radius map
-st.pydeck_chart(
-    pdk.Deck(
-        layers=[radius_layer],
-        initial_view_state=radius_view_state,
-        tooltip={
-            "html": "<b>Radius Point</b><br><b>Value:</b> {value}<br><b>Latitude:</b> {lat}<br><b>Longitude:</b> {lon}",
-            "style": {"color": "white"},
-        },
-    )
-)
 
 # Display the raw radius data
 st.subheader("Raw Radius Search Data")
