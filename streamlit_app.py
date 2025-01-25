@@ -418,14 +418,53 @@ st.download_button(
 
 
 
+import streamlit as st
+import pandas as pd
 
+# Input Values
+property_price = 500000  # Example value, replace with input if necessary
+annual_rent_income = 60000  # Example value, replace with input if necessary
+down_payment = 100000  # Example value, replace with input if necessary
+closing_costs = 10000  # Example value, replace with input if necessary
+rehab_costs = 15000  # Example value, replace with input if necessary
+annual_taxes = 6000
+annual_insurance = 1200
+annual_utilities = 3000
+maintenance = 10  # as % of rent
+capital_expenditure = 10  # as % of rent
+property_management = 8  # as % of rent
+vacancy_rate = 5  # as %
+interest_rate = 4.5  # as %
+loan_term = 30  # years
+
+# Calculation of Metrics
+loan_amount = property_price - down_payment
+monthly_rate = interest_rate / 100 / 12
+num_payments = loan_term * 12
+monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
+annual_debt_service = monthly_payment * 12
+operating_expenses = (
+    annual_taxes + annual_insurance + annual_utilities +
+    (annual_rent_income * (maintenance + capital_expenditure + property_management) / 100)
+)
+effective_gross_income = annual_rent_income * (1 - vacancy_rate / 100)
+noi = effective_gross_income - operating_expenses
+cash_flow = noi - annual_debt_service
+total_investment = down_payment + closing_costs + rehab_costs
+
+cap_rate = (noi / property_price) * 100
+cash_on_cash = (cash_flow / total_investment) * 100
+ltv_ratio = (loan_amount / property_price) * 100
+grm = property_price / annual_rent_income
+cash_flow_margin = (cash_flow / effective_gross_income) * 100
+ber = ((operating_expenses + annual_debt_service) / effective_gross_income) * 100
+break_even_rent = (operating_expenses + annual_debt_service) / (1 - vacancy_rate / 100)
+debt_coverage_ratio = noi / annual_debt_service
+equity_build_up = down_payment + cash_flow * loan_term
+irr = 12.5  # Example value, replace with real IRR calculation
+npv = 25000  # Example value, replace with real NPV calculation
 
 # Display Metrics
-st.header("Metrics")
-st.write(f"**Capitalization Rate:** {cap_rate:.2f}%")
-st.write(f"**Cash-on-Cash Return:** {cash_on_cash:.2f}%")
-st.write(f"**Monthly Mortgage Payment:** ${monthly_payment:,.2f}")
-st.write(f"**Net Operating Income (NOI):** ${noi:,.2f}")# Display Comprehensive Metrics
 st.header("Comprehensive Metrics")
 
 # Core Metrics
@@ -433,46 +472,34 @@ st.write(f"**Capitalization Rate (Cap Rate):** {cap_rate:.2f}%")
 st.write(f"**Cash-on-Cash Return (CoC):** {cash_on_cash:.2f}%")
 st.write(f"**Monthly Mortgage Payment:** ${monthly_payment:,.2f}")
 st.write(f"**Net Operating Income (NOI):** ${noi:,.2f}")
-st.write(f"**Effective Gross Income (EGI):** ${metrics['Effective Gross Income']:.2f}")
-st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
-st.write(f"**Annual Debt Service (Mortgage):** ${metrics['Annual Debt Service']:.2f}")
-st.write(f"**Total Cash Flow:** ${metrics['Cash Flow']:.2f}")
+st.write(f"**Effective Gross Income (EGI):** ${effective_gross_income:,.2f}")
+st.write(f"**Operating Expenses:** ${operating_expenses:,.2f}")
+st.write(f"**Annual Debt Service (Mortgage):** ${annual_debt_service:,.2f}")
+st.write(f"**Total Cash Flow:** ${cash_flow:,.2f}")
 
 # Equity & Leverage Metrics
-ltv_ratio = ((property_price - down_payment) / property_price) * 100
 st.write(f"**Loan-to-Value Ratio (LTV):** {ltv_ratio:.2f}%")
-equity_build_up = down_payment + metrics['Cash Flow'] * loan_term
 st.write(f"**Equity Build-Up Over Loan Term:** ${equity_build_up:,.2f}")
 
 # Profitability Metrics
-grm = property_price / annual_rent_income
 st.write(f"**Gross Rent Multiplier (GRM):** {grm:.2f}")
-cash_flow_margin = (metrics['Cash Flow'] / metrics['Effective Gross Income']) * 100
 st.write(f"**Cash Flow Margin:** {cash_flow_margin:.2f}%")
 
 # Risk & Break-Even Analysis
-ber = ((metrics['Operating Expenses'] + metrics['Annual Debt Service']) / metrics['Effective Gross Income']) * 100
 st.write(f"**Break-Even Ratio (BER):** {ber:.2f}%")
-break_even_rent = (metrics['Operating Expenses'] + metrics['Annual Debt Service']) / (1 - vacancy_rate / 100)
 st.write(f"**Break-Even Rent Per Year:** ${break_even_rent:,.2f}")
 st.write(f"**Break-Even Rent Per Month:** ${(break_even_rent / 12):,.2f}")
 
 # Advanced Metrics
-debt_coverage_ratio = metrics['NOI'] / metrics['Annual Debt Service']
 st.write(f"**Debt Coverage Ratio (DCR):** {debt_coverage_ratio:.2f}")
-total_investment = down_payment + closing_costs + rehab_costs
 st.write(f"**Total Investment:** ${total_investment:,.2f}")
-
-# Return Metrics
-irr = metrics["Internal Rate of Return"]
-npv = metrics["Net Present Value"]
 st.write(f"**Internal Rate of Return (IRR):** {irr:.2f}%")
 st.write(f"**Net Present Value (NPV):** ${npv:,.2f}")
 
-# Visualizations
+# Visualization
 st.subheader("Metric Comparisons")
 
-# Metrics DataFrame for Visualization
+# Prepare Data for Visualization
 comparison_df = pd.DataFrame({
     "Metric": [
         "Cap Rate (%)", "CoC Return (%)", "Cash Flow ($)", 
@@ -480,11 +507,22 @@ comparison_df = pd.DataFrame({
         "Debt Coverage Ratio", "GRM"
     ],
     "Value": [
-        cap_rate, cash_on_cash, metrics['Cash Flow'], 
-        metrics['NOI'], break_even_rent, ltv_ratio, 
+        cap_rate, cash_on_cash, cash_flow, 
+        noi, break_even_rent, ltv_ratio, 
         debt_coverage_ratio, grm
     ]
 })
+
+# Display a DataFrame for Reference
+st.dataframe(comparison_df)
+
+
+
+
+
+
+
+
 
 # Bar Chart for Key Metrics
 chart = alt.Chart(comparison_df).mark_bar().encode(
