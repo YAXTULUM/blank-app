@@ -176,9 +176,10 @@ st.markdown(
         <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
         <p>All Real Estate Knowledge in One Place.</p>
         
-      <p>
-    Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com </p> <p> - by Ekbalam
+    <p style="font-size: 0.9em; color: lightgrey;">
+    Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com - by Ekbalam
 </p>
+
 
 
     </div>
