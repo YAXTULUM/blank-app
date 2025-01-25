@@ -383,6 +383,14 @@ def main():
     # Sidebar Inputs
     _, _, financial_details = configure_sidebar()
 
+    # Ensure consistent data types for number inputs
+    appreciation_rate = st.sidebar.number_input(
+        "Appreciation Rate (%)", value=3.0, step=0.1  # Both value and step are floats
+    )
+    inflation_rate = st.sidebar.number_input(
+        "Inflation Rate (%)", value=2.0, step=0.1  # Both value and step are floats
+    )
+
     # Calculate Metrics
     try:
         metrics = calculate_metrics(financial_details)
@@ -406,42 +414,3 @@ if __name__ == "__main__":
 
  
  
-
-
-# Sensitivity Analysis Function
-def sensitivity_analysis(financial_details):
-    """Perform sensitivity analysis on rent and property price."""
-    # Extract initial values for rent and price
-    rent_income = financial_details["annual_rent_income"]
-    property_price = financial_details["property_price"]
-
-    # Define ranges for sensitivity analysis (20 points between 80% and 120% of initial values)
-    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
-    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
-
-    results = []  # Store results for all combinations of rent and price
-
-    for rent in rent_range:
-        for price in price_range:
-            # Create a copy of the financial details and update rent and price
-            updated_details = financial_details.copy()
-            updated_details["annual_rent_income"] = rent
-            updated_details["property_price"] = price
-
-            # Calculate metrics using the modified details
-            try:
-                metrics = calculate_metrics(updated_details)
-                results.append({
-                    "Rent Income ($)": rent,
-                    "Property Price ($)": price,
-                    "Cap Rate (%)": metrics["Cap Rate (%)"],
-                    "Cash Flow ($)": metrics["Cash Flow"],
-                })
-            except ValueError as e:
-                # Skip combinations that result in invalid calculations
-                continue
-
-    # Return results as a DataFrame
-    return pd.DataFrame(results)
-
-
