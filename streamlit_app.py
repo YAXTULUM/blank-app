@@ -239,11 +239,6 @@ def from_data_file(filename):
 
 
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-
-
 # Sidebar configuration function
 def configure_sidebar():
     """Sets up the sidebar and returns the user inputs."""
