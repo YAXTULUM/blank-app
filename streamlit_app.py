@@ -418,7 +418,6 @@ def sensitivity_analysis(financial_details):
     # Convert results to a DataFrame
     return pd.DataFrame(results)
 
-
 def sensitivity_analysis(financial_details):
     """Perform sensitivity analysis on rent and property price."""
     # Extract necessary inputs from financial_details
@@ -429,29 +428,31 @@ def sensitivity_analysis(financial_details):
         raise ValueError(f"Missing key in financial details: {e}")
 
     # Define ranges for sensitivity analysis
-    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
-    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
+    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)  # Rent varies ±20%
+    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)  # Price varies ±20%
 
     # Initialize results list
     results = []
     for rent in rent_range:
         for price in price_range:
-            # Update financial details for each combination
+            # Update financial details with new rent and price
             updated_details = financial_details.copy()
             updated_details["annual_rent_income"] = rent
             updated_details["property_price"] = price
 
             try:
-                # Calculate metrics for each combination
+                # Calculate metrics for updated financial details
                 metrics = calculate_metrics(updated_details)
                 results.append({
-                    "Rent Income ($)": rent,
-                    "Property Price ($)": price,
-                    "Cap Rate (%)": metrics["Cap Rate (%)"],
-                    "Cash Flow ($)": metrics["Cash Flow"],
+                    "Rent Income ($)": round(rent, 2),
+                    "Property Price ($)": round(price, 2),
+                    "Cap Rate (%)": round(metrics["Cap Rate (%)"], 2),
+                    "Cash Flow ($)": round(metrics["Cash Flow"], 2),
                 })
-            except Exception:
-                continue  # Skip invalid combinations
+            except Exception as e:
+                # Log warnings for problematic combinations
+                st.warning(f"Skipped combination (Rent: ${rent:,.2f}, Price: ${price:,.2f}) due to error: {e}")
+                continue
 
-    # Convert results to a DataFrame
+    # Convert results to a pandas DataFrame
     return pd.DataFrame(results)
