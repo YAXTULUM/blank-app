@@ -241,16 +241,85 @@ rehab_costs = st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, s
 annual_property_taxes = st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500)
 annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
 annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500)
-maintenance_costs = st.sidebar.number_input("Maintenance Costs (% of Rent)", value=10, step=1)
-capital_expenditures = st.sidebar.number_input("Capital Expenditures (% of Rent)", value=10, step=1)
-property_management_fee = st.sidebar.number_input("Property Management Fee (% of Rent)", value=8.0, step=0.1)
+maintenance_costs = st.sidebar.number_input("Maintenance Costs ($)", value=1500, step=100)
+miscellaneous_costs = st.sidebar.number_input("Miscellaneous Costs ($)", value=1000, step=100)
+capital_expenditures = st.sidebar.number_input("Capital Expenditures ($)", value=2000, step=100)
+property_management_fee = st.sidebar.number_input("Property Management Fee (%)", value=8.0, step=0.1)
 vacancy_rate = st.sidebar.number_input("Vacancy Rate (%)", value=5.0, step=0.1)
-
-# Income & Loan Inputs
-st.sidebar.subheader("Income and Loan Details")
-annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
 interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
 loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
+
+# Income Inputs
+st.sidebar.subheader("Income and Loan Details")
+annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
+
+# Calculate annual expenses as the sum of all cost components
+annual_expenses = (
+    annual_property_taxes +
+    annual_insurance +
+    annual_utilities +
+    maintenance_costs +
+    miscellaneous_costs +
+    capital_expenditures +
+    (annual_rent_income * (property_management_fee / 100)) +
+    (annual_rent_income * (vacancy_rate / 100))
+)
+
+# Calculation Function
+def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utilities,
+                      maintenance, capex, mgmt_perc, vacancy_perc, rate, term):
+    loan_amount = price - down
+    monthly_rate = rate / 100 / 12
+    num_payments = term * 12
+
+    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
+    annual_debt_service = monthly_payment * 12
+
+    operating_expenses = taxes + insurance + utilities + maintenance + capex + (rent * (mgmt_perc / 100))
+    effective_gross_income = rent * (1 - vacancy_perc / 100)
+    noi = effective_gross_income - operating_expenses
+
+    cash_flow = noi - annual_debt_service
+    total_investment = down + closing + rehab
+
+    cap_rate = (noi / price) * 100
+    cash_on_cash = (cash_flow / total_investment) * 100
+
+    return {
+        "Monthly Payment": monthly_payment,
+        "Annual Debt Service": annual_debt_service,
+        "Operating Expenses": operating_expenses,
+        "Effective Gross Income": effective_gross_income,
+        "NOI": noi,
+        "Cash Flow": cash_flow,
+        "Cap Rate": cap_rate,
+        "Cash on Cash": cash_on_cash
+    }
+
+# Call Metrics Calculation
+metrics = calculate_metrics(
+    property_price, annual_rent_income, down_payment, closing_costs, rehab_costs,
+    annual_property_taxes, annual_insurance, annual_utilities, maintenance_costs,
+    capital_expenditures, property_management_fee, vacancy_rate, interest_rate, loan_term
+)
+
+# Display Metrics
+st.header("Investment Metrics")
+st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
+st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
+st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
+st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
+st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
+st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
+st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
+st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
+
+
+
+
+
+
+
 
 # Calculations
 def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utilities,
