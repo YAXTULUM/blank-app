@@ -228,358 +228,176 @@ st.markdown(
 ###########  Header End ############################
 
 
+@st.cache_data
+def from_data_file(filename):
+    """Retrieve data from an online file and load it as a DataFrame."""
+    url = f"https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/{filename}"
+    try:
+        return pd.read_json(url)
+    except ValueError:
+        st.error(f"Error loading data from {url}. Ensure the file exists and is formatted correctly.")
+        return pd.DataFrame()
 
 
-
-# Sidebar Filters
+# Sidebar configuration for filters
 st.sidebar.header("Filters")
+
+# Location details inputs
+st.sidebar.subheader("Location Details")
+location_address = st.sidebar.text_input("Address", value="")
+location_city = st.sidebar.text_input("City", value="")
+location_state = st.sidebar.text_input("State", value="")
+location_zip = st.sidebar.text_input("Zip Code", value="")
+
+# Property details inputs
+st.sidebar.subheader("Property Details")
 price_range = st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000)
 bedrooms = st.sidebar.slider("Bedrooms", 1, 10, (2, 4))
 bathrooms = st.sidebar.slider("Bathrooms", 1, 10, (1, 3))
-area_range = st.sidebar.slider("Area (sq ft)", 500, 10000, (1000, 5000), step=100)
+area_range = st.sidebar.slider("Living Area (sq ft)", 500, 10000, (1000, 5000), step=100)
+land_area = st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500)
 
-# Financial Inputs
+# Financial details inputs
 st.sidebar.header("Financial Details")
 property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
-annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
-annual_expenses = st.sidebar.number_input("Annual Expenses ($)", value=5000, step=1000)
 down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
+closing_costs = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
+rehab_costs = st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500)
+annual_property_taxes = st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500)
+annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
+annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500)
+maintenance_perc = st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1)
+capex_perc = st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1)
+mgmt_perc = st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1)
+vacancy_perc = st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1)
 interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
 loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
+annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
 
-# Calculations
-def calculate_metrics(price, rent, expenses, down, rate, term):
+# Calculate annual expenses
+annual_expenses = (
+    annual_property_taxes +
+    annual_insurance +
+    annual_utilities +
+    (annual_rent_income * (maintenance_perc / 100)) +
+    (annual_rent_income * (capex_perc / 100)) +
+    (annual_rent_income * (mgmt_perc / 100)) +
+    (annual_rent_income * (vacancy_perc / 100))
+)
+
+
+# Define the core calculation function
+def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utilities,
+                      maintenance_perc, capex_perc, mgmt_perc, vacancy_perc, rate, term):
+    """Calculate financial metrics for a property investment."""
     loan_amount = price - down
     monthly_rate = rate / 100 / 12
     num_payments = term * 12
+
     monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
-    noi = rent - expenses
+    annual_debt_service = monthly_payment * 12
+
+    operating_expenses = taxes + insurance + utilities + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
+    effective_gross_income = rent * (1 - vacancy_perc / 100)
+    noi = effective_gross_income - operating_expenses
+
+    cash_flow = noi - annual_debt_service
+    total_investment = down + closing + rehab
+
     cap_rate = (noi / price) * 100
-    cash_on_cash = (noi / down) * 100
-    return cap_rate, cash_on_cash, monthly_payment, noi
+    cash_on_cash = (cash_flow / total_investment) * 100
 
-cap_rate, cash_on_cash, monthly_payment, noi = calculate_metrics(
-    property_price, annual_rent_income, annual_expenses, down_payment, interest_rate, loan_term
+    return {
+        "Monthly Payment": monthly_payment,
+        "Annual Debt Service": annual_debt_service,
+        "Operating Expenses": operating_expenses,
+        "Effective Gross Income": effective_gross_income,
+        "NOI": noi,
+        "Cash Flow": cash_flow,
+        "Cap Rate": cap_rate,
+        "Cash on Cash": cash_on_cash
+    }
+
+
+# Perform calculations
+metrics = calculate_metrics(
+    property_price, annual_rent_income, down_payment, closing_costs, rehab_costs,
+    annual_property_taxes, annual_insurance, annual_utilities, maintenance_perc,
+    capex_perc, mgmt_perc, vacancy_perc, interest_rate, loan_term
 )
 
-# Display Metrics
-st.header("Metrics")
-st.write(f"**Capitalization Rate:** {cap_rate:.2f}%")
-st.write(f"**Cash-on-Cash Return:** {cash_on_cash:.2f}%")
-st.write(f"**Monthly Mortgage Payment:** ${monthly_payment:,.2f}")
-st.write(f"**Net Operating Income (NOI):** ${noi:,.2f}")
-
-# Visualization: Price Distribution
-if st.checkbox("Show Price Distribution"):
-    price_data = pd.DataFrame({"Price ($)": np.random.randint(price_range[0], price_range[1], 50)})
-    st.bar_chart(price_data)
-
-# Data: Gross Real Estate GDP
-@st.cache_data
-def get_UN_data():
-    AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
-    df = pd.read_csv(AWS_BUCKET_URL + "/agri.csv.gz")
-    return df.set_index("Region")
-
-try:
-    df = get_UN_data()
-    countries = st.multiselect("Choose countries", list(df.index), ["United States of America", "Mexico", "Canada",])
-    if not countries:
-        st.error("Please select at least Two countries.")
-    else:
-        data = df.loc[countries]
-        data /= 1000000.0
-        st.subheader("Gross Real Estate GDP ($T)")
-        st.dataframe(data.sort_index())
+# Display results
+st.header("Investment Metrics")
+st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
+st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
+st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
+st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
+st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
+st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
+st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
+st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
 
 
+# Sensitivity Analysis
+def sensitivity_analysis(rent_income, property_price, down_payment, closing_costs, rehab_costs,
+                         taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc, rate, term):
+    """Perform sensitivity analysis on key variables like rent income and property price."""
+    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
+    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
 
-     
-        # Altair chart
-        data = data.T.reset_index()
-        data = pd.melt(data, id_vars=["index"]).rename(columns={"index": "year", "value": "Gross Agricultural Production ($B)"})
-        chart = alt.Chart(data).mark_area(opacity=0.3).encode(
-            x="year:T",
-            y=alt.Y("Gross Agricultural Production ($B):Q", stack=None),
-            color="Region:N",
-        )
-        st.altair_chart(chart, use_container_width=True)
-except URLError as e:
-    st.error(f"This demo requires internet access. Connection error: {e.reason}")
-
-
-
-
-
-# Dynamic Line Chart with Progress Bar
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-last_rows = np.random.randn(1, 1)
-chart = st.line_chart(last_rows)
-
-for i in range(1, 101):
-    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    status_text.text(f"{i}% complete")
-    chart.add_rows(new_rows)
-    progress_bar.progress(i)
-    last_rows = new_rows
-    time.sleep(0.05)
-
-progress_bar.empty()
-
-
-
-
-# Mapping
-@st.cache_data
-def from_data_file(filename):
-    url = "https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/%s" % filename
-    return pd.read_json(url)
-
-try:
-    ALL_LAYERS = {
-        "Bike rentals": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=200,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Bart stop exits": pdk.Layer(
-            "ScatterplotLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_color=[200, 30, 0, 160],
-            get_radius="[exits]",
-            radius_scale=0.05,
-        ),
-    }
-    st.sidebar.subheader("Map layers")
-    selected_layers = [
-        layer for layer_name, layer in ALL_LAYERS.items() if st.sidebar.checkbox(layer_name, True)
-    ]
-    if selected_layers:
-        st.pydeck_chart(
-            pdk.Deck(
-                map_style=None,
-                initial_view_state={"latitude": 37.76, "longitude": -122.4, "zoom": 11, "pitch": 50},
-                layers=selected_layers,
+    results = []
+    for rent in rent_range:
+        for price in price_range:
+            metrics = calculate_metrics(
+                price, rent, down_payment, closing_costs, rehab_costs,
+                taxes, insurance, utilities, maintenance, capex,
+                mgmt_perc, vacancy_perc, rate, term
             )
-        )
-    else:
-        st.error("Please choose at least one layer above.")
-except URLError as e:
-    st.error(f"Connection error: {e.reason}")
+            results.append({
+                "Rent Income ($)": rent,
+                "Property Price ($)": price,
+                "Cap Rate (%)": metrics["Cap Rate"],
+                "Cash Flow ($)": metrics["Cash Flow"]
+            })
+
+    return pd.DataFrame(results)
 
 
-
-
-
-# Function to generate mock data for California's growing cities
-@st.cache_data
-def california_investment_data():
-    data = pd.DataFrame({
-        "city": [
-            "San Francisco", "Los Angeles", "San Diego", "San Jose", "Fresno",
-            "Sacramento", "Long Beach", "Oakland", "Bakersfield", "Anaheim",
-            "Santa Ana", "Riverside", "Stockton", "Irvine", "Chula Vista",
-            "Fremont", "San Bernardino", "Modesto", "Fontana", "Oxnard",
-            "Moreno Valley", "Glendale", "Huntington Beach", "Santa Clarita", "Garden Grove"
-        ],
-        "lat": [
-            37.7749, 34.0522, 32.7157, 37.3382, 36.7378,
-            38.5816, 33.7701, 37.8044, 35.3733, 33.8366,
-            33.7455, 33.9806, 37.9577, 33.6846, 32.6401,
-            37.5485, 34.1083, 37.6391, 34.0922, 34.1975,
-            33.9425, 34.1425, 33.6595, 34.3917, 33.7743
-        ],
-        "lon": [
-            -122.4194, -118.2437, -117.1611, -121.8863, -119.7871,
-            -121.4944, -118.1937, -122.2711, -119.0187, -117.9145,
-            -117.8677, -117.3755, -121.2908, -117.8265, -117.0842,
-            -121.9886, -117.2898, -120.9969, -117.4350, -119.1771,
-            -117.2297, -118.2551, -117.9988, -118.5426, -117.9379
-        ],
-        "investment_value": [
-            80, 95, 85, 88, 75,
-            82, 78, 81, 74, 89,
-            83, 80, 76, 90, 79,
-            84, 77, 73, 76, 72,
-            70, 69, 86, 88, 68
-        ],
-    })
-    return data
-
-# Load the California investment data
-california_data = california_investment_data()
-
-# Display the raw data
-st.subheader("California Investment Data")
-st.dataframe(california_data)
-
-# Heat Map Layer
-heatmap_layer = pdk.Layer(
-    "HeatmapLayer",
-    data=california_data,
-    get_position=["lon", "lat"],
-    get_weight="investment_value",
-    radius=200,
-    opacity=0.8,
-    aggregation="MEAN",
+# Perform and display sensitivity analysis
+sensitivity_df = sensitivity_analysis(
+    annual_rent_income, property_price, down_payment, closing_costs, rehab_costs,
+    annual_property_taxes, annual_insurance, annual_utilities, maintenance_perc,
+    capex_perc, mgmt_perc, vacancy_perc, interest_rate, loan_term
 )
-
-# Scatterplot Layer (Optional for city markers)
-scatter_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=california_data,
-    get_position=["lon", "lat"],
-    get_radius=500,
-    get_color="[200, 30, 0, 160]",
-    pickable=True,
-)
-
-# Set the view state
-view_state = pdk.ViewState(
-    latitude=36.7783,  # Center latitude of California
-    longitude=-119.4179,  # Center longitude of California
-    zoom=6,
-    pitch=50,
-)
-
-# Render the map
-st.header("California Investment Heat Map")
-st.pydeck_chart(
-    pdk.Deck(
-        layers=[heatmap_layer, scatter_layer],
-        initial_view_state=view_state,
-        tooltip={
-            "html": "<b>City:</b> {city}<br><b>Investment Value:</b> {investment_value}",
-            "style": {"color": "white"}
-        },
-    )
-)
-
-# Highlight Best Cities to Invest
-st.subheader("Top 5 Cities to Invest")
-top_cities = california_data.nlargest(5, "investment_value")[["city", "investment_value"]]
-st.table(top_cities)
+cap_rate_pivot = sensitivity_df.pivot(index="Rent Income ($)", columns="Property Price ($)", values="Cap Rate (%)")
+st.write("Sensitivity Heatmap (Cap Rate)")
+st.dataframe(cap_rate_pivot)
 
 
+# Map Integration
+st.subheader("Investment Heatmap")
+city_data = pd.DataFrame({
+    "City": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"],
+    "Latitude": [34.0522, 37.7749, 32.7157, 38.5816, 37.3382],
+    "Longitude": [-118.2437, -122.4194, -117.1611, -121.4944, -121.8863],
+    "Value": [75, 85, 70, 65, 80]
+})
+city_data.rename(columns={"Latitude": "lat", "Longitude": "lon"}, inplace=True)
+st.map(city_data)
 
 
+# Downloadable Report
+def generate_report(data):
+    """Generate a downloadable CSV report."""
+    return data.to_csv(index=False).encode("utf-8")
 
 
-
-
-
-
-
-
-
-
-
-
-
-import streamlit as st
-import pandas as pd
-import pydeck as pdk
-import numpy as np
-
-# Mock advanced data for 25 cities in California
-@st.cache_data
-def get_advanced_data():
-    return pd.DataFrame({
-        "City": [
-            "Los Angeles", "San Diego", "San Jose", "San Francisco", "Fresno",
-            "Sacramento", "Long Beach", "Oakland", "Bakersfield", "Anaheim",
-            "Stockton", "Riverside", "Irvine", "Santa Ana", "Chula Vista",
-            "Fremont", "Santa Clarita", "San Bernardino", "Modesto", "Fontana",
-            "Oxnard", "Moreno Valley", "Glendale", "Huntington Beach", "Ontario"
-        ],
-        "Latitude": [
-            34.0522, 32.7157, 37.3382, 37.7749, 36.7378,
-            38.5816, 33.7701, 37.8044, 35.3733, 33.8366,
-            37.9577, 33.9806, 33.6846, 33.7455, 32.6401,
-            37.5485, 34.3917, 34.1083, 37.6391, 34.0922,
-            34.1975, 33.9425, 34.1425, 33.6595, 34.0633
-        ],
-        "Longitude": [
-            -118.2437, -117.1611, -121.8863, -122.4194, -119.7871,
-            -121.4944, -118.1937, -122.2711, -119.0187, -117.9145,
-            -121.2908, -117.3755, -117.8265, -117.8677, -117.0842,
-            -121.9886, -118.5426, -117.2898, -120.9969, -117.4350,
-            -119.1771, -117.2297, -118.2551, -117.9988, -117.6509
-        ],
-        "Population Growth (%)": np.random.uniform(0.5, 3.5, 25),
-        "Median Home Price ($)": np.random.randint(300000, 1500000, 25),
-        "Average Rental Yield (%)": np.random.uniform(2.5, 6.0, 25),
-        "Employment Rate (%)": np.random.uniform(80, 95, 25)
-    })
-
-# Load data
-data = get_advanced_data()
-
-# Sidebar filters
-st.sidebar.header("Filters")
-growth_filter = st.sidebar.slider("Population Growth (%)", 0.5, 3.5, (1.0, 3.0))
-rental_yield_filter = st.sidebar.slider("Rental Yield (%)", 2.5, 6.0, (3.0, 5.0))
-price_filter = st.sidebar.slider("Median Home Price ($)", 300000, 1500000, (500000, 1000000))
-
-# Apply filters
-filtered_data = data[
-    (data["Population Growth (%)"].between(*growth_filter)) &
-    (data["Average Rental Yield (%)"].between(*rental_yield_filter)) &
-    (data["Median Home Price ($)"].between(*price_filter))
-]
-
-# Heatmap Layer
-heatmap_layer = pdk.Layer(
-    "HeatmapLayer",
-    data=filtered_data,
-    get_position=["Longitude", "Latitude"],
-    get_weight="Population Growth (%)",
-    radius=300,
-    opacity=0.7,
-    aggregation="MEAN"
-)
-
-# Scatterplot Layer
-scatter_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=filtered_data,
-    get_position=["Longitude", "Latitude"],
-    get_radius=500,
-    get_color="[200, 30, 0, 160]",
-    pickable=True
-)
-
-# View State
-view_state = pdk.ViewState(
-    latitude=36.7783,
-    longitude=-119.4179,
-    zoom=6,
-    pitch=40
-)
-
-# Render Map
-st.header("California Advanced Real Estate Heatmap")
-st.pydeck_chart(pdk.Deck(
-    layers=[heatmap_layer, scatter_layer],
-    initial_view_state=view_state,
-    tooltip={
-        "html": "<b>City:</b> {City}<br>"
-                "<b>Population Growth:</b> {Population Growth (%)},<br>"
-                "<b>Median Price:</b> {Median Home Price ($)}",
-        "style": {"color": "white"}
-    }
-))
-
-# Show Filtered Table
-st.subheader("Filtered Data")
-st.dataframe(filtered_data)
-
+download_csv = generate_report(city_data)
+st.download_button(
+    label="Download Investment Report",
+    data=download_csv,
+    file_name="investment_report.csv",
+    mime="text/csv"
 
 
 
