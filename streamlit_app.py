@@ -395,425 +395,57 @@ def perform_sensitivity_analysis(rent_range, price_range, down_payment, closing_
     Perform sensitivity analysis for a range of rent and price combinations.
     """
     results = []
-
     for rent in rent_range:
         for price in price_range:
-            # Prepare financial details for the current combination
-            financial_details = {
-                "property_price": price,
-                "annual_rent_income": rent,
-                "down_payment": down_payment,
-                "closing_costs": closing_costs,
-                "rehab_costs": rehab_costs,
-                "annual_property_taxes": taxes,
-                "annual_insurance": insurance,
-                "annual_utilities": utilities,
-                "maintenance_perc": maintenance,
-                "capex_perc": capex,
-                "mgmt_perc": mgmt_perc,
-                "vacancy_perc": vacancy_perc,
-                "hoa_fees": hoa_fees,
-                "other_income": other_income,
-                "interest_rate": rate,
-                "loan_term": term,
-                "appreciation_rate": appreciation_rate,
-                "inflation_rate": inflation_rate,
-            }
-
-            # Calculate metrics for the current combination
-            metrics = calculate_metrics(financial_details)
-
-            # Append results for this combination
+            modified_details = financial_details.copy()
+            modified_details["annual_rent_income"] = rent
+            modified_details["property_price"] = price
+            metrics = calculate_metrics(modified_details)
             results.append({
                 "Rent Income ($)": rent,
                 "Property Price ($)": price,
-                "Cap Rate (%)": metrics.get("Cap Rate", 0),  # Default to 0 if not found
-                "Cash Flow ($)": metrics.get("Cash Flow", 0),  # Default to 0 if not found
-                "Break-Even Rent ($)": metrics.get("Break-Even Rent", None),  # Include new metrics if calculated
-                "ROI (%)": metrics.get("ROI", None),  # Include ROI if calculated
+                "Cap Rate (%)": metrics["Cap Rate"],
+                "Cash Flow ($)": metrics["Cash Flow"],
             })
 
     return pd.DataFrame(results)
 
 
-
-
-
-# Perform sensitivity analysis
-# Example usage
-rent_range = np.linspace(2000, 4000, 20)  # Example rent range
-price_range = np.linspace(100000, 500000, 20)  # Example property price range
-
-sensitivity_df = perform_sensitivity_analysis(
-    rent_range=rent_range,
-    price_range=price_range,
-    down_payment=50000,
-    closing_costs=5000,
-    rehab_costs=10000,
-    taxes=5000,
-    insurance=2000,
-    utilities=3000,
-    maintenance=10,
-    capex=10,
-    mgmt_perc=8,
-    vacancy_perc=5,
-    hoa_fees=100,
-    other_income=500,
-    rate=4.5,
-    term=30,
-    appreciation_rate=3,
-    inflation_rate=2
-)
-
-# Display sensitivity analysis
-st.dataframe(sensitivity_df)
-
-
-
-
-
-
-# Main application
+# Main function
 def main():
-    # Sidebar setup
+    st.title("Real Estate Investment Calculator")
+    st.write("Analyze your real estate investment with detailed metrics.")
+
+    # Sidebar Inputs
     location_details, property_details, financial_details = configure_sidebar()
 
-    # Extract financial details for calculation
-    metrics = calculate_metrics(
-        financial_details["property_price"],
-        financial_details["annual_rent_income"],
-        financial_details["down_payment"],
-        financial_details["closing_costs"],
-        financial_details["rehab_costs"],
-        financial_details["annual_property_taxes"],
-        financial_details["annual_insurance"],
-        financial_details["annual_utilities"],
-        financial_details["maintenance_perc"],
-        financial_details["capex_perc"],
-        financial_details["mgmt_perc"],
-        financial_details["vacancy_perc"],
-        financial_details["interest_rate"],
-        financial_details["loan_term"]
-    )
+    # Calculate Metrics
+    metrics = calculate_metrics(financial_details)
 
     # Display Metrics
     st.header("Investment Metrics")
-    for key, value in metrics.items():
-        st.write(f"**{key}:** ${value:,.2f}" if "($)" in key or "Payment" in key else f"**{key}:** {value:.2f}%")
+    for metric, value in metrics.items():
+        st.write(f"**{metric}:** ${value:,.2f}" if "($)" in metric else f"**{metric}:** {value:.2f}%")
 
-    # Perform sensitivity analysis
-    sensitivity_df = sensitivity_analysis(
-        financial_details["annual_rent_income"], financial_details["property_price"],
-        financial_details["down_payment"], financial_details["closing_costs"],
-        financial_details["rehab_costs"], financial_details["annual_property_taxes"],
-        financial_details["annual_insurance"], financial_details["annual_utilities"],
-        financial_details["maintenance_perc"], financial_details["capex_perc"],
-        financial_details["mgmt_perc"], financial_details["vacancy_perc"],
-        financial_details["interest_rate"], financial_details["loan_term"]
-    )
-
-    # Display sensitivity analysis results
+    # Perform Sensitivity Analysis
     st.header("Sensitivity Analysis")
     st.write("Explore how changes in rent and price affect key metrics.")
-    st.dataframe(sensitivity_df)
+    sensitivity_df = sensitivity_analysis(financial_details)
 
-# Run the app
+    # Plot the ROI Graph
+    st.subheader("ROI Analysis")
+    roi_chart = alt.Chart(sensitivity_df).mark_circle(size=60).encode(
+        x=alt.X("Property Price ($):Q"),
+        y=alt.Y("Rent Income ($):Q"),
+        size=alt.Size("Cap Rate (%)", legend=None),
+        color=alt.Color("Cash Flow ($):Q", scale=alt.Scale(scheme="blues")),
+        tooltip=["Property Price ($)", "Rent Income ($)", "Cap Rate (%)", "Cash Flow ($)"]
+    ).interactive()
+    st.altair_chart(roi_chart, use_container_width=True)
+
+
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-@st.cache_data
-def from_data_file(filename):
-    url = (
-        "https://raw.githubusercontent.com/streamlit/"
-        "example-data/master/hello/v1/%s" % filename
-    )
-    return pd.read_json(url)
-
-import streamlit as st
-import pydeck as pdk
-import pandas as pd
-import numpy as np
-from urllib.error import URLError
-
-
-# Function to simulate data file retrieval
-@st.cache_data
-def from_data_file(filename):
-    url = f"https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/{filename}"
-    try:
-        return pd.read_json(url)
-    except ValueError:
-        st.error(f"Error loading data from {url}. Ensure the file exists and is formatted correctly.")
-        return pd.DataFrame()
-
-
-# Sidebar configuration for map settings
-st.sidebar.subheader("Map Layers & Settings")
-user_lat = st.sidebar.number_input("Starting Latitude", value=37.76, step=0.01)
-user_lon = st.sidebar.number_input("Starting Longitude", value=-122.4, step=0.01)
-hex_radius = st.sidebar.slider("Hexagon Radius (meters)", min_value=100, max_value=1000, value=200, step=50)
-
-# Define layers for visualization
-try:
-    ALL_LAYERS = {
-        "VillaZone": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Residential": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Multifamily": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Retail": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Industrial Parks": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Schools": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Heatmap": pdk.Layer(
-            "HeatmapLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            get_weight="investment_potential" if "investment_potential" in from_data_file("bike_rental_stats.json").columns else None,
-            radius=500,
-        ),
-        "Bike Rentals": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=hex_radius,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Bart Stop Exits": pdk.Layer(
-            "ScatterplotLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_color=[200, 30, 0, 160],
-            get_radius="[exits]" if "exits" in from_data_file("bart_stop_stats.json").columns else 100,
-            radius_scale=0.05,
-        ),
-        "Bart Stop Names": pdk.Layer(
-            "TextLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_text="name" if "name" in from_data_file("bart_stop_stats.json").columns else "",
-            get_color=[0, 0, 0, 200],
-            get_size=10,
-            get_alignment_baseline="'bottom'",
-        ),
-        "Outbound Flow": pdk.Layer(
-            "ArcLayer",
-            data=from_data_file("bart_path_stats.json"),
-            get_source_position=["lon", "lat"],
-            get_target_position=["lon2", "lat2"],
-            get_source_color=[200, 30, 0, 160],
-            get_target_color=[200, 30, 0, 160],
-            auto_highlight=True,
-            width_scale=0.0001,
-            get_width="outbound" if "outbound" in from_data_file("bart_path_stats.json").columns else 1,
-            width_min_pixels=3,
-            width_max_pixels=30,
-        ),
-    }
-
-    # Select layers to display
-    st.sidebar.subheader("Layer Visibility")
-    selected_layers = [
-        layer
-        for layer_name, layer in ALL_LAYERS.items()
-        if st.sidebar.checkbox(layer_name, True)
-    ]
-
-    if selected_layers:
-        # Render the map with selected layers
-        st.pydeck_chart(
-            pdk.Deck(
-                map_style="mapbox://styles/mapbox/streets-v11",
-                initial_view_state={
-                    "latitude": user_lat,
-                    "longitude": user_lon,
-                    "zoom": 11,
-                    "pitch": 50,
-                },
-                layers=selected_layers,
-                tooltip={"html": "<b>Location:</b> {name}<br><b>Value:</b> {value}", "style": {"color": "white"}},
-            )
-        )
-    else:
-        st.error("Please choose at least one layer above.")
-
-except URLError as e:
-    st.error(
-        f"""
-        **This demo requires internet access.**
-        Connection error: {e.reason}
-        """
-    )
-
-
-
-
-
-
-
-
-
-
-# Bar Chart for Key Metrics
-chart = alt.Chart(comparison_df).mark_bar().encode(
-    x=alt.X("Metric", sort=None, title="Metric"),
-    y=alt.Y("Value", title="Value"),
-    tooltip=["Metric", "Value"]
-).interactive()
-st.altair_chart(chart, use_container_width=True)
-
-
-
-
-
-
-
-# Sensitivity Analysis
-st.subheader("Sensitivity Analysis")
-st.write("Explore how changes in key variables affect property performance.")
-
-# Sensitivity Analysis Example Data
-sensitivity_df = pd.DataFrame({
-    "Interest Rate (%)": [2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
-    "Monthly Payment ($)": [
-        calculate_metrics(property_price, annual_rent_income, annual_expenses, down_payment, rate, loan_term)[2]
-        for rate in [2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
-    ]
-})
-st.line_chart(sensitivity_df.set_index("Interest Rate (%)"))
-
-# AI Predictions
-st.subheader("AI-Powered Predictions")
-st.write("Leverage AI to forecast future returns, property appreciation, and investment performance.")
-
-# Placeholder for AI Model Integration
-st.write("**Predicted 5-Year Appreciation:** 12.5%")
-st.write("**Predicted Rental Growth Rate (Next 5 Years):** 4.2% per year")
-st.write("**Risk Assessment Score:** Low Risk (Score: 2.1/10)")
-
-# Generate Reports
-st.subheader("Downloadable Reports")
-if st.button("Generate Investment Report"):
-    # Placeholder for PDF generation function
-    st.success("Investment report has been generated and is ready for download!")
-    # st.download_button(label="Download Report", data=report_file, file_name="Investment_Report.pdf")
-
-
-
-
-
-
-
-# Visualization: Real Estate Price Distribution
-if st.checkbox("Show Price Distribution"):
-    price_data = pd.DataFrame({"Price ($)": np.random.randint(price_range[0], price_range[1], 50)})
-    st.bar_chart(price_data)
-
-# Data: Gross Real Estate GDP 
-@st.cache_data
-def get_UN_data():
-    AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
-    df = pd.read_csv(AWS_BUCKET_URL + "/agri.csv.gz")
-    return df.set_index("Region")
-
-try:
-    df = get_UN_data()
-    countries = st.multiselect("Choose countries", list(df.index), ["United States of America", "Mexico", "Canada",])
-    if not countries:
-        st.error("Please select at least Two countries.")
-    else:
-        data = df.loc[countries]
-        data /= 1000000.0
-        st.subheader("Gross Real Estate GDP ($T)")
-        st.dataframe(data.sort_index())
-
-        # Altair chart
-        data = data.T.reset_index()
-        data = pd.melt(data, id_vars=["index"]).rename(columns={"index": "year", "value": "Gross Agricultural Production ($B)"})
-        chart = alt.Chart(data).mark_area(opacity=0.3).encode(
-            x="year:T",
-            y=alt.Y("Gross Agricultural Production ($B):Q", stack=None),
-            color="Region:N",
-        )
-        st.altair_chart(chart, use_container_width=True)
-except URLError as e:
-    st.error(f"This demo requires internet access. Connection error: {e.reason}")
-
-
-
-# Dynamic Line Chart with Progress Bar
-progress_bar = st.sidebar.progress(0)
-status_text = st.sidebar.empty()
-last_rows = np.random.randn(1, 1)
-chart = st.line_chart(last_rows)
-
-for i in range(1, 101):
-    new_rows = last_rows[-1, :] + np.random.randn(5, 1).cumsum(axis=0)
-    status_text.text(f"{i}% complete")
-    chart.add_rows(new_rows)
-    progress_bar.progress(i)
-    last_rows = new_rows
-    time.sleep(0.05)
-
-progress_bar.empty()
-
-
 
 
 
