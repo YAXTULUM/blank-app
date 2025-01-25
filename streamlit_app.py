@@ -11,7 +11,7 @@ from urllib.error import URLError
 
 import streamlit as st
 
-# Title Section and Dropdown Menu
+# Add HTML and CSS to render properly in Streamlit
 st.markdown(
     """
     <style>
@@ -87,9 +87,7 @@ st.markdown(
 
         /* Dropdown Menu Styling */
         .dropdown-container {
-            position: absolute;
-            top: 20px;
-            right: 20px; /* Positioning the dropdown to the right-hand side */
+            position: relative;
             display: inline-block;
         }
 
@@ -100,9 +98,8 @@ st.markdown(
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             margin-top: 10px;
-            min-width: 220px; /* Slightly larger for better readability */
+            min-width: 220px;
             z-index: 1;
-            right: 0; /* Align the dropdown to the right */
         }
 
         .dropdown-content a {
@@ -130,23 +127,6 @@ st.markdown(
         .dropdown-arrow {
             margin-left: 5px;
             font-size: 12px;
-        }
-
-        /* Responsive Adjustments */
-        @media screen and (max-width: 768px) {
-            .dropdown-button {
-                font-size: 10px;
-                padding: 8px 12px;
-            }
-
-            .dropdown-content {
-                min-width: 180px; /* Adjust dropdown width for smaller screens */
-            }
-
-            .dropdown-content a {
-                font-size: 12px;
-                padding: 8px 15px;
-            }
         }
     </style>
 
