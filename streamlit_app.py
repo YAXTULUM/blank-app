@@ -245,82 +245,104 @@ import numpy as np
 
 # Sidebar configuration function
 def configure_sidebar():
-    """Sets up the sidebar and returns the user inputs."""
+    """Sets up the sidebar with expanded inputs and returns user data."""
     st.sidebar.header("Filters")
 
     # Location Details
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value="", key="location_address"),
-        "city": st.sidebar.text_input("City", value="", key="location_city"),
-        "state": st.sidebar.text_input("State", value="", key="location_state"),
-        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip"),
+        "address": st.sidebar.text_input("Address", value="", key="location_address_input"),
+        "city": st.sidebar.text_input("City", value="", key="location_city_input"),
+        "state": st.sidebar.text_input("State", value="", key="location_state_input"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip_input"),
+        "country": st.sidebar.text_input("Country", value="", key="location_country_input"),
+        "region": st.sidebar.text_input("Region", value="", key="location_region_input"),
+        "neighborhood": st.sidebar.text_input("Neighborhood", value="", key="location_neighborhood_input"),
     }
 
     # Property Details
     st.sidebar.subheader("Property Details")
     property_details = {
         "price_range": st.sidebar.slider(
-            "Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000, key="price_range"
+            "Price Range ($)", 50000, 10000000, (200000, 1500000), step=50000, key="price_range_slider"
         ),
-        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4), key="bedrooms"),
-        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3), key="bathrooms"),
+        "bedrooms": st.sidebar.slider("Bedrooms", 1, 15, (3, 5), key="bedrooms_slider"),
+        "bathrooms": st.sidebar.slider("Bathrooms", 1, 15, (2, 4), key="bathrooms_slider"),
         "area_range": st.sidebar.slider(
-            "Living Area (sq ft)", 500, 10000, (1000, 5000), step=100, key="area_range"
+            "Living Area (sq ft)", 500, 20000, (1500, 5000), step=100, key="area_range_slider"
         ),
         "land_area": st.sidebar.slider(
-            "Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500, key="land_area"
+            "Land Area (sq ft)", 1000, 100000, (5000, 30000), step=500, key="land_area_slider"
         ),
+        "property_type": st.sidebar.selectbox(
+            "Property Type", ["Single-Family", "Multi-Family", "Condo", "Townhouse", "Other"], key="property_type_select"
+        ),
+        "year_built": st.sidebar.slider("Year Built", 1900, 2025, 2000, key="year_built_slider"),
+        "garage": st.sidebar.radio("Garage", ["None", "1-Car", "2-Car", "3+ Car"], key="garage_radio"),
     }
 
     # Financial Details
     st.sidebar.header("Financial Details")
     financial_details = {
         "property_price": st.sidebar.number_input(
-            "Property Price ($)", value=300000, step=10000, key="property_price"
+            "Property Price ($)", value=300000, step=10000, key="property_price_input"
         ),
         "down_payment": st.sidebar.number_input(
-            "Down Payment ($)", value=60000, step=1000, key="down_payment"
+            "Down Payment ($)", value=60000, step=1000, key="down_payment_input"
         ),
         "closing_costs": st.sidebar.number_input(
-            "Closing Costs ($)", value=5000, step=500, key="closing_costs"
+            "Closing Costs ($)", value=5000, step=500, key="closing_costs_input"
         ),
         "rehab_costs": st.sidebar.number_input(
-            "Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs"
+            "Rehabilitation Costs ($)", value=10000, step=500, key="rehab_costs_input"
+        ),
+        "hoa_fees": st.sidebar.number_input(
+            "HOA Fees ($/Year)", value=0, step=100, key="hoa_fees_input"
         ),
         "annual_property_taxes": st.sidebar.number_input(
-            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes"
+            "Annual Property Taxes ($)", value=5000, step=500, key="annual_property_taxes_input"
         ),
         "annual_insurance": st.sidebar.number_input(
-            "Annual Insurance ($)", value=1200, step=100, key="annual_insurance"
+            "Annual Insurance ($)", value=1200, step=100, key="annual_insurance_input"
         ),
         "annual_utilities": st.sidebar.number_input(
-            "Annual Utilities ($)", value=3000, step=500, key="annual_utilities"
+            "Annual Utilities ($)", value=3000, step=500, key="annual_utilities_input"
         ),
         "maintenance_perc": st.sidebar.number_input(
-            "Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc"
+            "Maintenance (% of Rent)", value=10, step=1, key="maintenance_perc_input"
         ),
         "capex_perc": st.sidebar.number_input(
-            "Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc"
+            "Capital Expenditure (% of Rent)", value=10, step=1, key="capex_perc_input"
         ),
         "mgmt_perc": st.sidebar.number_input(
-            "Property Management (% of Rent)", value=8, step=1, key="mgmt_perc"
+            "Property Management (% of Rent)", value=8, step=1, key="mgmt_perc_input"
         ),
         "vacancy_perc": st.sidebar.number_input(
-            "Vacancy Rate (%)", value=5, step=1, key="vacancy_perc"
+            "Vacancy Rate (%)", value=5, step=1, key="vacancy_perc_input"
         ),
         "interest_rate": st.sidebar.number_input(
-            "Interest Rate (%)", value=4.5, step=0.1, key="interest_rate"
+            "Interest Rate (%)", value=4.5, step=0.1, key="interest_rate_input"
         ),
         "loan_term": st.sidebar.number_input(
-            "Loan Term (Years)", value=30, step=1, key="loan_term"
+            "Loan Term (Years)", value=30, step=1, key="loan_term_input"
         ),
         "annual_rent_income": st.sidebar.number_input(
-            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income"
+            "Annual Rent Income ($)", value=30000, step=1000, key="annual_rent_income_input"
+        ),
+        "additional_income": st.sidebar.number_input(
+            "Additional Income ($/Year)", value=0, step=500, key="additional_income_input"
+        ),
+        "depreciation": st.sidebar.number_input(
+            "Depreciation ($/Year)", value=0, step=500, key="depreciation_input"
         ),
     }
 
     return location_details, property_details, financial_details
+
+
+
+
+
 
 
 # Calculation function
