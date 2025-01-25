@@ -214,6 +214,12 @@ st.markdown(
 
 import streamlit as st
 
+
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+
 # Sidebar Filters
 st.sidebar.header("Filters")
 
@@ -241,13 +247,80 @@ rehab_costs = st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, s
 annual_property_taxes = st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500)
 annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
 annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500)
-maintenance_costs = st.sidebar.number_input("Maintenance Costs ($)", value=1500, step=100)
-miscellaneous_costs = st.sidebar.number_input("Miscellaneous Costs ($)", value=1000, step=100)
-capital_expenditures = st.sidebar.number_input("Capital Expenditures ($)", value=2000, step=100)
-property_management_fee = st.sidebar.number_input("Property Management Fee (%)", value=8.0, step=0.1)
-vacancy_rate = st.sidebar.number_input("Vacancy Rate (%)", value=5.0, step=0.1)
+maintenance_perc = st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1)
+capex_perc = st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1)
+mgmt_perc = st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1)
+vacancy_perc = st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1)
 interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
 loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
+annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
+
+# Calculate annual expenses as the sum of all cost components
+annual_expenses = (
+    annual_property_taxes +
+    annual_insurance +
+    annual_utilities +
+    (annual_rent_income * (maintenance_perc / 100)) +
+    (annual_rent_income * (capex_perc / 100)) +
+    (annual_rent_income * (mgmt_perc / 100)) +
+    (annual_rent_income * (vacancy_perc / 100))
+)
+
+# Calculation Function
+def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utilities,
+                      maintenance_perc, capex_perc, mgmt_perc, vacancy_perc, rate, term):
+    loan_amount = price - down
+    monthly_rate = rate / 100 / 12
+    num_payments = term * 12
+
+    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
+    annual_debt_service = monthly_payment * 12
+
+    operating_expenses = taxes + insurance + utilities + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
+    effective_gross_income = rent * (1 - vacancy_perc / 100)
+    noi = effective_gross_income - operating_expenses
+
+    cash_flow = noi - annual_debt_service
+    total_investment = down + closing + rehab
+
+    cap_rate = (noi / price) * 100
+    cash_on_cash = (cash_flow / total_investment) * 100
+
+    return {
+        "Monthly Payment": monthly_payment,
+        "Annual Debt Service": annual_debt_service,
+        "Operating Expenses": operating_expenses,
+        "Effective Gross Income": effective_gross_income,
+        "NOI": noi,
+        "Cash Flow": cash_flow,
+        "Cap Rate": cap_rate,
+        "Cash on Cash": cash_on_cash
+    }
+
+# Call Metrics Calculation
+metrics = calculate_metrics(
+    property_price, annual_rent_income, down_payment, closing_costs, rehab_costs,
+    annual_property_taxes, annual_insurance, annual_utilities, maintenance_perc,
+    capex_perc, mgmt_perc, vacancy_perc, interest_rate, loan_term
+)
+
+# Display Metrics
+st.header("Investment Metrics")
+st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
+st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
+st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
+st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
+st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
+st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
+st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
+st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
+
+
+
+
+
+
+
 
 # Income Inputs
 st.sidebar.subheader("Income and Loan Details")
@@ -757,6 +830,24 @@ def from_data_file(filename):
     )
     return pd.read_json(url)
 
+import streamlit as st
+import pydeck as pdk
+import pandas as pd
+import numpy as np
+from urllib.error import URLError
+
+
+# Function to simulate data file retrieval
+@st.cache_data
+def from_data_file(filename):
+    url = f"https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/{filename}"
+    try:
+        return pd.read_json(url)
+    except ValueError:
+        st.error(f"Error loading data from {url}. Ensure the file exists and is formatted correctly.")
+        return pd.DataFrame()
+
+
 # Sidebar configuration for map settings
 st.sidebar.subheader("Map Layers & Settings")
 user_lat = st.sidebar.number_input("Starting Latitude", value=37.76, step=0.01)
@@ -824,7 +915,7 @@ try:
             "HeatmapLayer",
             data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
-            get_weight="investment_potential",
+            get_weight="investment_potential" if "investment_potential" in from_data_file("bike_rental_stats.json").columns else None,
             radius=500,
         ),
         "Bike Rentals": pdk.Layer(
@@ -841,14 +932,14 @@ try:
             data=from_data_file("bart_stop_stats.json"),
             get_position=["lon", "lat"],
             get_color=[200, 30, 0, 160],
-            get_radius="[exits]",
+            get_radius="[exits]" if "exits" in from_data_file("bart_stop_stats.json").columns else 100,
             radius_scale=0.05,
         ),
         "Bart Stop Names": pdk.Layer(
             "TextLayer",
             data=from_data_file("bart_stop_stats.json"),
             get_position=["lon", "lat"],
-            get_text="name",
+            get_text="name" if "name" in from_data_file("bart_stop_stats.json").columns else "",
             get_color=[0, 0, 0, 200],
             get_size=10,
             get_alignment_baseline="'bottom'",
@@ -862,7 +953,7 @@ try:
             get_target_color=[200, 30, 0, 160],
             auto_highlight=True,
             width_scale=0.0001,
-            get_width="outbound",
+            get_width="outbound" if "outbound" in from_data_file("bart_path_stats.json").columns else 1,
             width_min_pixels=3,
             width_max_pixels=30,
         ),
@@ -901,4 +992,4 @@ except URLError as e:
         Connection error: {e.reason}
         """
     )
- 
+
