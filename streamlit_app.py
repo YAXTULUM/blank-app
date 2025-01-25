@@ -375,6 +375,12 @@ def calculate_metrics(financial_details):
         "Break-Even Rent": break_even_rent,
     }
 
+
+
+
+
+
+
 def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
@@ -382,7 +388,7 @@ def main():
     # Sidebar Inputs
     _, _, financial_details = configure_sidebar()
 
-   # Calculate Metrics
+    # Calculate Metrics
     try:
         metrics = calculate_metrics(financial_details)
         st.header("Investment Metrics")
@@ -394,9 +400,7 @@ def main():
         # Visualization 1: Bar Chart for Key Metrics
         st.subheader("Investment Metrics Visualization")
         bar_chart_data = metrics_df[
-            metrics_df["Metric"].isin(
-                ["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"]
-            )
+            metrics_df["Metric"].isin(["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"])
         ]
         bar_chart = alt.Chart(bar_chart_data).mark_bar().encode(
             x=alt.X("Metric", sort=None, title="Metric"),
@@ -430,18 +434,21 @@ def main():
     # Sensitivity Analysis
     if st.checkbox("Perform Sensitivity Analysis"):
         st.subheader("Sensitivity Analysis Results")
-        sensitivity_results = sensitivity_analysis(financial_details)
-        st.write(sensitivity_results)
+        try:
+            sensitivity_results = sensitivity_analysis(financial_details)
+            st.write(sensitivity_results)
 
-        # Visualization 3: Sensitivity Analysis Scatterplot
-        st.subheader("Sensitivity Analysis Visualization")
-        chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
-            x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
-            y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
-            color=alt.Color("Cap Rate (%):Q", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
-            tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
-        ).interactive()
-        st.altair_chart(chart, use_container_width=True)
+            # Visualization 3: Sensitivity Analysis Scatterplot
+            st.subheader("Sensitivity Analysis Visualization")
+            chart = alt.Chart(sensitivity_results).mark_circle(size=60).encode(
+                x=alt.X("Rent Income ($):Q", title="Rent Income ($)"),
+                y=alt.Y("Property Price ($):Q", title="Property Price ($)"),
+                color=alt.Color("Cap Rate (%)", scale=alt.Scale(scheme="viridis"), title="Cap Rate (%)"),
+                tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
+            ).interactive()
+            st.altair_chart(chart, use_container_width=True)
+        except Exception as e:
+            st.error(f"Error during sensitivity analysis: {e}")
 
 if __name__ == "__main__":
     main()
@@ -458,19 +465,20 @@ if __name__ == "__main__":
 
 def sensitivity_analysis(financial_details):
     """Perform sensitivity analysis on rent and property price."""
-    # Extract necessary inputs from financial_details
     try:
+        # Extract necessary inputs from financial_details
         rent_income = financial_details["annual_rent_income"]
         property_price = financial_details["property_price"]
     except KeyError as e:
         raise ValueError(f"Missing key in financial details: {e}")
 
     # Define ranges for sensitivity analysis
-    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
-    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
+    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)  # Rent Income varies by ±20%
+    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)  # Property Price varies by ±20%
 
     # Initialize results list
     results = []
+
     for rent in rent_range:
         for price in price_range:
             # Update financial details for each combination
@@ -488,11 +496,13 @@ def sensitivity_analysis(financial_details):
                     "Cash Flow ($)": metrics["Cash Flow"],
                 })
             except Exception as e:
-                st.warning(f"Error calculating metrics for Rent: {rent}, Price: {price}. Error: {e}")
+                # Log errors without interrupting the loop
+                st.warning(f"Error calculating metrics for Rent: ${rent:,.2f}, Price: ${price:,.2f}. Error: {e}")
                 continue
 
     # Convert results to a DataFrame
     return pd.DataFrame(results)
+
 
 
 
