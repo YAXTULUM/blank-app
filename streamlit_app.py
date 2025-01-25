@@ -228,9 +228,11 @@ st.markdown(
 ###########  Header End ############################
 
 
+
+# Utility function to load JSON data
 @st.cache_data
 def from_data_file(filename):
-    """Retrieve data from an online file and load it as a DataFrame."""
+    """Fetch data from a remote JSON file."""
     url = f"https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/{filename}"
     try:
         return pd.read_json(url)
@@ -238,65 +240,60 @@ def from_data_file(filename):
         st.error(f"Error loading data from {url}. Ensure the file exists and is formatted correctly.")
         return pd.DataFrame()
 
+# Sidebar configuration
+def configure_sidebar():
+    st.sidebar.header("Filters")
+    st.sidebar.subheader("Location Details")
+    location_details = {
+        "address": st.sidebar.text_input("Address", value=""),
+        "city": st.sidebar.text_input("City", value=""),
+        "state": st.sidebar.text_input("State", value=""),
+        "zip": st.sidebar.text_input("Zip Code", value="")
+    }
 
-# Sidebar configuration for filters
-st.sidebar.header("Filters")
+    st.sidebar.subheader("Property Details")
+    property_details = {
+        "price_range": st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000),
+        "bedrooms": st.sidebar.slider("Bedrooms", 1, 10, (2, 4)),
+        "bathrooms": st.sidebar.slider("Bathrooms", 1, 10, (1, 3)),
+        "area_range": st.sidebar.slider("Living Area (sq ft)", 500, 10000, (1000, 5000), step=100),
+        "land_area": st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500)
+    }
 
-# Location details inputs
-st.sidebar.subheader("Location Details")
-location_address = st.sidebar.text_input("Address", value="")
-location_city = st.sidebar.text_input("City", value="")
-location_state = st.sidebar.text_input("State", value="")
-location_zip = st.sidebar.text_input("Zip Code", value="")
+    st.sidebar.header("Financial Details")
+    financial_details = {
+        "property_price": st.sidebar.number_input("Property Price ($)", value=300000, step=10000),
+        "down_payment": st.sidebar.number_input("Down Payment ($)", value=60000, step=1000),
+        "closing_costs": st.sidebar.number_input("Closing Costs ($)", value=5000, step=500),
+        "rehab_costs": st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500),
+        "annual_property_taxes": st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500),
+        "annual_insurance": st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100),
+        "annual_utilities": st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500),
+        "maintenance_perc": st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1),
+        "capex_perc": st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1),
+        "mgmt_perc": st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1),
+        "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1),
+        "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1),
+        "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1),
+        "annual_rent_income": st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
+    }
 
-# Property details inputs
-st.sidebar.subheader("Property Details")
-price_range = st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000)
-bedrooms = st.sidebar.slider("Bedrooms", 1, 10, (2, 4))
-bathrooms = st.sidebar.slider("Bathrooms", 1, 10, (1, 3))
-area_range = st.sidebar.slider("Living Area (sq ft)", 500, 10000, (1000, 5000), step=100)
-land_area = st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (5000, 20000), step=500)
+    return location_details, property_details, financial_details
 
-# Financial details inputs
-st.sidebar.header("Financial Details")
-property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
-down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
-closing_costs = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
-rehab_costs = st.sidebar.number_input("Rehabilitation Costs ($)", value=10000, step=500)
-annual_property_taxes = st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500)
-annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
-annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500)
-maintenance_perc = st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1)
-capex_perc = st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1)
-mgmt_perc = st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1)
-vacancy_perc = st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1)
-interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
-loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
-annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
-
-# Calculate annual expenses
-annual_expenses = (
-    annual_property_taxes +
-    annual_insurance +
-    annual_utilities +
-    (annual_rent_income * (maintenance_perc / 100)) +
-    (annual_rent_income * (capex_perc / 100)) +
-    (annual_rent_income * (mgmt_perc / 100)) +
-    (annual_rent_income * (vacancy_perc / 100))
-)
-
-
-# Define the core calculation function
+# Function to calculate metrics
 def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utilities,
                       maintenance_perc, capex_perc, mgmt_perc, vacancy_perc, rate, term):
-    """Calculate financial metrics for a property investment."""
+    """Calculate key financial metrics."""
     loan_amount = price - down
     monthly_rate = rate / 100 / 12
     num_payments = term * 12
 
-    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
-    annual_debt_service = monthly_payment * 12
+    try:
+        monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
+    except ZeroDivisionError:
+        monthly_payment = 0
 
+    annual_debt_service = monthly_payment * 12
     operating_expenses = taxes + insurance + utilities + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
     effective_gross_income = rent * (1 - vacancy_perc / 100)
     noi = effective_gross_income - operating_expenses
@@ -304,8 +301,8 @@ def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utili
     cash_flow = noi - annual_debt_service
     total_investment = down + closing + rehab
 
-    cap_rate = (noi / price) * 100
-    cash_on_cash = (cash_flow / total_investment) * 100
+    cap_rate = (noi / price) * 100 if price > 0 else 0
+    cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
 
     return {
         "Monthly Payment": monthly_payment,
@@ -318,30 +315,10 @@ def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utili
         "Cash on Cash": cash_on_cash
     }
 
-
-# Perform calculations
-metrics = calculate_metrics(
-    property_price, annual_rent_income, down_payment, closing_costs, rehab_costs,
-    annual_property_taxes, annual_insurance, annual_utilities, maintenance_perc,
-    capex_perc, mgmt_perc, vacancy_perc, interest_rate, loan_term
-)
-
-# Display results
-st.header("Investment Metrics")
-st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
-st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
-st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
-st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
-st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
-st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
-st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
-st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
-
-
-# Sensitivity Analysis
+# Sensitivity analysis
 def sensitivity_analysis(rent_income, property_price, down_payment, closing_costs, rehab_costs,
                          taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc, rate, term):
-    """Perform sensitivity analysis on key variables like rent income and property price."""
+    """Perform sensitivity analysis on rent and price."""
     rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
     price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
 
@@ -362,42 +339,56 @@ def sensitivity_analysis(rent_income, property_price, down_payment, closing_cost
 
     return pd.DataFrame(results)
 
+# Main application
+def main():
+    # Sidebar setup
+    location_details, property_details, financial_details = configure_sidebar()
 
-# Perform and display sensitivity analysis
-sensitivity_df = sensitivity_analysis(
-    annual_rent_income, property_price, down_payment, closing_costs, rehab_costs,
-    annual_property_taxes, annual_insurance, annual_utilities, maintenance_perc,
-    capex_perc, mgmt_perc, vacancy_perc, interest_rate, loan_term
-)
-cap_rate_pivot = sensitivity_df.pivot(index="Rent Income ($)", columns="Property Price ($)", values="Cap Rate (%)")
-st.write("Sensitivity Heatmap (Cap Rate)")
-st.dataframe(cap_rate_pivot)
+    # Extract financial details for calculation
+    metrics = calculate_metrics(
+        financial_details["property_price"],
+        financial_details["annual_rent_income"],
+        financial_details["down_payment"],
+        financial_details["closing_costs"],
+        financial_details["rehab_costs"],
+        financial_details["annual_property_taxes"],
+        financial_details["annual_insurance"],
+        financial_details["annual_utilities"],
+        financial_details["maintenance_perc"],
+        financial_details["capex_perc"],
+        financial_details["mgmt_perc"],
+        financial_details["vacancy_perc"],
+        financial_details["interest_rate"],
+        financial_details["loan_term"]
+    )
 
+    # Display Metrics
+    st.header("Investment Metrics")
+    st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
+    st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
+    st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
+    st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
+    st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
+    st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
+    st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
+    st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
 
-# Map Integration
-st.subheader("Investment Heatmap")
-city_data = pd.DataFrame({
-    "City": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"],
-    "Latitude": [34.0522, 37.7749, 32.7157, 38.5816, 37.3382],
-    "Longitude": [-118.2437, -122.4194, -117.1611, -121.4944, -121.8863],
-    "Value": [75, 85, 70, 65, 80]
-})
-city_data.rename(columns={"Latitude": "lat", "Longitude": "lon"}, inplace=True)
-st.map(city_data)
+    # Perform sensitivity analysis
+    sensitivity_df = sensitivity_analysis(
+        financial_details["annual_rent_income"], financial_details["property_price"],
+        financial_details["down_payment"], financial_details["closing_costs"],
+        financial_details["rehab_costs"], financial_details["annual_property_taxes"],
+        financial_details["annual_insurance"], financial_details["annual_utilities"],
+        financial_details["maintenance_perc"], financial_details["capex_perc"],
+        financial_details["mgmt_perc"], financial_details["vacancy_perc"],
+        financial_details["interest_rate"], financial_details["loan_term"]
+    )
 
+    # Display sensitivity analysis results
+    st.header("Sensitivity Analysis")
+    st.write("Explore how changes in rent and price affect key metrics.")
+    st.dataframe(sensitivity_df)
 
-# Downloadable Report
-def generate_report(data):
-    """Generate a downloadable CSV report."""
-    return data.to_csv(index=False).encode("utf-8")
-
-
-download_csv = generate_report(city_data)
-st.download_button(
-    label="Download Investment Report",
-    data=download_csv,
-    file_name="investment_report.csv",
-    mime="text/csv"
-
-
-
+# Run the app
+if __name__ == "__main__":
+    main()
