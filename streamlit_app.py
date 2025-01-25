@@ -246,7 +246,12 @@ def load_data(filename):
         return pd.DataFrame()
 
 
-# Sidebar configuration function
+
+
+
+
+
+
 def configure_sidebar():
     """Sets up the sidebar and returns the user inputs."""
     st.sidebar.header("Filters")
@@ -254,10 +259,10 @@ def configure_sidebar():
     # Location Details
     st.sidebar.subheader("Location Details")
     location_details = {
-        "address": st.sidebar.text_input("Address", value="", key="location_address_sidebar"),
-        "city": st.sidebar.text_input("City", value="", key="location_city_sidebar"),
-        "state": st.sidebar.text_input("State", value="", key="location_state_sidebar"),
-        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip_sidebar"),
+        "address": st.sidebar.text_input("Address", value="", key="location_address_sidebar_1"),
+        "city": st.sidebar.text_input("City", value="", key="location_city_sidebar_1"),
+        "state": st.sidebar.text_input("State", value="", key="location_state_sidebar_1"),
+        "zip": st.sidebar.text_input("Zip Code", value="", key="location_zip_sidebar_1"),
     }
 
     # Property Details
@@ -305,6 +310,12 @@ def configure_sidebar():
     }
 
     return location_details, property_details, financial_details
+
+
+
+
+
+
 
 
 
