@@ -179,29 +179,7 @@ st.markdown(
  
  
 
-st.markdown(
-    """
-    <h1>VillaTerras AI Dashboard</h1>
-    <p style="font-size:12px; color:lightgrey;">
-        Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com - by Ekbalam
-    </p>
-    """,  # Properly closed
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
-    <div>
-        <h2>Key Features</h2>
-        <ul>
-            <li>Advanced Metrics</li>
-            <li>Property Analysis</li>
-            <li>Real Estate Trends</li>
-        </ul>
-    </div>
-    """,  # Properly closed
-    unsafe_allow_html=True
-)
+  <p>Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com -by Ekbalam</p>
 
 
 
