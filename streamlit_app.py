@@ -210,11 +210,6 @@ st.markdown(
 
 
 
-# Utility function to load JSON data
-import streamlit as st
-import pandas as pd
-import numpy as np
-from urllib.error import URLError
 
 # Utility function to load JSON data
 
