@@ -362,7 +362,12 @@ def calculate_metrics(financial_details):
     }
 
 
-# Main function
+
+
+
+
+
+# Main function  INVESTMENT CALCULATOR            WORKS  
 
 def main():
     st.title("Real Estate Investment Calculator")
@@ -391,11 +396,6 @@ if __name__ == "__main__":
 
 
 
-#  SECTION  #
-
-import streamlit as st
-import pandas as pd
-import numpy as np
 
 # Sensitivity Analysis Function
 def sensitivity_analysis(rent_income, property_price, down_payment, closing_costs, rehab_costs,
@@ -406,9 +406,12 @@ def sensitivity_analysis(rent_income, property_price, down_payment, closing_cost
     """
     rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
     price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
+
+    # Call helper function to compute sensitivity analysis results
     return perform_sensitivity_analysis(rent_range, price_range, down_payment, closing_costs, rehab_costs,
                                         taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc,
                                         hoa_fees, other_income, rate, term, appreciation_rate, inflation_rate)
+
 
 # Perform Sensitivity Analysis Function
 def perform_sensitivity_analysis(rent_range, price_range, down_payment, closing_costs, rehab_costs,
@@ -452,11 +455,12 @@ def perform_sensitivity_analysis(rent_range, price_range, down_payment, closing_
                 "Property Price ($)": price,
                 "Cap Rate (%)": metrics.get("Cap Rate", 0),  # Default to 0 if not found
                 "Cash Flow ($)": metrics.get("Cash Flow", 0),  # Default to 0 if not found
-                "Break-Even Rent ($)": metrics.get("Break-Even Rent", None),  # Include new metrics if calculated
-                "ROI (%)": metrics.get("ROI", None),  # Include ROI if calculated
+                "Break-Even Rent ($)": metrics.get("Break-Even Rent", None),
+                "Cash-on-Cash ROI (%)": metrics.get("Cash on Cash", 0),  # Renamed to match calculation
             })
 
     return pd.DataFrame(results)
+
 
 # Metrics Calculation Function
 def calculate_metrics(financial_details):
@@ -475,8 +479,8 @@ def calculate_metrics(financial_details):
     capex_perc = financial_details["capex_perc"]
     mgmt_perc = financial_details["mgmt_perc"]
     vacancy_perc = financial_details["vacancy_perc"]
-    hoa_fees = financial_details["hoa_fees"]
-    other_income = financial_details["other_income"]
+    hoa_fees = financial_details["hoa_fees"] * 12  # Annualize
+    other_income = financial_details["other_income"] * 12  # Annualize
     rate = financial_details["interest_rate"]
     term = financial_details["loan_term"]
 
@@ -490,7 +494,7 @@ def calculate_metrics(financial_details):
         monthly_payment = 0
 
     annual_debt_service = monthly_payment * 12
-    operating_expenses = taxes + insurance + utilities + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100) + hoa_fees
+    operating_expenses = taxes + insurance + utilities + hoa_fees + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
     effective_gross_income = rent * (1 - vacancy_perc / 100) + other_income
     noi = effective_gross_income - operating_expenses
 
@@ -499,7 +503,10 @@ def calculate_metrics(financial_details):
 
     cap_rate = (noi / price) * 100 if price > 0 else 0
     cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
-    break_even_rent = (operating_expenses + annual_debt_service) / (1 - vacancy_perc / 100)
+    try:
+        break_even_rent = (operating_expenses + annual_debt_service) / (1 - vacancy_perc / 100)
+    except ZeroDivisionError:
+        break_even_rent = 0
 
     return {
         "Monthly Payment": monthly_payment,
@@ -513,104 +520,143 @@ def calculate_metrics(financial_details):
         "Break-Even Rent": break_even_rent,
     }
 
+
+
 # Main Function
 def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with advanced metrics and sensitivity analysis.")
 
-    # Example inputs for sensitivity analysis
-    rent_income = 30000
-    property_price = 300000
-    down_payment = 60000
-    closing_costs = 5000
-    rehab_costs = 10000
-    taxes = 5000
-    insurance = 1200
-    utilities = 3000
-    maintenance = 10
-    capex = 10
-    mgmt_perc = 8
-    vacancy_perc = 5
-    hoa_fees = 1000
-    other_income = 500
-    rate = 4.5
-    term = 30
+    # Sidebar for User Inputs
+    st.sidebar.header("Input Parameters")
+    rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
+    property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
+    down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=5000)
+    closing_costs = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
+    rehab_costs = st.sidebar.number_input("Rehab Costs ($)", value=10000, step=1000)
+    taxes = st.sidebar.number_input("Annual Property Taxes ($)", value=5000, step=500)
+    insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
+    utilities = st.sidebar.number_input("Annual Utilities ($)", value=3000, step=500)
+    maintenance = st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1)
+    capex = st.sidebar.number_input("Capital Expenditures (% of Rent)", value=10, step=1)
+    mgmt_perc = st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1)
+    vacancy_perc = st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1)
+    hoa_fees = st.sidebar.number_input("HOA Fees (Monthly $)", value=1000, step=50)
+    other_income = st.sidebar.number_input("Other Income (Monthly $)", value=500, step=50)
+    rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
+    term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
+    appreciation_rate = st.sidebar.number_input("Appreciation Rate (%)", value=3, step=0.1)
+    inflation_rate = st.sidebar.number_input("Inflation Rate (%)", value=2, step=0.1)
 
-    # Perform sensitivity analysis
+    # Perform Sensitivity Analysis
     st.subheader("Sensitivity Analysis Results")
-    sensitivity_results = sensitivity_analysis(
-        rent_income, property_price, down_payment, closing_costs, rehab_costs,
-        taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc,
-        hoa_fees, other_income, rate, term, appreciation_rate=3, inflation_rate=2
-    )
-    st.dataframe(sensitivity_results)
+    try:
+        sensitivity_results = sensitivity_analysis(
+            rent_income, property_price, down_payment, closing_costs, rehab_costs,
+            taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc,
+            hoa_fees, other_income, rate, term, appreciation_rate=appreciation_rate, inflation_rate=inflation_rate
+        )
+        st.write("The table below shows the sensitivity of key financial metrics to variations in rent income and property price.")
+        st.dataframe(sensitivity_results)
 
+    except Exception as e:
+        st.error(f"An error occurred while performing the sensitivity analysis: {e}")
+
+if __name__ == "__main__":
+    main()
+
+# Perform Sensitivity Analysis
+# Example usage
+rent_range = np.linspace(2000, 4000, 20)  # Example rent range
+price_range = np.linspace(100000, 500000, 20)  # Example property price range
+
+try:
+    # Perform sensitivity analysis
+    sensitivity_df = perform_sensitivity_analysis(
+        rent_range=rent_range,
+        price_range=price_range,
+        down_payment=50000,
+        closing_costs=5000,
+        rehab_costs=10000,
+        taxes=5000,
+        insurance=2000,
+        utilities=3000,
+        maintenance=10,
+        capex=10,
+        mgmt_perc=8,
+        vacancy_perc=5,
+        hoa_fees=100,
+        other_income=500,
+        rate=4.5,
+        term=30,
+        appreciation_rate=3,
+        inflation_rate=2
+    )
+
+    # Check if the resulting DataFrame is valid
+    if not sensitivity_df.empty:
+        # Format key columns for clarity
+        sensitivity_df["Rent Income ($)"] = sensitivity_df["Rent Income ($)"].map("${:,.2f}".format)
+        sensitivity_df["Property Price ($)"] = sensitivity_df["Property Price ($)"].map("${:,.2f}".format)
+        sensitivity_df["Cap Rate (%)"] = sensitivity_df["Cap Rate (%)"].map("{:.2f}%".format)
+        sensitivity_df["Cash Flow ($)"] = sensitivity_df["Cash Flow ($)"].map("${:,.2f}".format)
+        sensitivity_df["Break-Even Rent ($)"] = sensitivity_df["Break-Even Rent ($)"].map("${:,.2f}".format)
+
+        # Display results as a dataframe
+        st.subheader("Sensitivity Analysis Results")
+        st.dataframe(sensitivity_df)
+
+        # Optional: Add a heatmap or visualization
+        st.subheader("Sensitivity Analysis Visualization")
+        heatmap = alt.Chart(sensitivity_df).mark_rect().encode(
+            x=alt.X("Rent Income ($):N", title="Rent Income"),
+            y=alt.Y("Property Price ($):N", title="Property Price"),
+            color=alt.Color("Cap Rate (%):Q", title="Cap Rate (%)", scale=alt.Scale(scheme="blues")),
+            tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)", "Break-Even Rent ($)"]
+        ).properties(width=800, height=400)
+        st.altair_chart(heatmap, use_container_width=True)
+    else:
+        st.error("The sensitivity analysis returned an empty DataFrame. Please check your input parameters.")
+
+except Exception as e:
+    st.error(f"An error occurred while performing the sensitivity analysis: {e}")
+
+
+
+
+
+
+# Main application
+def main():
+    # Sidebar setup to gather input details
+    location_details, property_details, financial_details = configure_sidebar()
+
+    # Extract financial details and calculate metrics
+    try:
+        metrics = calculate_metrics(financial_details)
+
+        # Display Metrics
+        st.header("Investment Metrics")
+        st.write("The key metrics for your real estate investment are calculated below:")
+        for key, value in metrics.items():
+            if "($)" in key or "Payment" in key or "Rent" in key:
+                st.write(f"**{key}:** ${value:,.2f}")
+            else:
+                st.write(f"**{key}:** {value:.2f}%")
+
+    except Exception as e:
+        st.error(f"An error occurred while calculating metrics: {e}")
 
 if __name__ == "__main__":
     main()
 
 
 
+
+
 # Perform sensitivity analysis
-# Example usage
-rent_range = np.linspace(2000, 4000, 20)  # Example rent range
-price_range = np.linspace(100000, 500000, 20)  # Example property price range
-
-sensitivity_df = perform_sensitivity_analysis(
-    rent_range=rent_range,
-    price_range=price_range,
-    down_payment=50000,
-    closing_costs=5000,
-    rehab_costs=10000,
-    taxes=5000,
-    insurance=2000,
-    utilities=3000,
-    maintenance=10,
-    capex=10,
-    mgmt_perc=8,
-    vacancy_perc=5,
-    hoa_fees=100,
-    other_income=500,
-    rate=4.5,
-    term=30,
-    appreciation_rate=3,
-    inflation_rate=2
-)
-
-# Display sensitivity analysis
-st.dataframe(sensitivity_df)
-
-
-
-# Main application
-def main():
-    # Sidebar setup
-    location_details, property_details, financial_details = configure_sidebar()
-
-    # Extract financial details for calculation
-    metrics = calculate_metrics(
-        financial_details["property_price"],
-        financial_details["annual_rent_income"],
-        financial_details["down_payment"],
-        financial_details["closing_costs"],
-        financial_details["rehab_costs"],
-        financial_details["annual_property_taxes"],
-        financial_details["annual_insurance"],
-        financial_details["annual_utilities"],
-        financial_details["maintenance_perc"],
-        financial_details["capex_perc"],
-        financial_details["mgmt_perc"],
-        financial_details["vacancy_perc"],
-        financial_details["interest_rate"],
-        financial_details["loan_term"]
-    )
-
-    # Display Metrics
-    st.header("Investment Metrics")
-    for key, value in metrics.items():
-        st.write(f"**{key}:** ${value:,.2f}" if "($)" in key or "Payment" in key else f"**{key}:** {value:.2f}%")
-
-    # Perform sensitivity analysis
+try:
+    # Call the sensitivity analysis function
     sensitivity_df = sensitivity_analysis(
         financial_details["annual_rent_income"], financial_details["property_price"],
         financial_details["down_payment"], financial_details["closing_costs"],
@@ -618,17 +664,37 @@ def main():
         financial_details["annual_insurance"], financial_details["annual_utilities"],
         financial_details["maintenance_perc"], financial_details["capex_perc"],
         financial_details["mgmt_perc"], financial_details["vacancy_perc"],
-        financial_details["interest_rate"], financial_details["loan_term"]
+        financial_details["hoa_fees"], financial_details["other_income"],
+        financial_details["interest_rate"], financial_details["loan_term"],
+        appreciation_rate=financial_details.get("appreciation_rate", 3),
+        inflation_rate=financial_details.get("inflation_rate", 2)
     )
 
     # Display sensitivity analysis results
-    st.header("Sensitivity Analysis")
-    st.write("Explore how changes in rent and price affect key metrics.")
-    st.dataframe(sensitivity_df)
+    if not sensitivity_df.empty:
+        st.header("Sensitivity Analysis")
+        st.write("Explore how changes in rent and price affect key metrics.")
+        st.dataframe(sensitivity_df)
+
+        # Optional: Add a heatmap visualization for better insights
+        st.subheader("Sensitivity Analysis Visualization")
+        heatmap = alt.Chart(sensitivity_df).mark_rect().encode(
+            x=alt.X("Rent Income ($):Q", title="Rent Income"),
+            y=alt.Y("Property Price ($):Q", title="Property Price"),
+            color=alt.Color("Cap Rate (%):Q", title="Cap Rate (%)", scale=alt.Scale(scheme="greens")),
+            tooltip=["Rent Income ($)", "Property Price ($)", "Cap Rate (%)", "Cash Flow ($)"]
+        ).properties(width=800, height=400)
+        st.altair_chart(heatmap, use_container_width=True)
+    else:
+        st.error("No results were generated for the sensitivity analysis. Please check your inputs.")
+
+except Exception as e:
+    st.error(f"An error occurred during the sensitivity analysis: {e}")
 
 # Run the app
 if __name__ == "__main__":
     main()
+
 
 
 
