@@ -373,3 +373,205 @@ def main():
 # Run the app
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+
+
+
+
+@st.cache_data
+def from_data_file(filename):
+    url = (
+        "https://raw.githubusercontent.com/streamlit/"
+        "example-data/master/hello/v1/%s" % filename
+    )
+    return pd.read_json(url)
+
+import streamlit as st
+import pydeck as pdk
+import pandas as pd
+import numpy as np
+from urllib.error import URLError
+
+
+# Function to simulate data file retrieval
+@st.cache_data
+def from_data_file(filename):
+    url = f"https://raw.githubusercontent.com/streamlit/example-data/master/hello/v1/{filename}"
+    try:
+        return pd.read_json(url)
+    except ValueError:
+        st.error(f"Error loading data from {url}. Ensure the file exists and is formatted correctly.")
+        return pd.DataFrame()
+
+
+# Sidebar configuration for map settings
+st.sidebar.subheader("Map Layers & Settings")
+user_lat = st.sidebar.number_input("Starting Latitude", value=37.76, step=0.01)
+user_lon = st.sidebar.number_input("Starting Longitude", value=-122.4, step=0.01)
+hex_radius = st.sidebar.slider("Hexagon Radius (meters)", min_value=100, max_value=1000, value=200, step=50)
+
+# Define layers for visualization
+try:
+    ALL_LAYERS = {
+        "VillaZone": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=hex_radius,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+        "Residential": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=hex_radius,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+        "Multifamily": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=hex_radius,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+        "Retail": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=hex_radius,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+        "Industrial Parks": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=hex_radius,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+        "Schools": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=hex_radius,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+        "Heatmap": pdk.Layer(
+            "HeatmapLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            get_weight="investment_potential" if "investment_potential" in from_data_file("bike_rental_stats.json").columns else None,
+            radius=500,
+        ),
+        "Bike Rentals": pdk.Layer(
+            "HexagonLayer",
+            data=from_data_file("bike_rental_stats.json"),
+            get_position=["lon", "lat"],
+            radius=hex_radius,
+            elevation_scale=4,
+            elevation_range=[0, 1000],
+            extruded=True,
+        ),
+        "Bart Stop Exits": pdk.Layer(
+            "ScatterplotLayer",
+            data=from_data_file("bart_stop_stats.json"),
+            get_position=["lon", "lat"],
+            get_color=[200, 30, 0, 160],
+            get_radius="[exits]" if "exits" in from_data_file("bart_stop_stats.json").columns else 100,
+            radius_scale=0.05,
+        ),
+        "Bart Stop Names": pdk.Layer(
+            "TextLayer",
+            data=from_data_file("bart_stop_stats.json"),
+            get_position=["lon", "lat"],
+            get_text="name" if "name" in from_data_file("bart_stop_stats.json").columns else "",
+            get_color=[0, 0, 0, 200],
+            get_size=10,
+            get_alignment_baseline="'bottom'",
+        ),
+        "Outbound Flow": pdk.Layer(
+            "ArcLayer",
+            data=from_data_file("bart_path_stats.json"),
+            get_source_position=["lon", "lat"],
+            get_target_position=["lon2", "lat2"],
+            get_source_color=[200, 30, 0, 160],
+            get_target_color=[200, 30, 0, 160],
+            auto_highlight=True,
+            width_scale=0.0001,
+            get_width="outbound" if "outbound" in from_data_file("bart_path_stats.json").columns else 1,
+            width_min_pixels=3,
+            width_max_pixels=30,
+        ),
+    }
+
+    # Select layers to display
+    st.sidebar.subheader("Layer Visibility")
+    selected_layers = [
+        layer
+        for layer_name, layer in ALL_LAYERS.items()
+        if st.sidebar.checkbox(layer_name, True)
+    ]
+
+    if selected_layers:
+        # Render the map with selected layers
+        st.pydeck_chart(
+            pdk.Deck(
+                map_style="mapbox://styles/mapbox/streets-v11",
+                initial_view_state={
+                    "latitude": user_lat,
+                    "longitude": user_lon,
+                    "zoom": 11,
+                    "pitch": 50,
+                },
+                layers=selected_layers,
+                tooltip={"html": "<b>Location:</b> {name}<br><b>Value:</b> {value}", "style": {"color": "white"}},
+            )
+        )
+    else:
+        st.error("Please choose at least one layer above.")
+
+except URLError as e:
+    st.error(
+        f"""
+        **This demo requires internet access.**
+        Connection error: {e.reason}
+        """
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
