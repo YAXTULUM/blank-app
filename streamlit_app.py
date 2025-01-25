@@ -59,6 +59,10 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 ###########  Header End ############################
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+
 # --- Sidebar Configuration ---
 def configure_sidebar():
     st.sidebar.header("Filters")
@@ -114,10 +118,13 @@ def main():
     st.title("Real Estate Investment Calculator")
     st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
 
+    # Sidebar Inputs
     location_details, property_details, financial_details = configure_sidebar()
 
-    st.subheader("Debug: Financial Details")
+    # Debugging: Display Financial Details
+    st.subheader("📊 Debug: Financial Details")
     st.json(financial_details)
+
 
 if __name__ == "__main__":
     main()
