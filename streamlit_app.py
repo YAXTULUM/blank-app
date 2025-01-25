@@ -386,11 +386,18 @@ def sensitivity_analysis(rent_income, property_price, down_payment, closing_cost
     rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
     price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
 
+def perform_sensitivity_analysis(rent_range, price_range, down_payment, closing_costs, rehab_costs,
+                                 taxes, insurance, utilities, maintenance, capex, mgmt_perc, vacancy_perc,
+                                 hoa_fees, other_income, rate, term, appreciation_rate, inflation_rate):
+    """
+    Perform sensitivity analysis for a range of rent and price combinations.
+    """
     results = []
+
     for rent in rent_range:
         for price in price_range:
-            # Calculate metrics for each combination of rent and price
-            metrics = calculate_metrics({
+            # Prepare financial details for the current combination
+            financial_details = {
                 "property_price": price,
                 "annual_rent_income": rent,
                 "down_payment": down_payment,
@@ -409,48 +416,55 @@ def sensitivity_analysis(rent_income, property_price, down_payment, closing_cost
                 "loan_term": term,
                 "appreciation_rate": appreciation_rate,
                 "inflation_rate": inflation_rate,
-            })
+            }
+
+            # Calculate metrics for the current combination
+            metrics = calculate_metrics(financial_details)
+
+            # Append results for this combination
             results.append({
                 "Rent Income ($)": rent,
                 "Property Price ($)": price,
-                "Cap Rate (%)": metrics["Cap Rate"],
-                "Cash Flow ($)": metrics["Cash Flow"],
-                "Break-Even Rent ($)": metrics.get("Break-Even Rent", None),  # Include new metrics
-                "ROI (%)": metrics.get("ROI", None),
+                "Cap Rate (%)": metrics.get("Cap Rate", 0),  # Default to 0 if not found
+                "Cash Flow ($)": metrics.get("Cash Flow", 0),  # Default to 0 if not found
+                "Break-Even Rent ($)": metrics.get("Break-Even Rent", None),  # Include new metrics if calculated
+                "ROI (%)": metrics.get("ROI", None),  # Include ROI if calculated
             })
 
     return pd.DataFrame(results)
 
 
+
+
+
 # Perform sensitivity analysis
-sensitivity_df = sensitivity_analysis(
-    rent_income=30000,  # Example annual rent income
-    property_price=300000,  # Example property price
-    down_payment=60000,
+# Example usage
+rent_range = np.linspace(2000, 4000, 20)  # Example rent range
+price_range = np.linspace(100000, 500000, 20)  # Example property price range
+
+sensitivity_df = perform_sensitivity_analysis(
+    rent_range=rent_range,
+    price_range=price_range,
+    down_payment=50000,
     closing_costs=5000,
     rehab_costs=10000,
     taxes=5000,
-    insurance=1200,
+    insurance=2000,
     utilities=3000,
     maintenance=10,
     capex=10,
     mgmt_perc=8,
     vacancy_perc=5,
-    hoa_fees=0,
-    other_income=0,
+    hoa_fees=100,
+    other_income=500,
     rate=4.5,
     term=30,
-    appreciation_rate=3.0,
-    inflation_rate=2.0,
+    appreciation_rate=3,
+    inflation_rate=2
 )
 
-# Display sensitivity analysis results
-st.header("Sensitivity Analysis")
-st.write("Explore how changes in rent and price affect key metrics.")
+# Display sensitivity analysis
 st.dataframe(sensitivity_df)
-
-
-
 
 
 
