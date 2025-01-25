@@ -9,11 +9,11 @@ from urllib.error import URLError
 
 ###########  Header Start ############################
 
-import streamlit as st
+ 
 
 import streamlit as st
 
-import streamlit as st
+ 
 
 # Title Section and Dropdown Menu
 st.markdown(
@@ -69,28 +69,31 @@ st.markdown(
             color: rgba(255, 255, 255, 0.9);
         }
 
-  /* Dropdown Button Styling */
+        /* Dropdown Button Styling */
         .dropdown-button {
-            background-color: #007BFF;
+            background-color: #b3cfed;
             color: white;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.22);
+            box-shadow: 0 4px 6px rgba(0, 0, 0.44, 0.55);
             transition: all 0.3s ease-in-out;
+            text-align: center;
         }
 
-        .dropdown-button:hover {
+     .dropdown-button:hover {
             background-color: #0056b3;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
         /* Dropdown Menu Styling */
         .dropdown-container {
-            position: relative;
+            position: absolute;
+            top: 20px;
+            left: 20px; /* Positioning the dropdown to the right-hand side */
             display: inline-block;
         }
 
@@ -101,9 +104,9 @@ st.markdown(
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             margin-top: 10px;
-            min-width: 220px;
+            min-width: 220px; /* Slightly larger for better readability */
             z-index: 1;
-            right: 0;
+            right: 0; /* Align the dropdown to the right */
         }
 
         .dropdown-content a {
@@ -122,22 +125,36 @@ st.markdown(
             color: #0056b3;
         }
 
-        /* Show dropdown content when toggled */
-        .dropdown-container.active .dropdown-content {
+        /* Show the dropdown content on hover */
+        .dropdown-container:hover .dropdown-content {
             display: block;
         }
-    </style>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const dropdownButton = document.querySelector(".dropdown-button");
-            const dropdownContainer = document.querySelector(".dropdown-container");
+        /* Dropdown Arrow Styling */
+        .dropdown-arrow {
+            margin-left: 5px;
+            font-size: 12px;
+        }
 
-            dropdownButton.addEventListener("click", function() {
-                dropdownContainer.classList.toggle("active");
-            });
-        });
-    </script>
+        /* Responsive Adjustments */
+        @media screen and (max-width: 768px) {
+            .dropdown-button {
+                font-size: 10px;
+                padding: 8px 12px;
+            }
+
+            .dropdown-content {
+                min-width: 180px; /* Adjust dropdown width for smaller screens */
+            }
+
+            .dropdown-content a {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+        }
+  </style>
+
+
 
     <!-- Dropdown Menu -->
     <div class="dropdown-container">
@@ -162,7 +179,19 @@ st.markdown(
         <h2>Ai Real Estate Agent | Assistant</h2>
         <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
         <p>All Real Estate Knowledge in One Place.</p>
-    </div>
+        
+ 
+ 
+
+  <p>Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com</p>
+
+
+ 
+    <p style="font-size:12px; color:lightgrey;">
+      Written by Ekbalam.
+    </p> 
+
+
     """,
     unsafe_allow_html=True
 )
