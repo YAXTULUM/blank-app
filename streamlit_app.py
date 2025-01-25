@@ -256,7 +256,7 @@ if st.checkbox("Show Price Distribution"):
     price_data = pd.DataFrame({"Price ($)": np.random.randint(price_range[0], price_range[1], 50)})
     st.bar_chart(price_data)
 
-# Data: Gross Agricultural Production
+# Data: Gross Real Estate GDP
 @st.cache_data
 def get_UN_data():
     AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
@@ -274,6 +274,9 @@ try:
         st.subheader("Gross Real Estate GDP ($T)")
         st.dataframe(data.sort_index())
 
+
+
+     
         # Altair chart
         data = data.T.reset_index()
         data = pd.melt(data, id_vars=["index"]).rename(columns={"index": "year", "value": "Gross Agricultural Production ($B)"})
@@ -285,6 +288,10 @@ try:
         st.altair_chart(chart, use_container_width=True)
 except URLError as e:
     st.error(f"This demo requires internet access. Connection error: {e.reason}")
+
+
+
+
 
 # Dynamic Line Chart with Progress Bar
 progress_bar = st.sidebar.progress(0)
@@ -301,6 +308,9 @@ for i in range(1, 101):
     time.sleep(0.05)
 
 progress_bar.empty()
+
+
+
 
 # Mapping
 @st.cache_data
