@@ -172,10 +172,15 @@ st.markdown(
     <!-- Title Section -->
     <div class="title-section">
         <h1>VillaTerras Ai</h1>
-        <h2>Real Estate Agent Assistant</h2>
+        <h2>Ai Real Estate Agent | Assistant</h2>
         <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
         <p>All Real Estate Knowledge in One Place.</p>
-        <p>Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com -by Ekbalam</p>
+        
+      <p style="font-size: 0.9em; color: lightgrey;">
+    Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com </p> <p style="font-size: 0.9em; color: lightgrey;"> - by Ekbalam
+</p>
+
+
     </div>
     """,
     unsafe_allow_html=True
