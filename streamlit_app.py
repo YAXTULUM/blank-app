@@ -176,7 +176,16 @@ st.markdown(
         <p><strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
         <p>All Real Estate Knowledge in One Place.</p>
         
-     <p>Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com -by Ekbalam</p>
+ 
+
+st.markdown(
+    """
+    <p style="font-size:12px; color:lightgrey;">
+        Analyze, compare, and manage properties with advanced metrics and tools, all with VillaTerras.com - by Ekbalam
+    </p>
+    """,
+    unsafe_allow_html=True
+)
 
 
     </div>
