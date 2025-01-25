@@ -652,7 +652,7 @@ try:
     ALL_LAYERS = {
         "VillaZone": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("villa_zone_stats.json"),
+            data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
             radius=hex_radius,
             elevation_scale=4,
@@ -661,7 +661,7 @@ try:
         ),
         "Residential": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("residential_zone_stats.json"),
+            data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
             radius=hex_radius,
             elevation_scale=4,
@@ -670,7 +670,7 @@ try:
         ),
         "Multifamily": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("multifamily_zone_stats.json"),
+            data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
             radius=hex_radius,
             elevation_scale=4,
@@ -679,7 +679,7 @@ try:
         ),
         "Retail": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("retail_zone_stats.json"),
+            data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
             radius=hex_radius,
             elevation_scale=4,
@@ -688,7 +688,7 @@ try:
         ),
         "Industrial Parks": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("industrial_parks_stats.json"),
+            data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
             radius=hex_radius,
             elevation_scale=4,
@@ -697,7 +697,7 @@ try:
         ),
         "Schools": pdk.Layer(
             "HexagonLayer",
-            data=from_data_file("schools_zone_stats.json"),
+            data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
             radius=hex_radius,
             elevation_scale=4,
@@ -706,7 +706,7 @@ try:
         ),
         "Heatmap": pdk.Layer(
             "HeatmapLayer",
-            data=from_data_file("investment_data.json"),
+            data=from_data_file("bike_rental_stats.json"),
             get_position=["lon", "lat"],
             get_weight="investment_potential",
             radius=500,
