@@ -316,6 +316,7 @@ def calculate_metrics(financial_details):
 
 # --- Main Function ---
 # Function to create bar chart
+# Function to create a bar chart
 def create_bar_chart(dataframe, title):
     """Creates a bar chart from a given dataframe."""
     return alt.Chart(dataframe).mark_bar().encode(
@@ -335,9 +336,6 @@ def main():
     # Debugging: Display financial_details
     st.write("Debug: Financial Details:", financial_details)
 
-    # Initialize `metrics_df` to avoid NameError
-    metrics_df = None
-
     # Calculate Metrics
     try:
         metrics = calculate_metrics(financial_details)
@@ -346,15 +344,7 @@ def main():
         # Display metrics as a table
         metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
         st.table(metrics_df)
-    except ValueError as e:
-        st.error(f"Error in calculating metrics: {e}. Please check your input values.")
-        return  # Exit if metrics calculation fails
-    except Exception as e:
-        st.error(f"Unexpected error occurred: {e}")
-        return  # Exit if unexpected error occurs
 
-    # Ensure `metrics_df` is defined before proceeding
-    if metrics_df is not None:
         # Visualization: Bar Chart for Key Metrics
         st.subheader("Investment Metrics Visualization")
         selected_metrics = st.multiselect(
@@ -415,6 +405,11 @@ def main():
 
             except Exception as e:
                 st.error(f"Error during sensitivity analysis: {e}")
+
+    except ValueError as e:
+        st.error(f"Error in calculating metrics: {e}. Please check your input values.")
+    except Exception as e:
+        st.error(f"Unexpected error occurred: {e}")
 
 
 if __name__ == "__main__":
