@@ -311,121 +311,101 @@ progress_bar.empty()
 
 
 
+import streamlit as st
+import pandas as pd
+import pydeck as pdk
+import numpy as np
 
-# Set page configuration
-st.set_page_config(page_title="VillaTerras AI - Advanced Real Estate Map", layout="wide")
-
-# Mock Data (replace this with API data in real implementation)
+# Mock advanced data for 25 cities in California
 @st.cache_data
-def load_city_data():
+def get_advanced_data():
     return pd.DataFrame({
-        "City": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "Fresno"],
-        "Latitude": [34.0522, 37.7749, 32.7157, 38.5816, 36.7378],
-        "Longitude": [-118.2437, -122.4194, -117.1611, -121.4944, -119.7871],
-        "Growth": [2.5, 3.0, 1.8, 2.3, 1.5],
-        "MedianPrice": [800000, 1200000, 700000, 450000, 300000],
-        "RentalYield": [3.5, 2.8, 4.0, 4.5, 5.2],
+        "City": [
+            "Los Angeles", "San Diego", "San Jose", "San Francisco", "Fresno",
+            "Sacramento", "Long Beach", "Oakland", "Bakersfield", "Anaheim",
+            "Stockton", "Riverside", "Irvine", "Santa Ana", "Chula Vista",
+            "Fremont", "Santa Clarita", "San Bernardino", "Modesto", "Fontana",
+            "Oxnard", "Moreno Valley", "Glendale", "Huntington Beach", "Ontario"
+        ],
+        "Latitude": [
+            34.0522, 32.7157, 37.3382, 37.7749, 36.7378,
+            38.5816, 33.7701, 37.8044, 35.3733, 33.8366,
+            37.9577, 33.9806, 33.6846, 33.7455, 32.6401,
+            37.5485, 34.3917, 34.1083, 37.6391, 34.0922,
+            34.1975, 33.9425, 34.1425, 33.6595, 34.0633
+        ],
+        "Longitude": [
+            -118.2437, -117.1611, -121.8863, -122.4194, -119.7871,
+            -121.4944, -118.1937, -122.2711, -119.0187, -117.9145,
+            -121.2908, -117.3755, -117.8265, -117.8677, -117.0842,
+            -121.9886, -118.5426, -117.2898, -120.9969, -117.4350,
+            -119.1771, -117.2297, -118.2551, -117.9988, -117.6509
+        ],
+        "Population Growth (%)": np.random.uniform(0.5, 3.5, 25),
+        "Median Home Price ($)": np.random.randint(300000, 1500000, 25),
+        "Average Rental Yield (%)": np.random.uniform(2.5, 6.0, 25),
+        "Employment Rate (%)": np.random.uniform(80, 95, 25)
     })
 
-# API Integration (Zillow-like or Census Mock)
-@st.cache_data
-def fetch_real_estate_data(zip_code):
-    # Mock API call, replace with a real API integration
-    api_data = {
-        "Median Price": 750000,
-        "Rental Yield": 4.2,
-        "Growth Rate": 2.1,
-    }
-    return api_data
+# Load data
+data = get_advanced_data()
 
-# Predict AI-driven investment scores
-@st.cache_data
-def predict_investment_scores(data):
-    # Simple example with linear regression
-    model = LinearRegression()
-    features = data[["Growth", "MedianPrice", "RentalYield"]]
-    target = np.random.rand(len(data)) * 100  # Mock target, replace with real data
-    model.fit(features, target)
-    data["InvestmentScore"] = model.predict(features)
-    return data
+# Sidebar filters
+st.sidebar.header("Filters")
+growth_filter = st.sidebar.slider("Population Growth (%)", 0.5, 3.5, (1.0, 3.0))
+rental_yield_filter = st.sidebar.slider("Rental Yield (%)", 2.5, 6.0, (3.0, 5.0))
+price_filter = st.sidebar.slider("Median Home Price ($)", 300000, 1500000, (500000, 1000000))
 
-# Generate downloadable analytics report
-@st.cache_data
-def generate_report(data):
-    csv_data = data.to_csv(index=False)
-    return csv_data
+# Apply filters
+filtered_data = data[
+    (data["Population Growth (%)"].between(*growth_filter)) &
+    (data["Average Rental Yield (%)"].between(*rental_yield_filter)) &
+    (data["Median Home Price ($)"].between(*price_filter))
+]
 
-# Load city data
-data = load_city_data()
-
-# Sidebar - Search by ZIP code or City
-st.sidebar.header("Search Options")
-search_type = st.sidebar.radio("Search By:", ["City", "ZIP Code"])
-search_query = st.sidebar.text_input("Enter your search query:")
-
-if st.sidebar.button("Search"):
-    if search_type == "City":
-        filtered_data = data[data["City"].str.contains(search_query, case=False)]
-    elif search_type == "ZIP Code":
-        api_data = fetch_real_estate_data(search_query)
-        filtered_data = pd.DataFrame([{
-            "City": f"ZIP {search_query}",
-            "Latitude": 37.7749,  # Replace with real lat/lon
-            "Longitude": -122.4194,
-            "Growth": api_data["Growth Rate"],
-            "MedianPrice": api_data["Median Price"],
-            "RentalYield": api_data["Rental Yield"],
-        }])
-else:
-    filtered_data = data
-
-# Predict AI-driven investment scores
-filtered_data = predict_investment_scores(filtered_data)
-
-# Display Metrics
-st.header("Key Metrics")
-for idx, row in filtered_data.iterrows():
-    st.write(f"**City:** {row['City']}")
-    st.write(f"**Growth:** {row['Growth']}%")
-    st.write(f"**Median Price:** ${row['MedianPrice']:,}")
-    st.write(f"**Rental Yield:** {row['RentalYield']}%")
-    st.write(f"**Investment Score:** {row['InvestmentScore']:.2f}")
-    st.write("---")
-
-# Generate and Download Report
-if st.button("Download Analytics Report"):
-    csv_data = generate_report(filtered_data)
-    st.download_button("Download CSV", csv_data, "investment_report.csv", "text/csv")
-
-# Visualization - Heatmap + Investment Score
-st.header("Investment Heatmap")
+# Heatmap Layer
 heatmap_layer = pdk.Layer(
     "HeatmapLayer",
     data=filtered_data,
     get_position=["Longitude", "Latitude"],
-    get_weight="InvestmentScore",
-    radius=30000,
+    get_weight="Population Growth (%)",
+    radius=300,
     opacity=0.7,
+    aggregation="MEAN"
 )
 
+# Scatterplot Layer
 scatter_layer = pdk.Layer(
     "ScatterplotLayer",
     data=filtered_data,
     get_position=["Longitude", "Latitude"],
-    get_color="[255, 0, 0, 160]",
-    get_radius=50000,
-    pickable=True,
+    get_radius=500,
+    get_color="[200, 30, 0, 160]",
+    pickable=True
 )
 
+# View State
 view_state = pdk.ViewState(
-    latitude=filtered_data["Latitude"].mean(),
-    longitude=filtered_data["Longitude"].mean(),
+    latitude=36.7783,
+    longitude=-119.4179,
     zoom=6,
-    pitch=40,
+    pitch=40
 )
 
+# Render Map
+st.header("California Advanced Real Estate Heatmap")
 st.pydeck_chart(pdk.Deck(
     layers=[heatmap_layer, scatter_layer],
     initial_view_state=view_state,
-    tooltip={"html": "<b>City:</b> {City}<br><b>Investment Score:</b> {InvestmentScore:.2f}"}
+    tooltip={
+        "html": "<b>City:</b> {City}<br>"
+                "<b>Population Growth:</b> {Population Growth (%)},<br>"
+                "<b>Median Price:</b> {Median Home Price ($)}",
+        "style": {"color": "white"}
+    }
 ))
+
+# Show Filtered Table
+st.subheader("Filtered Data")
+st.dataframe(filtered_data)
+
