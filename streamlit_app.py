@@ -1,13 +1,29 @@
-# Enhanced Debug: Financial Details
-st.subheader("📊 Debug: Financial Details")
+import streamlit as st
+import pandas as pd
+import numpy as np
+import altair as alt
+
+# --- Styling Section ---
 st.markdown(
     """
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+        .title-section {
+            background: linear-gradient(135deg, #4c88d2, #5ba2f7);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
         .details-container {
             background: linear-gradient(135deg, #ffffff, #e8f1f7);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
             margin-bottom: 20px;
         }
@@ -23,9 +39,9 @@ st.markdown(
             border-collapse: collapse;
         }
         .details-table th, .details-table td {
-            text-align: left;
             padding: 12px 15px;
             border: 1px solid #dde5ed;
+            text-align: left;
         }
         .details-table th {
             background: #0056b3;
@@ -38,33 +54,14 @@ st.markdown(
         .details-table tr:hover {
             background: #f1f7fc;
         }
-        .details-value {
-            font-weight: bold;
-            color: #0056b3;
-        }
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
-
-# Convert financial details dictionary to a DataFrame for a clean display
-details_df = pd.DataFrame(list(financial_details.items()), columns=["Detail", "Value"])
-
-# Display the financial details in a custom-styled container
-st.markdown('<div class="details-container">', unsafe_allow_html=True)
-st.markdown('<div class="details-header">Financial Details Overview</div>', unsafe_allow_html=True)
-st.markdown(details_df.to_html(index=False, classes="details-table"), unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-
-
-###########  Header End ############################
-
-import streamlit as st
-import pandas as pd
-import numpy as np
 
 # --- Sidebar Configuration ---
 def configure_sidebar():
+    """Sets up the sidebar and returns the user inputs."""
     st.sidebar.header("Filters")
 
     # Location Details
@@ -102,29 +99,70 @@ def configure_sidebar():
         "vacancy_perc": st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1, key="vacancy"),
         "hoa_fees": st.sidebar.number_input("HOA Fees (Monthly $)", value=0, step=50, key="hoa_fees"),
         "other_income": st.sidebar.number_input("Other Income (Monthly $)", value=0, step=50, key="other_income"),
-        "appreciation_rate": st.sidebar.number_input("Appreciation Rate (%)", value=3.0, step=0.1, key="appreciation"),
         "interest_rate": st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1, key="interest_rate"),
         "loan_term": st.sidebar.number_input("Loan Term (Years)", value=30, step=1, key="loan_term"),
         "annual_rent_income": st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000, key="rent_income"),
-        "inflation_rate": st.sidebar.number_input("Inflation Rate (%)", value=2.0, step=0.1, key="inflation"),
-        "selling_costs_perc": st.sidebar.number_input("Selling Costs (% of Sale Price)", value=6.0, step=0.1, key="selling_costs"),
     }
 
     return location_details, property_details, financial_details
 
+# --- Calculate Metrics ---
+def calculate_metrics(financial_details):
+    """Calculate key financial metrics for a real estate investment."""
+    # Extract Inputs
+    price = financial_details["property_price"]
+    rent = financial_details["annual_rent_income"]
+    down = financial_details["down_payment"]
+    closing = financial_details["closing_costs"]
+    rehab = financial_details["rehab_costs"]
+    taxes = financial_details["annual_property_taxes"]
+    insurance = financial_details["annual_insurance"]
+    utilities = financial_details["annual_utilities"]
+    hoa_fees = financial_details["hoa_fees"] * 12
+    other_income = financial_details["other_income"] * 12
+    rate = financial_details["interest_rate"]
+    term = financial_details["loan_term"]
+
+    # Calculations
+    loan_amount = price - down
+    monthly_rate = rate / 100 / 12
+    num_payments = term * 12
+    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
+    annual_debt_service = monthly_payment * 12
+    maintenance_cost = rent * (financial_details["maintenance_perc"] / 100)
+    capex_cost = rent * (financial_details["capex_perc"] / 100)
+    mgmt_cost = rent * (financial_details["mgmt_perc"] / 100)
+    operating_expenses = taxes + insurance + utilities + hoa_fees + maintenance_cost + capex_cost + mgmt_cost
+    effective_gross_income = rent * (1 - financial_details["vacancy_perc"] / 100) + other_income
+    noi = effective_gross_income - operating_expenses
+    cash_flow = noi - annual_debt_service
+    total_investment = down + closing + rehab
+    cap_rate = (noi / price) * 100 if price > 0 else 0
+    cash_on_cash = (cash_flow / total_investment) * 100 if total_investment > 0 else 0
+
+    return {
+        "Monthly Payment": monthly_payment,
+        "Annual Debt Service": annual_debt_service,
+        "Operating Expenses": operating_expenses,
+        "Effective Gross Income": effective_gross_income,
+        "NOI": noi,
+        "Cash Flow": cash_flow,
+        "Cap Rate (%)": cap_rate,
+        "Cash-on-Cash ROI (%)": cash_on_cash,
+    }
 
 # --- Main Function ---
 def main():
-    st.title("Real Estate Investment Calculator")
-    st.write("Analyze your real estate investment with detailed metrics and sensitivity analysis.")
+    st.markdown('<div class="title-section"><h1>Real Estate Investment Calculator</h1></div>', unsafe_allow_html=True)
 
-    # Sidebar Inputs
     location_details, property_details, financial_details = configure_sidebar()
 
-    # Debugging: Display Financial Details
     st.subheader("📊 Debug: Financial Details")
     st.json(financial_details)
 
+    metrics = calculate_metrics(financial_details)
+    st.subheader("Investment Metrics")
+    st.table(pd.DataFrame(metrics.items(), columns=["Metric", "Value"]))
 
 if __name__ == "__main__":
     main()
