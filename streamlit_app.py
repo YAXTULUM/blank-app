@@ -436,31 +436,52 @@ def main():
     # Sidebar Inputs
     _, _, financial_details = configure_sidebar()
 
-    # Calculate Metrics
-    try:
-        metrics = calculate_metrics(financial_details)
-        st.header("Investment Metrics")
-        
-        # Display metrics as a table
-        metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
-        st.table(metrics_df)
 
-        # Visualization: Bar Chart for Key Metrics
-        st.subheader("Investment Metrics Visualization")
-        bar_chart_data = metrics_df[
-            metrics_df["Metric"].isin(["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"])
-        ]
-        bar_chart = alt.Chart(bar_chart_data).mark_bar().encode(
-            x=alt.X("Metric", sort=None, title="Metric"),
-            y=alt.Y("Value", title="Value ($)"),
-            tooltip=["Metric", "Value"]
-        ).interactive()
-        st.altair_chart(bar_chart, use_container_width=True)
 
-    except ValueError as e:
-        st.error(f"Error in calculating metrics: {e}")
+ 
+   def create_bar_chart(dataframe, title):
+    return alt.Chart(dataframe).mark_bar().encode(
+        x=alt.X("Metric", sort=None, title="Metric"),
+        y=alt.Y("Value", title="Value ($)"),
+        tooltip=["Metric", "Value"]
+    ).properties(title=title).interactive()
+
+# Calculate Metrics
+try:
+    metrics = calculate_metrics(financial_details)
+    if not metrics:
+        st.warning("No metrics available to display. Please check your inputs.")
         return
 
+    st.header("Investment Metrics")
+    
+    # Display metrics as a table
+    metrics_df = pd.DataFrame(metrics.items(), columns=["Metric", "Value"])
+    st.table(metrics_df)
+
+    # Visualization: Bar Chart for Key Metrics
+    st.subheader("Investment Metrics Visualization")
+    selected_metrics = st.multiselect(
+        "Select Metrics to Visualize",
+        options=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"],
+        default=["Monthly Payment", "Operating Expenses", "NOI", "Cash Flow"]
+    )
+
+    bar_chart_data = metrics_df[metrics_df["Metric"].isin(selected_metrics)]
+    if bar_chart_data.empty:
+        st.warning("No data selected for visualization.")
+    else:
+        bar_chart = create_bar_chart(bar_chart_data, title="Key Investment Metrics")
+        st.altair_chart(bar_chart, use_container_width=True)
+
+except ValueError as e:
+    st.error(f"Error in calculating metrics: {e}. Please check your input values.")
+
+
+
+
+
+ 
     # Sensitivity Analysis
     if st.checkbox("Perform Sensitivity Analysis"):
         st.subheader("Sensitivity Analysis Results")
