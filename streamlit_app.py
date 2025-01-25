@@ -11,60 +11,9 @@ from urllib.error import URLError
 
 import streamlit as st
 
-# Add HTML and CSS to render properly in Streamlit
 st.markdown(
     """
     <style>
-        /* Title Section Styling */
-        .title-section {
-            padding: 20px;
-            background: linear-gradient(135deg, #b9d2ec, #bcd2e58c);
-            color: white;
-            border-radius: 25px;
-            box-shadow: 0 12px 18px rgba(0, 0.44, 0.55, 0.55);
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .title-section:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .title-section h1 {
-            font-size: 3em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.9),
-                         0 0 20px rgba(0, 123, 255, 0.8),
-                         0 0 30px rgba(0, 123, 255, 0.7);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .title-section h1:hover {
-            text-shadow: 0 0 5px rgba(255, 255, 255, 1),
-                         0 0 10px rgba(0, 123, 255, 1),
-                         0 0 15px rgba(0, 123, 255, 1);
-            transform: scale(1.1);
-        }
-
-        .title-section h2 {
-            font-size: 2em;
-            font-weight: semi-bold;
-            margin-bottom: 15px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8),
-                         0 0 15px rgba(0, 123, 255, 0.7);
-        }
-
-        .title-section p {
-            font-size: 1.2em;
-            margin: 0;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
         /* Dropdown Button Styling */
         .dropdown-button {
             background-color: #007BFF;
@@ -87,7 +36,9 @@ st.markdown(
 
         /* Dropdown Menu Styling */
         .dropdown-container {
-            position: relative;
+            position: absolute;
+            top: 20px;
+            right: 20px; /* Aligns the dropdown container to the right-hand side */
             display: inline-block;
         }
 
@@ -100,6 +51,7 @@ st.markdown(
             margin-top: 10px;
             min-width: 220px;
             z-index: 1;
+            right: 0; /* Aligns the dropdown content to the right edge of the button */
         }
 
         .dropdown-content a {
@@ -122,12 +74,6 @@ st.markdown(
         .dropdown-container:hover .dropdown-content {
             display: block;
         }
-
-        /* Dropdown Arrow Styling */
-        .dropdown-arrow {
-            margin-left: 5px;
-            font-size: 12px;
-        }
     </style>
 
     <!-- Dropdown Menu -->
@@ -145,15 +91,6 @@ st.markdown(
             <a href="/?page=Trends">Trends</a>
             <a href="/?page=Contact">Contact</a>
         </div>
-    </div>
-
-    <!-- Title Section -->
-    <div class="title-section">
-        <h1>VillaTerras Ai Real Estate Dashboard</h1>
-        <h2>Real Estate Dashboard</h2>
-        <p>Welcome to the <strong>VillaTerras Ai Real Estate Dashboard</strong>.</p>
-        <p>All Real Estate Knowledge in One Place.</p>
-        <p>Analyze, compare, and manage properties with advanced metrics and tools.</p>
     </div>
     """,
     unsafe_allow_html=True
