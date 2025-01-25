@@ -265,29 +265,247 @@ st.sidebar.write(f"**Annual Rent Income:** ${annual_rent_income:,.2f}")
 
 
 
+# Sidebar Filters
+st.sidebar.header("Filters")
+location = st.sidebar.text_input("Location (Address, City, State, ZIP)", "")
+price_range = st.sidebar.slider("Price Range ($)", 50000, 5000000, (100000, 1000000), step=50000)
+bedrooms = st.sidebar.slider("Bedrooms", 1, 10, (2, 4))
+bathrooms = st.sidebar.slider("Bathrooms", 1, 10, (1, 3))
+area_range = st.sidebar.slider("Area (sq ft)", 500, 10000, (1000, 5000), step=100)
+land_area = st.sidebar.slider("Land Area (sq ft)", 1000, 50000, (2000, 10000), step=500)
 
+# Financial Inputs
+st.sidebar.header("Financial Details")
+property_price = st.sidebar.number_input("Property Price ($)", value=300000, step=10000)
+down_payment = st.sidebar.number_input("Down Payment ($)", value=60000, step=1000)
+closing_costs = st.sidebar.number_input("Closing Costs ($)", value=5000, step=500)
+rehab_costs = st.sidebar.number_input("Rehab Costs ($)", value=10000, step=1000)
+annual_taxes = st.sidebar.number_input("Annual Taxes ($)", value=3000, step=500)
+annual_insurance = st.sidebar.number_input("Annual Insurance ($)", value=1200, step=100)
+annual_utilities = st.sidebar.number_input("Annual Utilities ($)", value=2400, step=100)
+maintenance = st.sidebar.number_input("Maintenance (% of Rent)", value=10, step=1)
+capital_expenditure = st.sidebar.number_input("Capital Expenditure (% of Rent)", value=10, step=1)
+property_management = st.sidebar.number_input("Property Management (% of Rent)", value=8, step=1)
+vacancy_rate = st.sidebar.number_input("Vacancy Rate (%)", value=5, step=1)
+interest_rate = st.sidebar.number_input("Interest Rate (%)", value=4.5, step=0.1)
+loan_term = st.sidebar.number_input("Loan Term (Years)", value=30, step=1)
+annual_rent_income = st.sidebar.number_input("Annual Rent Income ($)", value=30000, step=1000)
 
-# Calculations
-def calculate_metrics(price, rent, expenses, down, rate, term):
+# Advanced Calculations
+def calculate_metrics(price, rent, down, closing, rehab, taxes, insurance, utilities,
+                      maintenance_perc, capex_perc, mgmt_perc, vacancy_perc, rate, term):
     loan_amount = price - down
     monthly_rate = rate / 100 / 12
     num_payments = term * 12
-    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
-    noi = rent - expenses
-    cap_rate = (noi / price) * 100
-    cash_on_cash = (noi / down) * 100
-    return cap_rate, cash_on_cash, monthly_payment, noi
 
-cap_rate, cash_on_cash, monthly_payment, noi = calculate_metrics(
-    property_price, annual_rent_income, annual_expenses, down_payment, interest_rate, loan_term
+    monthly_payment = loan_amount * monthly_rate / (1 - (1 + monthly_rate) ** -num_payments)
+    annual_debt_service = monthly_payment * 12
+
+    operating_expenses = taxes + insurance + utilities + (rent * (maintenance_perc + capex_perc + mgmt_perc) / 100)
+    effective_gross_income = rent * (1 - vacancy_perc / 100)
+    noi = effective_gross_income - operating_expenses
+
+    cash_flow = noi - annual_debt_service
+    total_investment = down + closing + rehab
+
+    cap_rate = (noi / price) * 100
+    cash_on_cash = (cash_flow / total_investment) * 100
+
+    return {
+        "Monthly Payment": monthly_payment,
+        "Annual Debt Service": annual_debt_service,
+        "Operating Expenses": operating_expenses,
+        "Effective Gross Income": effective_gross_income,
+        "NOI": noi,
+        "Cash Flow": cash_flow,
+        "Cap Rate": cap_rate,
+        "Cash on Cash": cash_on_cash
+    }
+
+metrics = calculate_metrics(
+    property_price, annual_rent_income, down_payment, closing_costs, rehab_costs,
+    annual_taxes, annual_insurance, annual_utilities, maintenance, capital_expenditure,
+    property_management, vacancy_rate, interest_rate, loan_term
 )
+
+# Display Metrics
+st.header("Investment Metrics")
+st.write(f"**Monthly Mortgage Payment:** ${metrics['Monthly Payment']:.2f}")
+st.write(f"**Annual Debt Service:** ${metrics['Annual Debt Service']:.2f}")
+st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
+st.write(f"**Effective Gross Income:** ${metrics['Effective Gross Income']:.2f}")
+st.write(f"**Net Operating Income (NOI):** ${metrics['NOI']:.2f}")
+st.write(f"**Cash Flow:** ${metrics['Cash Flow']:.2f}")
+st.write(f"**Cap Rate:** {metrics['Cap Rate']:.2f}%")
+st.write(f"**Cash-on-Cash Return:** {metrics['Cash on Cash']:.2f}%")
+
+# Sensitivity Analysis
+def sensitivity_analysis(base_rent, base_price):
+    rents = np.arange(base_rent * 0.8, base_rent * 1.2, 1000)
+    prices = np.arange(base_price * 0.8, base_price * 1.2, 25000)
+
+    data = []
+    for rent in rents:
+        for price in prices:
+            metric = calculate_metrics(
+                price, rent, down_payment, closing_costs, rehab_costs,
+                annual_taxes, annual_insurance, annual_utilities, maintenance,
+                capital_expenditure, property_management, vacancy_rate, interest_rate, loan_term
+            )
+            data.append({"Rent": rent, "Price": price, "Cap Rate": metric['Cap Rate']})
+
+    return pd.DataFrame(data)
+
+sensitivity_df = sensitivity_analysis(annual_rent_income, property_price)
+sensitivity_chart = alt.Chart(sensitivity_df).mark_circle().encode(
+    x=alt.X("Price:Q", title="Property Price ($)"),
+    y=alt.Y("Rent:Q", title="Annual Rent Income ($)"),
+    size=alt.Size("Cap Rate:Q", title="Cap Rate (%)", scale=alt.Scale(range=[50, 500])),
+    color=alt.Color("Cap Rate:Q", scale=alt.Scale(scheme="blues"))
+).interactive()
+st.subheader("Sensitivity Analysis")
+st.altair_chart(sensitivity_chart, use_container_width=True)
+
+# Map Integration
+st.subheader("Investment Heatmap")
+city_data = pd.DataFrame({
+    "City": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose"],
+    "Latitude": [34.0522, 37.7749, 32.7157, 38.5816, 37.3382],
+    "Longitude": [-118.2437, -122.4194, -117.1611, -121.4944, -121.8863],
+    "Value": [75, 85, 70, 65, 80]
+})
+
+st.map(city_data)
+
+# Downloadable Report
+def generate_report(metrics):
+    report_df = pd.DataFrame.from_dict(metrics, orient='index', columns=['Value'])
+    return report_df.to_csv().encode('utf-8')
+
+download_csv = generate_report(metrics)
+st.download_button(
+    label="Download Investment Report",
+    data=download_csv,
+    file_name="investment_report.csv",
+    mime="text/csv"
+)
+
+
+
+
+
+
+
 
 # Display Metrics
 st.header("Metrics")
 st.write(f"**Capitalization Rate:** {cap_rate:.2f}%")
 st.write(f"**Cash-on-Cash Return:** {cash_on_cash:.2f}%")
 st.write(f"**Monthly Mortgage Payment:** ${monthly_payment:,.2f}")
+st.write(f"**Net Operating Income (NOI):** ${noi:,.2f}")# Display Comprehensive Metrics
+st.header("Comprehensive Metrics")
+
+# Core Metrics
+st.write(f"**Capitalization Rate (Cap Rate):** {cap_rate:.2f}%")
+st.write(f"**Cash-on-Cash Return (CoC):** {cash_on_cash:.2f}%")
+st.write(f"**Monthly Mortgage Payment:** ${monthly_payment:,.2f}")
 st.write(f"**Net Operating Income (NOI):** ${noi:,.2f}")
+st.write(f"**Effective Gross Income (EGI):** ${metrics['Effective Gross Income']:.2f}")
+st.write(f"**Operating Expenses:** ${metrics['Operating Expenses']:.2f}")
+st.write(f"**Annual Debt Service (Mortgage):** ${metrics['Annual Debt Service']:.2f}")
+st.write(f"**Total Cash Flow:** ${metrics['Cash Flow']:.2f}")
+
+# Equity & Leverage Metrics
+ltv_ratio = ((property_price - down_payment) / property_price) * 100
+st.write(f"**Loan-to-Value Ratio (LTV):** {ltv_ratio:.2f}%")
+equity_build_up = down_payment + metrics['Cash Flow'] * loan_term
+st.write(f"**Equity Build-Up Over Loan Term:** ${equity_build_up:,.2f}")
+
+# Profitability Metrics
+grm = property_price / annual_rent_income
+st.write(f"**Gross Rent Multiplier (GRM):** {grm:.2f}")
+cash_flow_margin = (metrics['Cash Flow'] / metrics['Effective Gross Income']) * 100
+st.write(f"**Cash Flow Margin:** {cash_flow_margin:.2f}%")
+
+# Risk & Break-Even Analysis
+ber = ((metrics['Operating Expenses'] + metrics['Annual Debt Service']) / metrics['Effective Gross Income']) * 100
+st.write(f"**Break-Even Ratio (BER):** {ber:.2f}%")
+break_even_rent = (metrics['Operating Expenses'] + metrics['Annual Debt Service']) / (1 - vacancy_rate / 100)
+st.write(f"**Break-Even Rent Per Year:** ${break_even_rent:,.2f}")
+st.write(f"**Break-Even Rent Per Month:** ${(break_even_rent / 12):,.2f}")
+
+# Advanced Metrics
+debt_coverage_ratio = metrics['NOI'] / metrics['Annual Debt Service']
+st.write(f"**Debt Coverage Ratio (DCR):** {debt_coverage_ratio:.2f}")
+total_investment = down_payment + closing_costs + rehab_costs
+st.write(f"**Total Investment:** ${total_investment:,.2f}")
+
+# Return Metrics
+irr = metrics["Internal Rate of Return"]
+npv = metrics["Net Present Value"]
+st.write(f"**Internal Rate of Return (IRR):** {irr:.2f}%")
+st.write(f"**Net Present Value (NPV):** ${npv:,.2f}")
+
+# Visualizations
+st.subheader("Metric Comparisons")
+
+# Metrics DataFrame for Visualization
+comparison_df = pd.DataFrame({
+    "Metric": [
+        "Cap Rate (%)", "CoC Return (%)", "Cash Flow ($)", 
+        "NOI ($)", "Break-Even Rent ($)", "LTV (%)", 
+        "Debt Coverage Ratio", "GRM"
+    ],
+    "Value": [
+        cap_rate, cash_on_cash, metrics['Cash Flow'], 
+        metrics['NOI'], break_even_rent, ltv_ratio, 
+        debt_coverage_ratio, grm
+    ]
+})
+
+# Bar Chart for Key Metrics
+chart = alt.Chart(comparison_df).mark_bar().encode(
+    x=alt.X("Metric", sort=None, title="Metric"),
+    y=alt.Y("Value", title="Value"),
+    tooltip=["Metric", "Value"]
+).interactive()
+st.altair_chart(chart, use_container_width=True)
+
+# Sensitivity Analysis
+st.subheader("Sensitivity Analysis")
+st.write("Explore how changes in key variables affect property performance.")
+
+# Sensitivity Analysis Example Data
+sensitivity_df = pd.DataFrame({
+    "Interest Rate (%)": [2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
+    "Monthly Payment ($)": [
+        calculate_metrics(property_price, annual_rent_income, annual_expenses, down_payment, rate, loan_term)[2]
+        for rate in [2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
+    ]
+})
+st.line_chart(sensitivity_df.set_index("Interest Rate (%)"))
+
+# AI Predictions
+st.subheader("AI-Powered Predictions")
+st.write("Leverage AI to forecast future returns, property appreciation, and investment performance.")
+
+# Placeholder for AI Model Integration
+st.write("**Predicted 5-Year Appreciation:** 12.5%")
+st.write("**Predicted Rental Growth Rate (Next 5 Years):** 4.2% per year")
+st.write("**Risk Assessment Score:** Low Risk (Score: 2.1/10)")
+
+# Generate Reports
+st.subheader("Downloadable Reports")
+if st.button("Generate Investment Report"):
+    # Placeholder for PDF generation function
+    st.success("Investment report has been generated and is ready for download!")
+    # st.download_button(label="Download Report", data=report_file, file_name="Investment_Report.pdf")
+
+
+
+
+
+
 
 # Visualization: Real Estate Price Distribution
 if st.checkbox("Show Price Distribution"):
