@@ -430,42 +430,5 @@ def main():
 
 
 
-
-
-
-def sensitivity_analysis(financial_details):
-    """Perform sensitivity analysis on rent and property price."""
-    rent_income = financial_details["annual_rent_income"]
-    property_price = financial_details["property_price"]
-
-    # Define ranges for sensitivity analysis
-    rent_range = np.linspace(rent_income * 0.8, rent_income * 1.2, 20)
-    price_range = np.linspace(property_price * 0.8, property_price * 1.2, 20)
-
-    results = []  # Store results for all combinations
-    for rent in rent_range:
-        for price in price_range:
-            # Create a copy of financial details and update rent and price
-            updated_details = financial_details.copy()
-            updated_details["annual_rent_income"] = rent
-            updated_details["property_price"] = price
-
-            try:
-                # Calculate metrics with updated details
-                metrics = calculate_metrics(updated_details)
-                results.append({
-                    "Rent Income ($)": rent,
-                    "Property Price ($)": price,
-                    "Cap Rate (%)": metrics["Cap Rate (%)"],
-                    "Cash Flow ($)": metrics["Cash Flow"],
-                })
-            except ValueError:
-                continue  # Skip invalid combinations
-
-    # Convert results to DataFrame
-    return pd.DataFrame(results)
-
-
-
-
+ 
 
