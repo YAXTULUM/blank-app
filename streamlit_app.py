@@ -11,7 +11,7 @@ from urllib.error import URLError
 
 import streamlit as st
 
-# Title Section (Already Included in Backbone)
+# Title Section and Dropdown Menu
 st.markdown(
     """
     <style>
@@ -65,116 +65,92 @@ st.markdown(
             color: rgba(255, 255, 255, 0.9);
         }
 
-        /* Responsive Styling */
-        @media screen and (max-width: 768px) {
-            .title-section {
-                padding: 15px;
-            }
-            .title-section h1 {
-                font-size: 2.5em;
-            }
-            .title-section h2 {
-                font-size: 1.8em;
-            }
-            .title-section p {
-                font-size: 1em;
-            }
+        /* Dropdown Button Styling */
+        .dropdown-button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.22);
+            transition: all 0.3s ease-in-out;
+            text-align: center;
         }
 
-  
-    /* Dropdown Button Styling */
-    .dropdown-button {
-        background-color: #007BFF;
-        color: white;
-        font-size: 12px;
-        font-weight: bold;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.22);
-        transition: all 0.3s ease-in-out;
-        text-align: center;
-    }
+        .dropdown-button:hover {
+            background-color: #0056b3;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
 
-    .dropdown-button:hover {
-        background-color: #0056b3;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Dropdown Menu Styling */
-    .dropdown-container {
-        position: absolute;
-        top: 20px;
-        right: 20px; /* Positioning the dropdown to the right-hand side */
-        display: inline-block;
-    }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f8f9fa;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-        margin-top: 10px;
-        min-width: 220px; /* Slightly larger for better readability */
-        z-index: 1;
-        right: 0; /* Align the dropdown to the right */
-    }
-
-    .dropdown-content a {
-        color: black;
-        font-size: 14px;
-        font-weight: 500;
-        padding: 10px 20px;
-        text-decoration: none;
-        display: block;
-        border-radius: 5px;
-        transition: background-color 0.2s ease;
-    }
-
-    .dropdown-content a:hover {
-        background-color: #cce4f7;
-        color: #0056b3;
-    }
-
-    /* Show the dropdown content on hover */
-    .dropdown-container:hover .dropdown-content {
-        display: block;
-    }
-
-    /* Dropdown Arrow Styling */
-    .dropdown-arrow {
-        margin-left: 5px;
-        font-size: 12px;
-    }
-
-    /* Optional Full View Styling for All Options */
-    .dropdown-content.show-all a {
-        padding: 10px;
-        font-size: 13px;
-        text-align: center;
-    }
-
-    /* Responsive Adjustments */
-    @media screen and (max-width: 768px) {
-        .dropdown-button {
-            font-size: 10px;
-            padding: 8px 12px;
+        /* Dropdown Menu Styling */
+        .dropdown-container {
+            position: absolute;
+            top: 20px;
+            right: 20px; /* Positioning the dropdown to the right-hand side */
+            display: inline-block;
         }
 
         .dropdown-content {
-            min-width: 180px; /* Adjust dropdown width for smaller screens */
+            display: none;
+            position: absolute;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-top: 10px;
+            min-width: 220px; /* Slightly larger for better readability */
+            z-index: 1;
+            right: 0; /* Align the dropdown to the right */
         }
 
         .dropdown-content a {
-            font-size: 12px;
-            padding: 8px 15px;
+            color: black;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
         }
-    }
-</style>
 
- <!-- Dropdown Menu -->
+        .dropdown-content a:hover {
+            background-color: #cce4f7;
+            color: #0056b3;
+        }
+
+        /* Show the dropdown content on hover */
+        .dropdown-container:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Dropdown Arrow Styling */
+        .dropdown-arrow {
+            margin-left: 5px;
+            font-size: 12px;
+        }
+
+        /* Responsive Adjustments */
+        @media screen and (max-width: 768px) {
+            .dropdown-button {
+                font-size: 10px;
+                padding: 8px 12px;
+            }
+
+            .dropdown-content {
+                min-width: 180px; /* Adjust dropdown width for smaller screens */
+            }
+
+            .dropdown-content a {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+
+    <!-- Dropdown Menu -->
     <div class="dropdown-container">
         <button class="dropdown-button">
             Menu <span class="dropdown-arrow">▼</span>
@@ -202,7 +178,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 
 ###########  Header End ############################
