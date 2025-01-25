@@ -177,8 +177,7 @@ st.markdown(
         <p>All Real Estate Knowledge in One Place.</p>
         
  
-
-import streamlit as st
+ 
 
 # Correctly formatted markdown with closing triple quotes
 st.markdown(
