@@ -404,10 +404,7 @@ if __name__ == "__main__":
 
 
 
-
-# Header Section
-st.markdown(
-    """
+ 
     <style>
         .title-section {
             padding: 20px;
