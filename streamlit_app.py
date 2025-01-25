@@ -125,7 +125,7 @@ if st.checkbox("Show Price Distribution"):
     price_data = pd.DataFrame({"Price ($)": np.random.randint(price_range[0], price_range[1], 50)})
     st.bar_chart(price_data)
 
-# Data: Gross Agricultural Production
+# Data: Real Estate GDP
 @st.cache_data
 def get_UN_data():
     AWS_BUCKET_URL = "https://streamlit-demo-data.s3-us-west-2.amazonaws.com"
@@ -134,21 +134,21 @@ def get_UN_data():
 
 try:
     df = get_UN_data()
-    countries = st.multiselect("Choose countries", list(df.index), ["China", "United States of America"])
+    countries = st.multiselect("Choose countries", list(df.index), ["United States of America" "Mexico", "Canada",])
     if not countries:
-        st.error("Please select at least one country.")
+        st.error("Please select at least Two countries.")
     else:
         data = df.loc[countries]
         data /= 1000000.0
-        st.subheader("Gross Agricultural Production ($B)")
+        st.subheader("Real Estate GDP ($T)")
         st.dataframe(data.sort_index())
 
         # Altair chart
         data = data.T.reset_index()
-        data = pd.melt(data, id_vars=["index"]).rename(columns={"index": "year", "value": "Gross Agricultural Product ($B)"})
+        data = pd.melt(data, id_vars=["index"]).rename(columns={"index": "year", "value": "Real Estate GDP ($T)"})
         chart = alt.Chart(data).mark_area(opacity=0.3).encode(
             x="year:T",
-            y=alt.Y("Gross Agricultural Product ($B):Q", stack=None),
+            y=alt.Y("Gross Real Estate GDP ($T):Q", stack=None),
             color="Region:N",
         )
         st.altair_chart(chart, use_container_width=True)
