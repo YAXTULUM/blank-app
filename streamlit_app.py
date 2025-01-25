@@ -178,6 +178,8 @@ st.markdown(
         
  
 
+import streamlit as st
+
 st.markdown(
     """
     <p style="font-size:12px; color:lightgrey;">
@@ -187,11 +189,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 
 ###########  Header End ############################
